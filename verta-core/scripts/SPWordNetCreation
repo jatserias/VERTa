@@ -1,0 +1,8 @@
+ ##
+ ## creates the two wordnet fiels variants and hyper relations form src/main/resources/spa-wn.gz
+ ## the script needs to be executed from the root of the projects
+ ##
+ 
+ gunzip -c  src/main/resources/spa-wn.gz | sed s/'spa-30-'//g | awk '{print $1"\t"$3}' | sort | uniq  | gzip -  > src/main/resources/hyper.gz
+ 
+ gunzip -c  src/main/resources/spa-wn.gz | awk '{print $1"\t"$2; print $3"\t"$4}' | sed s/'spa-30-'//g | sort | uniq  | gzip -  > src/main/resources/variants.gz

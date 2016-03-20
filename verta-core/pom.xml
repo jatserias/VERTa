@@ -1,0 +1,175 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>mt</groupId>
+  <artifactId>VERTa</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>VERTa</name>
+ 
+  <build>
+  	<plugins>
+<!-- plugin for uber jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+               <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>jordi</shadedClassifierName> 
+              <artifactSet>
+              </artifactSet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+<!-- -->
+
+
+  	<plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-install-plugin</artifactId>
+        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <show>private</show>
+          <nohelp>true</nohelp>
+        </configuration>
+      </plugin>
+  	<plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+  		<source>1.6</source>
+		<target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-surefire-plugin</artifactId>
+	    <version>2.5</version>
+	    <configuration>
+	        <argLine>-Xmx2G</argLine>
+	    </configuration>
+	</plugin>
+
+ 	</plugins>
+  	<defaultGoal>install</defaultGoal>
+  	<extensions>
+  	</extensions>
+  	<filters>
+  	</filters>
+  	<finalName>VERTa</finalName>
+  	<directory>target</directory>
+  	<resources>
+  	</resources>
+  	</build>
+  	<reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
+        <configuration>
+          <show>public</show>
+        </configuration>
+      </plugin>
+</plugins>
+  </reporting>
+  
+  <dependencies>
+  	<dependency>
+  		<groupId>maven-plugins</groupId>
+  		<artifactId>maven-sourceforge-plugin</artifactId>
+  		<version>1.3</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+  		<groupId>log4j</groupId>
+  		<artifactId>log4j</artifactId>
+  		<version>1.2.14</version>
+  		<type>jar</type>
+  		<scope>compile</scope>
+  	</dependency>
+  	<dependency>
+	<groupId>junit</groupId>
+	<artifactId>junit</artifactId>
+	<version>4.1</version>
+	<scope>compile</scope>
+</dependency>
+  <dependency>
+    <groupId>com.martiansoftware</groupId>
+    <artifactId>jsap</artifactId>
+    <version>2.1</version>
+</dependency>
+ <dependency>
+    <groupId>jaws</groupId>
+    <artifactId>jaws</artifactId>
+    <version>1.2</version>
+    <!-- <scope>system</scope> -->
+    <!-- <systemPath>${project.basedir}/lib/jaws-bin.jar</systemPath> -->
+</dependency>
+
+<!--  Standford Parser   --> 
+    <dependency>
+        <groupId>edu.stanford.nlp</groupId>
+        <artifactId>stanford-corenlp</artifactId>
+        <version>1.3.3</version>
+   </dependency>
+<!--   -->   
+<!-- NEL -->
+  
+   
+    <dependency>
+      <groupId>it.unimi.dsi</groupId>
+      <artifactId>fastutil</artifactId>
+      <version>6.4.4</version>
+    </dependency>     
+ 
+    <dependency>
+        <groupId>it.unimi.dsi</groupId>
+        <artifactId>sux4j</artifactId>
+        <version>3.0.4</version>
+</dependency>
+<dependency>
+                <groupId>it.unimi.dsi</groupId>
+                <artifactId>webgraph</artifactId>
+                <version>3.0.7</version>
+        </dependency>
+<dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-compress</artifactId>
+        <version>1.4.1</version>
+</dependency>
+ 
+        
+         
+ <!--  Fluency model -->
+ 
+ <dependency>
+	<groupId>edu.berkeley.nlp</groupId>
+	<artifactId>berkeleylm</artifactId>
+	<version>1.1.2</version>
+</dependency>
+    
+  </dependencies>
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  	<maven.sourceforge.username>batalla</maven.sourceforge.username>
+  <maven.sourceforge.project.name>maven-plugins</maven.sourceforge.project.name>
+  <maven.sourceforge.project.packageName>sourceforge-plugin</maven.sourceforge.project.packageName>
+  <maven.sourceforge.project.submitNewsItem>true</maven.sourceforge.project.submitNewsItem>
+  </properties>
+  <modules>
+  </modules>
+
+</project>
