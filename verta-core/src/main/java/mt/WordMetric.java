@@ -206,8 +206,8 @@ public void load(BufferedReader config, double groupWeight, String filename) {
   	 
   	  
   	  Similarity sm=instantiateSimilarity(className,  weight,line, npar);
-  	   	  
-  	 if(!ReaderCONLL.hasFeatures(line[npar].split(","))) {
+  	  CONLLformat fmt = new CONLLformat("conf/conll08.fmt");  
+  	 if(!ReaderCONLL.hasFeatures(line[npar].split(","),fmt)) {
   		  System.err.println("Unknown feature name >"+line[npar]+"< metric config file >"+filename+"<");
 	          System.err.println("At LINE:"+buff);
 	          new Exception().printStackTrace();

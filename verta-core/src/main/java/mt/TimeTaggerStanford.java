@@ -1,6 +1,8 @@
 package mt;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +11,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
-
 
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -73,11 +74,12 @@ public class TimeTaggerStanford {
 		 List<CoreMap> x = test.tag(sens.get(0));
 		
 		
-		  	
-			ReaderCONLL proposedFile = new ReaderCONLL("data/eli/100_sentences_sys01tag-new");
-			
+		  
+			BufferedReader proposedFile = new BufferedReader( new FileReader("data/eli/100_sentences_sys01tag-new")); 
+			CONLLformat fmt = new CONLLformat("conf/conll08.fmt");
+	
 			try {
-				Sentence s = proposedFile.read();
+				Sentence s = ReaderCONLL.read(proposedFile,fmt);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

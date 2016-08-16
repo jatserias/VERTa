@@ -1,6 +1,8 @@
 package mt;
 
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -152,9 +154,10 @@ public class SentenceSimilarityNERC extends  SentenceSimilarityBase implements S
 	
 	public static void main(String[] args) throws Exception {
 	  	
-		ReaderCONLL proposedFile = new ReaderCONLL("data/eli/100_sentences_sys01tag-new");
+		BufferedReader proposedFile = new BufferedReader( new FileReader("data/eli/100_sentences_sys01tag-new")); 
+		CONLLformat fmt = new CONLLformat("conf/conll08.fmt");
 		
-		Sentence s = proposedFile.read();
+		Sentence s = ReaderCONLL.read(proposedFile,fmt);
 		for(NERC ne : generateNERC(s)) {
 			System.err.println(ne.mention);
 		}

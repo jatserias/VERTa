@@ -17,57 +17,28 @@ import java.io.PrintStream;
  */
 public class ReaderCONLL {
 	
-	static String formatFilename= System.getProperty("fmt")==null ? "conf/conll08.fmt" : System.getProperty("fmt");
-	
-	static String[]  featureNames = loadFormat();
-	BufferedReader in;
-
-	
-    //static private int offset=0;
-    
-	public static String[] loadFormat() {
-		try {
-		if(featureNames==null) {
-		BufferedReader ftin=null;
-			try{	
-				ftin=new BufferedReader(new FileReader(formatFilename));
-			}catch(Exception e) {
-				ftin=new BufferedReader(new InputStreamReader(ReaderCONLL.class.getResourceAsStream("/"+formatFilename)));
-			}
-		
-		String buff=ftin.readLine();
-		return buff.split("\t");
-		}
-		else return featureNames;
-		}
-		catch(Exception e){
-			System.err.println("Error Loading CONLL format");
-			e.printStackTrace();
-			System.exit(-1);
-			return null;
-		}
-	}
-	   
+	//BufferedReader in;
+	//final CONLLformat fmt;
 	/**
 	 * creates a reader that will read conll format file filename
 	 * @param filename
 	 * @throws FileNotFoundException
 	 */
-	public ReaderCONLL(String filename) throws FileNotFoundException {
-		in = new BufferedReader(new FileReader(filename));
-	     
-	}
+//	public ReaderCONLL(String filename, CONLLformat fmt) throws FileNotFoundException {
+//		this.fmt=fmt;
+//		in = new BufferedReader(new FileReader(filename));	     
+//	}
 	
 	/**
 	 * 
 	 * @return the sentence read or null
 	 * @throws Exception 
 	 */
-	public Sentence read() throws Exception {
-		return read(in);
-	}
+//	public Sentence read() throws Exception {
+//		return read(in,fmt);
+//	}
 	
-	public static Sentence read(BufferedReader sin) throws Exception {
+	public static Sentence read(BufferedReader sin, CONLLformat pfmt) throws Exception {
 	    String buff;
 	    Sentence sen = new Sentence();
 	    int nw=1;
@@ -79,12 +50,12 @@ public class ReaderCONLL {
 	    	}
 	    	else {
 	    	String fields[] = buff.split("[ \t]+");
-	    	if(fields.length != featureNames.length) {
-	    		throw new Exception("CONLL format error at line:"+buff+" found "+fields.length+" fields  but format has defined "+featureNames.length);
+	    	if(fields.length != pfmt.featureNames.length) {
+	    		throw new Exception("CONLL format error at line:"+buff+" found "+fields.length+" fields  but format has defined "+pfmt.featureNames.length);
 	    	}
 	    	Word w = new Word(String.format("%d", nw++));
 	    	int fnum=0;
-	    	for(String feat: featureNames) {
+	    	for(String feat: pfmt.featureNames) {
 	    		w.setFeature(feat,fields[fnum++]);
 	    	}
 	    	sen.add(w);
@@ -102,7 +73,7 @@ public class ReaderCONLL {
 	 * @return
 	 * @throws Exception 
 	 */
-	public Segment readSegment()  {
+	public static Segment readSegment(BufferedReader in,CONLLformat fmt)  {
 	    String buff;
 	    Sentence sen = new Sentence();
 	    Segment seg = new Segment();
@@ -124,14 +95,13 @@ public class ReaderCONLL {
 	    		sen = new Sentence(); nw=1;
 	    	}
 	    	else {
-	    	String fields[] = buff.split("\t");
-	    	if(fields.length != featureNames.length) {
-	    		throw new Exception("CONLL format error at line:>"+buff+"<");
-	    		
+	    	String fields[] = buff.split("[ \t]+");
+	    	if(fields.length != fmt.featureNames.length) {
+	    		throw new Exception("CONLL format error at line:"+buff+" found "+fields.length+" fields  but format has defined "+fmt.featureNames.length);	
 	    	   }
 	    	  Word w = new Word(String.format("%d", nw++));
 	    	  int fnum=0;
-	    	  for(String feat: featureNames) {
+	    	  for(String feat: fmt.featureNames) {
 	    		w.setFeature(feat,fields[fnum++]);
 	        	}
 	    	 sen.add(w);
@@ -154,7 +124,7 @@ public class ReaderCONLL {
 	 * add process header annotations
 	 * @param buff
 	 */
-	private void processHeader(Segment seg,String buff) {
+	private static void processHeader(Segment seg,String buff) {
 		//timex headers
 		if(buff.startsWith("%%#TIMEX")) {
 			String fields[] = buff.split("[\t]"); 
@@ -192,27 +162,27 @@ public class ReaderCONLL {
 	 * @param featureName
 	 * @return true iif featureName is a feature of the format
 	 */
-	public static boolean hasFeature(String featureName) {
+	public static boolean hasFeature(String featureName,CONLLformat pfmt) {
 	    boolean found=false;
 	    int i=0;
-	    while (!found && i< featureNames.length) {
-	    	found=(featureNames[i++].compareTo(featureName)==0);
+	    while (!found && i< pfmt.featureNames.length) {
+	    	found=(pfmt.featureNames[i++].compareTo(featureName)==0);
 	    }
 		return found;
 	}
 
-	public static boolean hasFeatures(String[] features) {
+	public static boolean hasFeatures(String[] features,final CONLLformat pfmt) {
 	    boolean hold=true;
 	    int i=0;
 	    while (hold && i< features.length) {
-	    	hold=hasFeature(features[i]);++i;
+	    	hold=hasFeature(features[i],pfmt);++i;
 	    }
 		return hold;
 	}
 	
 	
 	public static void writeHeader(){}
-	public static void writeSegment(int i,PrintStream nout,final Segment seg){
+	public static void writeSegment(int i,PrintStream nout,final Segment seg, CONLLformat pfmt){
 		nout.println("%%#"+"SEG"+"\t"+i);
 		nout.println("%%#"+"DEP"+"\t"+seg.getDepScore());
 		nout.println("%%#"+"SENTI"+"\t"+seg.getSentiment());
@@ -228,7 +198,7 @@ public class ReaderCONLL {
 		
 		for(Word w: s) {
 			int j=0;
-			for(String feature:featureNames) {
+			for(String feature:pfmt.featureNames) {
 				if(j>0) nout.print("\t");
 				nout.print(w.getFeature(feature));
 				++j;
@@ -245,9 +215,11 @@ public class ReaderCONLL {
 	 */
 	
 	public static void main(String[] args) throws Exception {
-		ReaderCONLL reader = new ReaderCONLL("/Users/jordiatserias/Batallin/Minicorpus_100_sentences.desr.conll");
+		
+		BufferedReader buff = new BufferedReader(new FileReader("/Users/jordiatserias/Batallin/Minicorpus_100_sentences.desr.conll"));
+		CONLLformat fmt=		new CONLLformat("conf/conll08.fmt");
 		Sentence s;
-		while((s=reader.read())!=null) {	
+		while((s=ReaderCONLL.read(buff, fmt))!=null) {	
 			s.dump(System.out);
 		}
 	}

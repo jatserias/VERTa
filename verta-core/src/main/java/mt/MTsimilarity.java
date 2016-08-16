@@ -431,13 +431,15 @@ public class MTsimilarity {
 		// END DUMP CONF
 	}	
 		
+	
+	CONLLformat fmt = new CONLLformat("conf/conll08.fmt");
 		
 		//TEST reading just one sentence
-		ReaderCONLL proposedFile = new ReaderCONLL(hypFilename);
-		ReaderCONLL referenceFiles [] = new ReaderCONLL[refFilenames.length];
+	BufferedReader proposedFile = new BufferedReader(new FileReader(hypFilename));
+	BufferedReader referenceFiles [] = new BufferedReader[refFilenames.length];
 		int j=0;
 		for(String refFilename:refFilenames) {
-		   referenceFiles[j++] = new ReaderCONLL(refFilename);
+		   referenceFiles[j++] = new BufferedReader(new FileReader(refFilename));
 		}
 		
 		
@@ -446,7 +448,8 @@ public class MTsimilarity {
 		Segment proposedSeg;
 		Sentence  proposedSentence;
 		try {
-			proposedSeg = proposedFile.readSegment(); proposedSentence = proposedSeg.toSentence();
+			proposedSeg = ReaderCONLL.readSegment(proposedFile,fmt); 
+			proposedSentence = proposedSeg.toSentence();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -479,12 +482,12 @@ public class MTsimilarity {
 		 * for every reference
 		 * we should create a different file dump??
 		 */
-		for(ReaderCONLL referenceFile: referenceFiles) {
+		for(BufferedReader referenceFile: referenceFiles) {
 		
 		Segment referenceSeg=null;
 		Sentence  referenceSentence =null;
 		try {
-			referenceSeg = referenceFile.readSegment(); referenceSentence = referenceSeg.toSentence();
+			referenceSeg = ReaderCONLL.readSegment(referenceFile,fmt); referenceSentence = referenceSeg.toSentence();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -557,7 +560,7 @@ public class MTsimilarity {
 		
 		// next pair
 		  try {
-			proposedSeg = proposedFile.readSegment();
+			proposedSeg = ReaderCONLL.readSegment(proposedFile,fmt);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

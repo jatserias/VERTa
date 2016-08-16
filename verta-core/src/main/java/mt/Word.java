@@ -26,7 +26,11 @@ public class Word {
 	}
 	public void setFeature(String featureName, String featureValue) {features.put(featureName,featureValue);}
     public String getFeature(String featureName) {
-	 return features.get(featureName); 
+     String res = features.get(featureName);
+     if(res==null) {
+    	 return "NOPE";
+     }
+     return res;
    }
     
     public String toString() {

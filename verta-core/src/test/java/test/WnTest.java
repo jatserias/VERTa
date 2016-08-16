@@ -28,10 +28,8 @@ public class WnTest {
 		System.getProperties().setProperty("WNLANG","EN");
 		System.getProperties().setProperty("wordnet.database.dir","/usr/local/WordNet-3.0/dict/");
 		
-	String wordForm ;
+	//String wordForm ;
 	
-		
-		System.err.println("HERE");
 		SimilaritySynonymWn x = new mt.SimilaritySynonymWn();
 		
 		
