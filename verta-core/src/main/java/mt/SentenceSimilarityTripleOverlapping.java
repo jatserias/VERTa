@@ -1,11 +1,26 @@
 package mt;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
+
+import mt.core.AlignmentBuilderBestMatch;
+import mt.core.AlignmentImpl;
+import mt.core.DistanceMatrix;
+import mt.core.MatchResult;
+import mt.core.MetricActivationCounter;
+import mt.core.SentenceAlignment;
+import mt.core.SentenceMetric;
+import mt.core.SentenceSimilarityBase;
+import mt.core.SimilarityResult;
+import mt.core.TripleMatchPattern;
+import mt.core.TriplesMatch;
+import mt.nlp.Sentence;
+import mt.nlp.Triples;
+import mt.nlp.Word;
+import verta.xml.XMLFormater;
 
 /**
  * 
@@ -20,7 +35,7 @@ import java.util.Vector;
 public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase implements SentenceMetric {
 
 
-	public static boolean FILTER_TOP =false;
+	public static boolean FILTER_TOP = false;
 	
 	/// USE OLD MATCHING (LREC version)
 	static boolean USE_OLD=false;
@@ -35,7 +50,13 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	 */
 	public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile) throws IOException{
 		super(counters);
-		tmatch= USE_OLD ? new TriplesMatch(configFile,counters) : new TripleMatchPattern(configFile,counters); 
+		tmatch= USE_OLD ? new TriplesMatch(configFile, counters) : new TripleMatchPattern(configFile, counters); 
+	}
+	
+	public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile, BufferedReader config) throws IOException{
+		super(counters);
+		tmatch = USE_OLD ? new TriplesMatch(counters) : new TripleMatchPattern(counters); 
+		tmatch.load(configFile, config);
 	}
 	
 	double compare(boolean reversed,final Sentence s1, final Sentence s2, final SentenceAlignment alignment, PrintStream strace){
@@ -69,6 +90,12 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		
 		
 		if(MTsimilarity.DUMP)  {		
+			xml_dump_triples(n1, strace, res, btrip);
+		}
+		return res;
+	}
+
+	private static void xml_dump_triples(final Triples n1, PrintStream strace, double res, Triples btrip) {
 		strace.println("<trip  sc=\""+res+"\">");
 		strace.println("<src>"+XMLFormater.encodeXMLString(n1.toString())+"</src>");
 		if(btrip!=null){ 
@@ -76,18 +103,8 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		} 
 		else {strace.println("<trg>NO MATCH</trg>");}
 		strace.println("</trip>");
-		}
-		return res;
 	}
 	
-//	private static boolean compareTriple(
-//			boolean reversed, 
-//			final Triples n1,
-//			final Triples n2, 
-//			final SentenceAlignment align) {
-//		return align.aligned(reversed,n1.source,n2.source) && align.aligned(reversed,n1.target,n2.target) && n1.equals(n2);
-//	}
-//
 	
 	private double compare(boolean reversed, final List<Triples> ts1, final List<Triples> ts2,final  SentenceAlignment alignment, PrintStream strace) {
 		  // That may no be simetric if align is not simetric
@@ -108,7 +125,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	 * @param s1 sentence
 	 * @return a list of triples 
 	 */
-	static private List<Triples> tripleGenerator(final Sentence s1) {
+	static List<Triples> tripleGenerator(final Sentence s1) {
 		List<Triples> res = new Vector<Triples>();
 		for(Word w: s1) {
 			Triples t =  new Triples(s1, w);
@@ -117,22 +134,6 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		}
 		return res;
 	}
-
-//	private static Triples createTriple(final Sentence s1, Word w) {
-//		Triples t = new Triples();
-//		
-//		// mod and head were reversed, bug fixed on 15/05/2014
-//		//1       Parliament      NNP     NNP     parliament      B-ORG   B-noun.other    B-E:ORGANIZATION:GOVERNMENT     nsubj   4
-//		// source (head) 4
-//		// target (mod)  1
-//		t.source=Integer.parseInt(w.getFeature(ID_NAME));
-//		t.sourceString=w.getFeature(WORD_NAME);
-//		String head =w.getFeature(DEPHEAD_NAME);
-//		t.target = head.startsWith("_") ?  -1 :Integer.parseInt(w.getFeature(DEPHEAD_NAME));
-//		t.targetString =  (t.target<1) ? "TOP" : s1.get(t.target-1).getFeature(WORD_NAME);
-//		t.label=w.getFeature(DEPLABEL_NAME);
-//		return t;
-//	}
 
 	double getMax() {
 		return 0;
@@ -147,7 +148,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		List<Triples> ts1 = tripleGenerator(proposedSentence);		
 		List<Triples> ts2 = tripleGenerator(referenceSentence);
 		SentenceAlignment align = new AlignmentImpl(ts1.size(), ts2.size());
-		double[] tres = new  double[2];
+
 		DistanceMatrix d = createDist(false,ts1, ts2, dist);
 		
 		//TODO  Normalization is going to hell 
@@ -167,17 +168,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	    double recall= sum >0 ? INsimilarity(true, align, ts2, ts1, d,strace) / sum  : 0.0;
 		return new SimilarityResult(prec,recall);
 	}
-	/**
-	 * new internal similarity function
-	 * 
-	 * @param reversed
-	 * @param a
-	 * @param proposedSentence
-	 * @param referenceSentence
-	 * @param d
-	 * @param strace
-	 * @return
-	 */
+	/// new internal similarity function
 	public  double INsimilarity(
 			boolean reversed,
 			SentenceAlignment a,
@@ -187,39 +178,48 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		
 		new AlignmentBuilderBestMatch().build(reversed,a ,d);
 		
-		int [] al=a.aligned(reversed);
 	    double res=0;
 	    
-	    for(int i=0;i<al.length;++i) {	
+	    int i_align=0;
+	    for(int i_al:a.getAlignment(reversed)) {	
 	    	//System.err.println("check "+proposedSentence.size()+" x "+targetSentence.size()+" "+i+":"+al[i]+" sum="+res);
-	    	if(al[i]>=0) res += d.getDistance(reversed, i, al[i]);
+	    	if(i_al>=0) res += d.getDistance(reversed, i_align, i_al);
+	    	++i_align;
 	    }
 	    
 	    if(MTsimilarity.DUMP) {
-	    	strace.println("<trips n='"+al.length+"' type="+ (reversed?"\"t2s\">" : "\"s2t\">"));
-	    	for(int i=0;i<al.length;++i) {	
-	    	strace.println("<trip  tc=\""+tmatch.getWeight(proposedSentence.get(i).label)+"\" sc=\""+(al[i]>=0 ? d.getDistance(reversed, i, al[i]) : -1)+"\" prov=\""+(al[i]>=0 ? a.provenence(reversed,i,al[i]) : "nomatch")+"\">");
-			strace.println("<src>"+XMLFormater.encodeXMLString(
-					(proposedSentence.get(i).toString()))+"</src>");
-			if(al[i]>=0){ 
-				strace.println("<trg>"+XMLFormater.encodeXMLString(referenceSentence.get(al[i]).toString())+"</trg>");
-			} 
-			else {strace.println("<trg>NO MATCH</trg>");}
-			strace.println("</trip>");
-	    	}
-	    	strace.println("</trips>");
+	    	xml_dump_alignment(reversed, a, proposedSentence, referenceSentence, d, strace, i_align);
 	    }
-	    //System.err.println("returning res:"+(al.length >0 ? res / al.length : 0.0)+ " sum:"+res+" num:"+ al.length );
+	    	
 		// we need to normalize
 		return res; // al.length >0 ? res / al.length : 0.0;
 	}
-	
-	private DistanceMatrix createDist(boolean reversed, final List<Triples> ts1, final  List<Triples> ts2, final SentenceAlignment dist) {
-		DistanceMatrix res = new DistanceMatrix (ts1.size(),ts2.size());
+
+	private void xml_dump_alignment(boolean reversed, SentenceAlignment a, final List<Triples> proposedSentence,
+			final List<Triples> referenceSentence, DistanceMatrix d, PrintStream strace, int i_align) {
+		strace.println("<trips n='"+i_align+"' type="+ (reversed?"\"t2s\">" : "\"s2t\">"));
 		int i=0;
-		 for(Triples n1:ts1){
+		for(int i_al:a.getAlignment(reversed)) {	
+		strace.println("<trip  tc=\""+tmatch.getWeight(proposedSentence.get(i).label)+"\" sc=\""+(i_al>=0 ? d.getDistance(reversed, i, i_al) : -1)+"\" prov=\""+(i_al>=0 ? a.provenance(reversed,i,i_al) : "nomatch")+"\">");
+		strace.println("<src>"+XMLFormater.encodeXMLString(
+				(proposedSentence.get(i).toString()))+"</src>");
+		if(i_al>=0){ 
+			strace.println("<trg>"+XMLFormater.encodeXMLString(referenceSentence.get(i_al).toString())+"</trg>");
+		} 
+		else {strace.println("<trg>NO MATCH</trg>");}
+		strace.println("</trip>");
+		i++;
+		}
+		strace.println("</trips>");
+	}
+	
+	protected DistanceMatrix createDist(boolean reversed, final List<Triples> ts1, final  List<Triples> ts2, final SentenceAlignment dist) {
+		DistanceMatrix res = new DistanceMatrix (ts1.size(), ts2.size());
+		
+		int i=0;
+		 for(Triples n1: ts1){
 			 int j=0;
-			 for(Triples n2:ts2) {
+			 for(Triples n2: ts2) {
 				 if(reversed) {
 					 MatchResult tres = tmatch.match(true,n2, n1, dist);
 					 res.setDistance(true,j,i,tres.score,tres.prov);}
@@ -231,29 +231,6 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 			 ++i;
 		 }
 		return res;
-	}
-
-	//@Override
-	public  double[] OLDsimilarity(
-			final Sentence proposedSentence,
-			final Sentence referenceSentence, 
-			final SentenceAlignment dist, PrintStream strace) {
-		
-		double[] tres = new  double[2];
-		
-		List<Triples> ts1 = tripleGenerator(proposedSentence);		
-		List<Triples> ts2 = tripleGenerator(referenceSentence);
-		
-		
-		//for(Triples t:ts1) System.err.println(t.dump());
-		if(MTsimilarity.DUMP)  	strace.println("<trips type=\"s2t\">");
-		double resp = compare(false, ts1, ts2, dist,strace);
-		if(MTsimilarity.DUMP) strace.println("</trips>\n<trips type=\"t2s\">");
-		double resr = compare(true, ts2, ts1, dist,strace);
-		if(MTsimilarity.DUMP) strace.println("</trips>");
-		tres[0] =  ts1.size() >0 ? resp /  ts1.size() : 0;
-		tres[1] = ts1.size() >0 ?  resr / ts2.size() : 0;
-		return tres;
 	}
 
 	@Override

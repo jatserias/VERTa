@@ -2,18 +2,22 @@ package mt;
 
 import java.io.PrintStream;
 
+import mt.core.MetricActivationCounter;
+import mt.core.SentenceAlignment;
+import mt.core.SentenceMetric;
+import mt.core.SentenceSimilarityBase;
+import mt.core.SimilarityResult;
+import mt.nlp.Sentence;
+
 public class SentenceSimilarityUnsimilar extends SentenceSimilarityBase implements SentenceMetric {
 
-	
 	SentenceSimilarityUnsimilar(MetricActivationCounter counters) {
 		super(counters);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public SimilarityResult similarity(Sentence s1, Sentence s2, SentenceAlignment dist,
-			PrintStream strace) {
-			return SimilarityResult.bad;
+	public SimilarityResult similarity(Sentence s1, Sentence s2, SentenceAlignment dist, PrintStream strace) {
+		return SimilarityResult.bad;
 	}
 
 	@Override

@@ -1,3 +1,0 @@
-NNS	NN	24
-DT	D	200
-D	DT	100

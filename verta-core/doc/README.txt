@@ -1,6 +1,6 @@
 * Prerequisites
 
-java jdk1.6
+java jdk1.8
 
 * To install
 
