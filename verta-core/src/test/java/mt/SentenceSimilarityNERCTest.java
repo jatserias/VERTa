@@ -1,6 +1,5 @@
 package mt;
 
-import static org.junit.Assert.assertArrayEquals;
 
 import java.util.Collection;
 
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import mt.nlp.NERC;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
+import org.junit.jupiter.api.Assertions;
 
 class SentenceSimilarityNERCTest {
 
@@ -31,6 +31,6 @@ class SentenceSimilarityNERCTest {
 				// @TODO position is not correct, this should be 7,7
 				new NERC(1, 6, 6, "Mike", "LOC")
 				};
-		assertArrayEquals(expected_ner, nerc.toArray());
+		Assertions.assertArrayEquals(expected_ner, nerc.toArray());
 	}
 }
