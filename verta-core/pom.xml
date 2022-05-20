@@ -61,7 +61,7 @@
 						</goals>
 						<configuration>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
-							<shadedClassifierName>jordi</shadedClassifierName>
+							<shadedClassifierName>verta_all</shadedClassifierName>
 							<artifactSet />
 
 						</configuration>
