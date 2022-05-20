@@ -99,7 +99,7 @@ public class TripleMatchPattern extends TriplesMatch {
 
 	@Override
 	public void load(String filename) throws FileNotFoundException, IOException {
-		System.err.println("Loading " + filename.substring(4));
+		LOGGER.info(String.format("Loading >%s<", filename.substring(4)));
 		BufferedReader config = (filename.startsWith("jar:")
 				? new BufferedReader(
 						new InputStreamReader(TripleMatchPattern.class.getResourceAsStream(filename.substring(4))))

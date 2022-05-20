@@ -9,6 +9,7 @@ import mt.nlp.Word;
  * THIS CLASS SEEMS NOT TO BE USED
  *
  */
+@Deprecated
 public class SentenceSimilarityBestMatchFromLeft {
 
 	// TODO a patch to capture all distances

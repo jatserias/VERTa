@@ -59,29 +59,28 @@ public class NgramTest {
 		}
 
 		MetricResult r = mt.similarity(s1, s2);
-		r.dist.dump(System.err);
 
 		double ngramprec;
 		MetricActivationCounter counter = new MetricActivationCounter();
 		NgramMatch ngram = new NgramMatch(counter, "2");
 
 		for (int i = 2; i < s1.size(); ++i) {
-			ngramprec = NgramMatch.compareNgrams(i, true, s1, s1, r.dist, System.err);
+			ngramprec = NgramMatch.compareNgrams(i, true, s1, s1, dist, System.err);
 			System.err.println("i:" + i + ":" + ngramprec + " #ngrams:" + NgramMatch.sumatori(i, s1.size()));
 			Assertions.assertEquals(NgramMatch.sumatori(i, s1.size()), ngramprec, 0.01,
 					String.format("Ngram prec %d", i));
-			SimilarityResult x = ngram.similarity(s1, s1, r.dist, System.err);
+			SimilarityResult x = ngram.similarity(s1, s1, dist, System.err);
 			System.err.println("TRACE" + x);
-			ngramprec = NgramMatch.compareNgrams(i, false, s1, s1, r.dist, System.err);
+			ngramprec = NgramMatch.compareNgrams(i, false, s1, s1, dist, System.err);
 			Assertions.assertEquals(ngramprec, NgramMatch.sumatori(i, s1.size()), 0.01);
 		}
 
-		ngramprec = NgramMatch.compareNgrams(100, false, s1, s2, r.dist, System.err);
+		ngramprec = NgramMatch.compareNgrams(100, false, s1, s2, dist, System.err);
 		System.err.println("PREC:" + ngramprec + ":" + NgramMatch.sumatori(100, s1.size()));
 		ngramprec = ngramprec / NgramMatch.sumatori(100, s1.size());
 
-		// we will need to reverese dist??
-		double ngramrec = NgramMatch.compareNgrams(100, true, s2, s1, r.dist, System.err);
+		// we will need to reverse dist
+		double ngramrec = NgramMatch.compareNgrams(100, true, s2, s1, dist, System.err);
 		ngramrec = ngramrec / NgramMatch.sumatori(1, 100, s2.size());
 		System.err.println("PREC:" + ngramrec + ":" + NgramMatch.sumatori(100, s1.size()));
 
@@ -97,7 +96,7 @@ public class NgramTest {
 		 * 
 		 */
 		r = mt.similarity(s1, s3);
-		r.dist.dump(System.err);
+
 		SentenceAlignment align = dist; // new AlignmentBuilderFirstLeft2Rigth().build(dist);
 		// OLD
 		// Integer align[] = new Integer[Math.max(s1.size(), s2.size())];

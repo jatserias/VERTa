@@ -5,11 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import mt.nlp.Triples;
 
 /// A simple class for Matching triples
 public class TriplesMatch {
+	
+	protected static Logger LOGGER = Logger.getLogger(TriplesMatch.class.getName());
 	
 	private static final String LABEL_PAIR_SEPARATOR = "#";
 	// we need to read this weight from the config file

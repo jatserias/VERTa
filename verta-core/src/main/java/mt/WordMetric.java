@@ -8,19 +8,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import mt.core.AlignmentBuilderBestMatch;
-import mt.core.AlignmentImpl;
 import mt.core.DistanceMatrix;
 import mt.core.FeatureMetric;
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
 import mt.core.Similarity;
 import mt.core.WeightedWordMetric;
-import mt.core.WordFilter;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
 import verta.wn.WordNetAPI;
-import verta.xml.AlignmentImplXMlDumper;
 import verta.xml.WordMetricXMLDumper;
 
 public class WordMetric {
@@ -30,8 +25,6 @@ public class WordMetric {
 	private static final int MAX_FEATURE_WEIGHT = 100;
 
 	static int NOWORDMETRICS = 2;
-
-	public boolean FILTER_PUNCTUATION = false;
 
 	// we should group metrics by id
 	public HashMap<String, WeightedWordMetric> featureMetrics;
@@ -122,7 +115,7 @@ public class WordMetric {
 		WordMetricXMLDumper.xml_wm_start_ft(pout, type);
 
 		/**
-		 * there is an inconsistence between groupId and group number
+		 * there is an inconsistency between groupId and group number
 		 */
 		// for every group metric
 		int ngroup = 0;
@@ -217,60 +210,6 @@ public class WordMetric {
 	 * 
 	 */
 
-	public double[] similarity(final Sentence proposedSentence, final Sentence referenceSentence, DistanceMatrix dist,
-			PrintStream strace) {
-
-		double[] res = new double[2];
-
-		AlignmentImpl align = new AlignmentImpl(proposedSentence.size(), referenceSentence.size());
-
-		double prec = sentenceSimilarity(dist, align, false, proposedSentence, referenceSentence);
-		double rec = sentenceSimilarity(dist, align, true, referenceSentence, proposedSentence);
-		res[0] = prec;
-		res[1] = rec;
-
-		// dump the alignment
-		if (MTsimilarity.DUMP) {
-			AlignmentImplXMlDumper.dump(align, strace);
-		}
-
-		return res;
-	}
-
-	public double sentenceSimilarity(DistanceMatrix dist, SentenceAlignment a, final boolean reversed,
-			final Sentence proposedSentence, final Sentence targetSentence) {
-		// calculate all distances
-		int w = 0;
-		for (Word sw : proposedSentence) {
-			int iw = 0;
-			for (Word tw : targetSentence) {
-				this.reversed = reversed;
-				double mdist = this.similarity(sw, tw);
-				dist.setDistance(reversed, w, iw, mdist, "lex");
-				++iw;
-			}
-			++w;
-		}
-
-		// TODO configure alignment strategy
-		new AlignmentBuilderBestMatch().build(reversed, a, dist);
-
-		// calculate scores given the selected alignment
-		int nwords = 0;
-
-		double res = 0;
-		int i = 0;
-		for (int i_al: a.getAlignment(reversed)) {
-			if (!FILTER_PUNCTUATION || !WordFilter.filter(proposedSentence.get(i))) {
-				if (i_al >= 0)
-					res += dist.getDistance(reversed, i, i_al);
-				nwords++;
-			}
-			i++;
-		}
-
-		return res / nwords++;
-	}
 
 	/**
 	 * Calculates the similarity between two sentences
@@ -280,66 +219,52 @@ public class WordMetric {
 	 * @param wm               the word metric to be used
 	 * @return the similarity [0-1]
 	 */
-	public double sentenceSimilarity(
-
-			Integer align[], boolean[] taken, DistanceMatrix dist,
-
-			final boolean reversed, final Sentence proposedSentence, final Sentence targetSentence) {
-
-		double distBestWord[] = new double[proposedSentence.size()];
-		int sw = 0;
-		for (Word w : proposedSentence) {
-			distBestWord[sw] = bestMatch(reversed, sw, w, targetSentence, align, taken, dist);
-			++sw;
-		}
-
-		double sum = 0;
-
-		for (int j = 0; j < distBestWord.length; ++j) {
-			if (distBestWord[j] > 0)
-				sum += distBestWord[j];
-		}
-
-		// @BUG return sum+100*sum/proposedSentence.size();
-		return sum / proposedSentence.size();
-	}
-
-	/**
-	 * returns the highest similarity according to Wordmetric wm between Word w (at
-	 * position pos) with any the words in targetSentence
+	/*
+	 * @Deprecated double sentenceSimilarity(
 	 * 
-	 * reversed was used to inverse relation in prec / recall like hypernym -
-	 * hyponym
+	 * Integer align[], boolean[] taken, DistanceMatrix dist,
 	 * 
+	 * final boolean reversed, final Sentence proposedSentence, final Sentence
+	 * targetSentence) {
+	 * 
+	 * calculate_word_similarity_matrix(dist, reversed, proposedSentence,
+	 * targetSentence);
+	 * 
+	 * int proposed_size = proposedSentence.size(); int target_size =
+	 * targetSentence.size();
+	 * 
+	 * return calculate_sentence_aggregated_word_similarity(align, taken, dist,
+	 * reversed, proposed_size, target_size); }
+	 * 
+	 * private double calculate_sentence_aggregated_word_similarity(Integer[] align,
+	 * boolean[] taken, DistanceMatrix dist, final boolean reversed, int
+	 * proposed_size, int target_size) { double distBestWord[] = new
+	 * double[proposed_size];
+	 * 
+	 * for (int sw = 0; sw<proposed_size; ++sw) { double max = 0; int maxword = -1;
+	 * int iw = 0; while (iw < target_size) { // Not Aligned before double mdist =
+	 * dist.getDistance(reversed, sw, iw); if (!taken[iw]) { // TODO store the
+	 * metric info to count best-similarity usage group+metric if (mdist > max) {
+	 * max = mdist; maxword = iw; } } ++iw; }
+	 * 
+	 * // final result if (maxword > -1) { align[sw] = maxword; taken[maxword] =
+	 * true; } distBestWord[sw] = max; ++sw; }
+	 * 
+	 * double sum = 0;
+	 * 
+	 * for (int j = 0; j < distBestWord.length; ++j) { if (distBestWord[j] > 0) sum
+	 * += distBestWord[j]; }
+	 * 
+	 * // @BUG return sum+100*sum/proposedSentence.size(); return sum /
+	 * proposed_size; }
+	 * 
+	 * private void calculate_word_similarity_matrix(DistanceMatrix dist, final
+	 * boolean reversed, final Sentence proposedSentence, final Sentence
+	 * targetSentence) { this.reversed = reversed; for(int i_sw=0; i_sw <
+	 * proposedSentence.size(); ++i_sw) { for(int i_tw=0; i_tw <
+	 * targetSentence.size(); ++i_tw) { double mdist =
+	 * this.similarity(proposedSentence.get(i_sw), targetSentence.get(i_tw));
+	 * dist.setDistance(reversed, i_sw, i_tw, mdist, this.getName()); } } }
 	 */
-	double bestMatch(final boolean reversed, final int pos, final Word w, final Sentence targetSentence,
-			Integer[] align, boolean[] taken, DistanceMatrix dist) {
-		boolean found = false;
-		double max = 0;
-		int maxword = -1;
-		int iw = 0;
-		while (iw < targetSentence.size() && !found) {
-			// Not Aligned before
-			if (!taken[iw]) {
-				this.reversed = reversed;
-				double mdist = this.similarity(w, targetSentence.get(iw));
-				dist.setDistance(reversed, pos, iw, mdist, "lex");
-
-				// TODO store the metric info to count best-similarity usage group+metric
-				if (mdist > max) {
-					max = mdist;
-					maxword = iw;
-				}
-			}
-			++iw;
-		}
-
-		// final result
-		if (maxword > -1) {
-			align[pos] = maxword;
-			taken[maxword] = true;
-		}
-		return max;
-	}
 
 }

@@ -4,7 +4,7 @@ package mt.core;
  * 
  * An 1 to 1 alignment between the words of two sentences sentences
  * 
- * keep best aligment in both directions
+ * keep best alignment in both directions
  * 
  */
 public interface SentenceAlignment {

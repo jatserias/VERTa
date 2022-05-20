@@ -9,6 +9,9 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.Parameter;
+import com.martiansoftware.jsap.StringParser;
+import com.martiansoftware.jsap.UnflaggedOption;
 
 import mt.core.MetricResult;
 import mt.core.Verta;
@@ -93,7 +96,11 @@ public class MTsimilarity {
 									JSAP.REQUIRED, JSAP.NOT_GREEDY, "metric confic file"),
 							new com.martiansoftware.jsap.UnflaggedOption("exp", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
 									JSAP.REQUIRED, JSAP.NOT_GREEDY, "experiment name"),
-							topt, mopt,
+							new com.martiansoftware.jsap.FlaggedOption("fmt",
+									JSAP.STRING_PARSER, "conf/conll08.fmt", JSAP.NOT_REQUIRED, 'f', JSAP.NO_LONGFLAG,
+									"input format definition file"),
+							topt, 
+							mopt,
 							new com.martiansoftware.jsap.Switch("xml", 'x', "xml", "Generate xml trace files"),
 							new com.martiansoftware.jsap.Switch("punc", 'p', "punc", "Filter punctuation"),
 							new com.martiansoftware.jsap.Switch("top", 't', "top", "Include TOP dependencies"),
@@ -110,6 +117,8 @@ public class MTsimilarity {
 			String experimentName = jsapResult.getString("exp");
 			String refFilenames[] = jsapResult.getStringArray("references");
 			String language = jsapResult.getString("lang");
+			String inputFormat = jsapResult.getString("fmt");
+			
 			DUMP = jsapResult.getBoolean("xml", false);
 
 			LOGGER.warning("XML trace" + (DUMP ? "Activated" : "Deactivated"));
@@ -129,7 +138,7 @@ public class MTsimilarity {
 			SentenceSimilarityTripleOverlapping.FILTER_TOP = !jsapResult.getBoolean("top", false);
 
 			WordNetAPI wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
-			CONLLformat fmt = new CONLLformat("conf/conll08.fmt");
+			CONLLformat fmt = new CONLLformat(inputFormat);
 			MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, wn);
 			mt.verta.setFilter(jsapResult.getBoolean("punc", false));
 			mt.verta.getTracer().DUMP = DUMP;

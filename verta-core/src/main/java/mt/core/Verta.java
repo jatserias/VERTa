@@ -6,14 +6,19 @@ import java.util.List;
 import java.util.Vector;
 import java.util.logging.Logger;
 
+import mt.MTsimilarity;
 import mt.WordMetric;
 import mt.nlp.Sentence;
+import mt.nlp.Word;
 import verta.wn.WordNetAPI;
+import verta.xml.AlignmentImplXMlDumper;
 import verta.xml.VertaXMLDumper;
 
 public class Verta {
 
 	private static Logger LOGGER = Logger.getLogger(Verta.class.getName());
+	
+	public boolean FILTER_PUNCTUATION = false;
 	
 	/// Word Metrics
 	public List<WordMetric> wms;
@@ -103,9 +108,7 @@ public class Verta {
 	}
 	
 	public void setFilter(boolean filter) {
-		for (WordMetric w : wms) {
-			w.FILTER_PUNCTUATION = filter;
-		}
+		FILTER_PUNCTUATION = filter;	
 	}
 	
 	/**
@@ -118,10 +121,11 @@ public class Verta {
 		getTracer().start_lexical_metrics();
 		
 		/// Applies word-alignment metrics
-		DistanceMatrix dist = new DistanceMatrix(proposedSentence, referenceSentence);
-
+		SentenceAlignment lex_align = null;
+		SentenceAlignment lex_align_rev = null;
+		
 		/// store the partial results
-		MetricResult tres = new MetricResult(dist);
+		MetricResult tres = new MetricResult();
 
 		/**
 		 * for w X w apply all word metrics
@@ -129,35 +133,43 @@ public class Verta {
 		 * As a side result a matrix of distance (tres.dist) and an alignment between
 		 * the sentences is build
 		 */
+		int nsim = 0;
 		for (WordMetric iwm : wms) {
 			// Return also dist matrix (internally uses align)
-			double[] res = iwm.similarity(proposedSentence, referenceSentence, tres.dist, getTracer().strace);
-			double prec = res[0];
-			double rec = res[1];
+
+			AlignmentBuilder builder = new AlignmentBuilderBestMatch();
+			
+			// calculate all distances
+			DistanceMatrix dist = create_word_distance_matrix(iwm, false, proposedSentence, referenceSentence);
+			AlignmentImpl align = new AlignmentImpl(proposedSentence.size(), referenceSentence.size());
+			// TODO configure alignment strategy
+			builder.build(false, align, dist);
+			double prec = calculate_similarity_for_alignment(dist, align, false, proposedSentence, this.FILTER_PUNCTUATION);
+			
+			
+			DistanceMatrix dist_rev = create_word_distance_matrix(iwm, true,  referenceSentence, proposedSentence);
+			// This was the previous heuristic: AlignmentImpl align_rev = align;
+			builder.build(true, align, dist_rev);
+			double rec = calculate_similarity_for_alignment(dist_rev, align, true, referenceSentence, this.FILTER_PUNCTUATION);
+			
+		
+			// dump the alignment
+			if (MTsimilarity.DUMP) {
+				AlignmentImplXMlDumper.dump(align, getTracer().strace);
+			}
 
 			tres.add(iwm.getName(), iwm.getWeight(), prec, rec);
 
 			getTracer().xml_dump_distances(referenceSentence, proposedSentence, iwm);
 
-			/**
-			 * @TODO ALERT we only align using the first lexical metric (should we add them
-			 *       all?)
-			 * 
-			 *       this assignment is to avoid to update the distance matrix so only the
-			 *       first lexical metric is used to calculate the alignment
-			 */
-			tres.dist = new DistanceMatrix(proposedSentence, referenceSentence);
+			// use first word distance to alignments
+			if(nsim==0){
+				lex_align = align;
+			}
+			++nsim;
 		}
 
 		getTracer().end_lexical_metrics();
-
-		/**
-		 * build Alignment based on the distance Matrix from the lexical components
-		 */
-		// We shoudl consider using different alignment builders
-		// SentenceAlignment align = new AlignmentBuilderFirstLeft2Rigth().build(dist);
-		// SentenceAlignment align = new AlignmentBuilderBestMatch().build(dist);
-		SentenceAlignment align = dist;
 
 		/***
 		 * Call sentence level metrics using align[] for word metrics
@@ -166,7 +178,7 @@ public class Verta {
 		getTracer().star_sentence_metrics();
 
 		for (WeightedSentenceMetric iwm : sm) {
-			SimilarityResult res = iwm.similarity(proposedSentence, referenceSentence, align, getTracer().strace);
+			SimilarityResult res = iwm.similarity(proposedSentence, referenceSentence, lex_align, getTracer().strace);
 			double prec = res.getPrec();
 			double rec = res.getRec();
 
@@ -195,4 +207,54 @@ public class Verta {
 		this.counters = counters;
 	}
 
+	// Word sentence metric
+ 
+	/**
+	 * 
+	 * adds up all similarity for all aligned words that are not filtered (e,g, punctuation)
+	 * 
+	 * @param dist
+	 * @param a
+	 * @param reversed
+	 * @param proposedSentence
+	 * @param filter
+	 * @return
+	 */
+	static double calculate_similarity_for_alignment(DistanceMatrix dist, SentenceAlignment a, final boolean reversed,
+			final Sentence proposedSentence, boolean filter) {
+		// calculate scores given the selected alignment
+		int nwords = 0;
+
+		double res = 0;
+		int i = 0;
+		for (int i_al: a.getAlignment(reversed)) {
+			if (! filter || !WordFilter.filter(proposedSentence.get(i))) {
+				if (i_al >= 0)
+					res += dist.getDistance(reversed, i, i_al);
+				nwords++;
+			}
+			i++;
+		}
+
+		return res / nwords++;
+	}
+
+	static DistanceMatrix create_word_distance_matrix(WordMetric iwm,  final boolean reversed,
+			final Sentence proposedSentence, final Sentence targetSentence) {
+		
+		DistanceMatrix dist = reversed ? new DistanceMatrix(targetSentence, proposedSentence) : new DistanceMatrix(proposedSentence, targetSentence);
+		
+		int w = 0;
+		for (Word sw : proposedSentence) {
+			int iw = 0;
+			for (Word tw : targetSentence) {
+				iwm.reversed = reversed;
+				double mdist = iwm.similarity(sw, tw);
+				dist.addDistance(reversed, w, iw, mdist, iwm.getName());
+				++iw;
+			}
+			++w;
+		}
+		return dist;
+	}
 }

@@ -13,7 +13,7 @@ public class AlignmentImpl implements SentenceAlignment {
 		alignT2S = new int[colsize];
 		provS2T = new Object[rowsize];
 		provT2S = new Object[colsize];
-		;
+		
 		for (int i = 0; i < rowsize; ++i) {
 			alignS2T[i] = -1;
 		}
@@ -35,7 +35,7 @@ public class AlignmentImpl implements SentenceAlignment {
 
 	@Override
 	public boolean isAligned(boolean reversed, int i, int j) {
-		return reversed ? alignT2S[j] == i : alignS2T[j] == i;
+		return reversed ? alignT2S[i] == j : alignS2T[i] == j;
 	}
 
 	@Override

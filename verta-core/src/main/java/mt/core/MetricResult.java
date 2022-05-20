@@ -6,7 +6,7 @@ import java.util.Vector;
 
 /// representation of the whole result
 public class MetricResult {
-	public DistanceMatrix dist;
+	
 	private double prec;
 	private double rec;
 	private Vector<Double> v_w;
@@ -34,11 +34,6 @@ public class MetricResult {
 	}
 
 	public MetricResult() {
-		init(0, 0);
-	}
-
-	public MetricResult(DistanceMatrix dist) {
-		this.dist = dist;
 		init(0, 0);
 	}
 

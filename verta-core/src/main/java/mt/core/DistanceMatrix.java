@@ -6,19 +6,14 @@ import mt.nlp.Sentence;
 import mt.nlp.Word;
 
 /// A direct implementation  of a sentenceAligment using the whole matrix
-public class DistanceMatrix implements SentenceAlignment {
+public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignment {
 	
-	private static final String NO_PROVENANCE = "NULL";
 
-	/// distance from source to target words
-	private double[][] dist;
-	private Object[][] prov;
-	
 	/// source Sentence
-	public Sentence source;
+	private Sentence source;
 
 	/// target Sentence
-	public Sentence target;
+	private Sentence target;
 
 	final int source_size;
 	final int target_size;
@@ -26,16 +21,13 @@ public class DistanceMatrix implements SentenceAlignment {
 
 	// for testing purposes
 	public DistanceMatrix(double[][] m) {
-		dist = m;
+		super(m);
 		this.source_size = m.length;
 		this.target_size = m[0].length;
-		prov = new Object[source_size][target_size];
 	}
 
 	public DistanceMatrix(int source_size, int target_size) {
-		dist = new double[source_size][target_size];
-		
-		prov = new Object[source_size][target_size];
+		super(source_size,target_size);
 		this.source_size = source_size;
 		this.target_size = target_size;
 	}
@@ -45,38 +37,10 @@ public class DistanceMatrix implements SentenceAlignment {
 		this.source = source;
 		this.target = target;
 	}
-
-	private void setDistance(int n1, int n2, double d, Object provenence) {
-		dist[n1][n2] = d;
-		prov[n1][n2] = provenence;
-	}
-
-	public void setDistance(boolean reversed, int n1, int n2, double d, Object o) {
-		if (reversed)
-			setDistance(n2, n1, d, o);
-		else
-			setDistance(n1, n2, d, o);
-	}
-
-	private double getDistance(int n1, int n2) {
-		return dist[n1][n2];
-	}
-
-	public double getDistance(boolean reversed, int n1, int n2) {
-		return reversed ? getDistance(n2, n1) : getDistance(n1, n2);
-	}
-
-	private String getProvenance(int n1, int n2) {
-		return prov[n1][n2] == null ? NO_PROVENANCE : prov[n1][n2].toString();
-	}
 	
-	public String getProvenance(boolean reversed, int n1, int n2) {
-		return reversed ? getProvenance(n2, n1) : getProvenance(n1, n2);
-	}
-
 	/// Default strategy is free alignment
 	public boolean isAligned(boolean reversed, int n1, int n2) {
-		return reversed ? getDistance(n2, n1) > 0 : getDistance(n1, n2) > 0;
+		return getDistance(reversed, n1, n2) > 0;
 	}
 
 	public void dump(PrintStream s) {

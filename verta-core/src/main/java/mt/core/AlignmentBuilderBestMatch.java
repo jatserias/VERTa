@@ -3,7 +3,7 @@ package mt.core;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-/// A class to do a better aligment 
+/// A class to do a better alignment 
 public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 	class Align implements Comparator<Align> {
 		public Align(int i, int j, double dd, Object prov) {
@@ -69,13 +69,10 @@ public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 					sorted.add(new Align(i, j, dd, d.getProvenance(reversed, i, j)));
 			}
 		//
-		boolean taken[] = new boolean[target_size];
-		for (int i = 0; i < taken.length; i++)
-			taken[i] = false;
-		boolean staken[] = new boolean[source_size];
-		for (int i = 0; i < staken.length; i++)
-			staken[i] = false;
-
+		boolean[] taken = initilize_taken(target_size);
+		
+		boolean[] staken = initilize_taken(source_size);
+		
 		while (!sorted.isEmpty()) {
 			Align a = sorted.poll();
 			if (!staken[a.source] && !taken[a.target]) {
@@ -85,6 +82,13 @@ public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 			}
 		}
 
+	}
+
+	private boolean[] initilize_taken(int target_size) {
+		boolean taken[] = new boolean[target_size];
+		for (int i = 0; i < taken.length; i++)
+			taken[i] = false;
+		return taken;
 	}
 
 }
