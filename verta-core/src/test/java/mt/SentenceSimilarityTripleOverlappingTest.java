@@ -30,9 +30,9 @@ class SentenceSimilarityTripleOverlappingTest {
 	@Test
 	void test() {
 		Sentence s = new Sentence();
-		s.add(new Word("1", "cat").setFeature(Triples.ID_NAME, "1").setFeature(Triples.DEPHEAD_NAME, "2").setFeature(Triples.DEPLABEL_NAME, "subj"));
-		s.add(new Word("2", "eats").setFeature(Triples.ID_NAME, "2").setFeature(Triples.DEPHEAD_NAME, "_").setFeature(Triples.DEPLABEL_NAME, "_"));
-		s.add(new Word("3", "fish").setFeature(Triples.ID_NAME, "3").setFeature(Triples.DEPHEAD_NAME, "2").setFeature(Triples.DEPLABEL_NAME, "obj"));
+		s.add(new Word("1", "cat").setFeature(Triples.ID_NAME, "1").setFeature("DEPHEAD", "2").setFeature("DEPLABEL", "subj"));
+		s.add(new Word("2", "eats").setFeature(Triples.ID_NAME, "2").setFeature("DEPHEAD", "_").setFeature("DEPLABEL", "_"));
+		s.add(new Word("3", "fish").setFeature(Triples.ID_NAME, "3").setFeature("DEPHEAD", "2").setFeature("DEPLABEL", "obj"));
 		
 		// SentenceSimilarityTripleOverlapping.FILTER_TOP = true;
 		List<Triples> result = SentenceSimilarityTripleOverlapping.tripleGenerator(s);
@@ -75,7 +75,7 @@ class SentenceSimilarityTripleOverlappingTest {
 	
 	// TODO turn into junit
 	 public void old_main_test() throws IOException {
-			TripleMatchPattern t = new TripleMatchPattern("conf/triplesmatch.conf", new MetricActivationCounter());
+			TripleMatchPattern t = new TripleMatchPattern("conf/triplesmatch.conf", new MetricActivationCounter(), "DEPHEAD", "DEPLABEL");
 			boolean reversed = false;
 			Triples x = new Triples("amod_de", 1, 2);
 			Triples y = new Triples("prep_of", 1, 2);

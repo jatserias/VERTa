@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import mt.nlp.Triples;
+import mt.nlp.io.FileManager;
 
 /**
  * 
@@ -84,28 +85,26 @@ public class TripleMatchPattern extends TriplesMatch {
 
 	}
 
-	public TripleMatchPattern(MetricActivationCounter counters) {
-		super(counters);
-		System.err.println("Initilizing patterns");
+	public TripleMatchPattern(MetricActivationCounter counters, String head_column_name, String label_column_name) {
+		super(counters, head_column_name,label_column_name);
+		LOGGER.info("Initilizing patterns");
 		// TODO load the rest of parameters
 		groups = new HashMap<String, LabelSet>();
 		lp = new ArrayList<Tpattern>();
 	}
 		
-	public TripleMatchPattern(String filename, MetricActivationCounter counters) throws IOException {
-		this(counters);
+	public TripleMatchPattern(String filename, MetricActivationCounter counters, String head_column_name, String label_column_name) throws IOException {
+		this(counters, head_column_name,label_column_name);
 		load(filename);
 	}
 
 	@Override
 	public void load(String filename) throws FileNotFoundException, IOException {
 		LOGGER.info(String.format("Loading >%s<", filename.substring(4)));
-		BufferedReader config = (filename.startsWith("jar:")
-				? new BufferedReader(
-						new InputStreamReader(TripleMatchPattern.class.getResourceAsStream(filename.substring(4))))
-				: new BufferedReader(new FileReader(filename)));
+		BufferedReader config = FileManager.get_file_content(filename);
 		load(filename, config);
 	}
+
 	
 	@Override
 	public void load(String filename, BufferedReader config) throws IOException {	

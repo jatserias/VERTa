@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import mt.MTsimilarity;
+import mt.SentenceSimilarityTripleOverlapping;
 import mt.SimilarityEqual;
 import mt.WordMetric;
 import mt.nlp.Sentence;
@@ -98,13 +99,13 @@ class VertaTest {
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
 		
-		referenceSentence.add(new Word("1", "w1").setFeature(Triples.ID_NAME, "1").setFeature(Triples.DEPLABEL_NAME, "nsubj").setFeature(Triples.DEPHEAD_NAME, "2"));
-		referenceSentence.add(new Word("2", "w2").setFeature(Triples.ID_NAME, "2").setFeature(Triples.DEPLABEL_NAME, "_").setFeature(Triples.DEPHEAD_NAME, "0"));
-		referenceSentence.add(new Word("3", "w3").setFeature(Triples.ID_NAME, "3").setFeature(Triples.DEPLABEL_NAME, "obj").setFeature(Triples.DEPHEAD_NAME, "2"));
+		referenceSentence.add(new Word("1", "w1").setFeature(Triples.ID_NAME, "1").setFeature("DEPLABEL", "nsubj").setFeature("DEPHEAD", "2"));
+		referenceSentence.add(new Word("2", "w2").setFeature(Triples.ID_NAME, "2").setFeature("DEPLABEL", "_").setFeature("DEPHEAD", "0"));
+		referenceSentence.add(new Word("3", "w3").setFeature(Triples.ID_NAME, "3").setFeature("DEPLABEL", "obj").setFeature("DEPHEAD", "2"));
 		
-		proposedSentence.add(new Word("1", "w3").setFeature(Triples.ID_NAME, "1").setFeature(Triples.DEPLABEL_NAME, "nsubj").setFeature(Triples.DEPHEAD_NAME, "3"));
-		proposedSentence.add(new Word("2", "w1").setFeature(Triples.ID_NAME, "2").setFeature(Triples.DEPLABEL_NAME, "obj").setFeature(Triples.DEPHEAD_NAME, "3"));
-		proposedSentence.add(new Word("3", "w2").setFeature(Triples.ID_NAME, "3").setFeature(Triples.DEPLABEL_NAME, "_").setFeature(Triples.DEPHEAD_NAME, "0"));
+		proposedSentence.add(new Word("1", "w3").setFeature(Triples.ID_NAME, "1").setFeature("DEPLABEL", "nsubj").setFeature("DEPHEAD", "3"));
+		proposedSentence.add(new Word("2", "w1").setFeature(Triples.ID_NAME, "2").setFeature("DEPLABEL", "obj").setFeature("DEPHEAD", "3"));
+		proposedSentence.add(new Word("3", "w2").setFeature(Triples.ID_NAME, "3").setFeature("DEPLABEL", "_").setFeature("DEPHEAD", "0"));
 		
 		MetricResult result = verta.similarity(referenceSentence, proposedSentence);
 		result.dump(System.err);

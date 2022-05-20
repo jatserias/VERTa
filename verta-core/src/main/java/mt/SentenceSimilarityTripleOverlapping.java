@@ -1,6 +1,7 @@
 package mt;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
@@ -43,20 +44,27 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	TriplesMatch tmatch;
 
 	/**
+	 * Default column names for syntatic dependences triples
+	 * Used as default for backward compatible configuration
+	 */
+	private static final String DEPHEAD_NAME = "DEPHEAD";
+	private  static final String DEPLABEL_NAME = "DEPLABEL";
+
+	/**
 	 * we should parametrice
 	 * 
 	 * @param configfile
 	 * @throws IOException
 	 */
 	public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile) throws IOException {
-		super(counters);
-		tmatch = USE_OLD ? new TriplesMatch(configFile, counters) : new TripleMatchPattern(configFile, counters);
+			this(counters, configFile, mt.nlp.io.FileManager.get_file_content(configFile));
 	}
+		
 
 	public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile,
 			BufferedReader config) throws IOException {
 		super(counters);
-		tmatch = USE_OLD ? new TriplesMatch(counters) : new TripleMatchPattern(counters);
+		tmatch = USE_OLD ? new TriplesMatch(counters, DEPHEAD_NAME, DEPHEAD_NAME) : new TripleMatchPattern(counters, DEPHEAD_NAME, DEPHEAD_NAME);
 		tmatch.load(configFile, config);
 	}
 
@@ -111,6 +119,22 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 		return res;
 	}
 
+
+	public static Triples MakeTriple(Sentence sentence, Word word, String head_column, String label_column) {
+		int target = Integer.parseInt(word.getFeature(Triples.ID_NAME));
+		String targetString = word.getFeature(Triples.WORD_NAME);
+
+		String head = word.getFeature(head_column);
+		int source = head.startsWith("_") ? -1 : Integer.parseInt(head);
+		String sourceString = (source < 1) ? "TOP" : sentence.get(source - 1).getFeature(Triples.WORD_NAME);
+		String label = word.getFeature(label_column);
+		return new Triples(label, source, target, sourceString,targetString);
+	}
+	
+	public static Triples MakeTriple(final Sentence sentence, final Word word) throws NumberFormatException {
+		return MakeTriple(sentence, word, SentenceSimilarityTripleOverlapping.DEPHEAD_NAME, SentenceSimilarityTripleOverlapping.DEPLABEL_NAME);
+	}
+	
 	/**
 	 * Reconstruct/read triples/call parser
 	 * 
@@ -120,7 +144,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	static List<Triples> tripleGenerator(final Sentence s1) {
 		List<Triples> res = new Vector<Triples>();
 		for (Word w : s1) {
-			Triples t = new Triples(s1, w);
+			Triples t = SentenceSimilarityTripleOverlapping.MakeTriple(s1, w);
 
 			if (FILTER_TOP || t.getTarget() >= 1)
 				res.add(t);
@@ -209,4 +233,5 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 	public void dump(PrintStream strace) {
 		strace.print("<metric name='dependency triples'/>");
 	}
+
 }

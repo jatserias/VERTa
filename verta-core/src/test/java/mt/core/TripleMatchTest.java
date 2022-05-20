@@ -32,7 +32,7 @@ public class TripleMatchTest {
 		assert (TriplesMatch.getSubLabel("dep_a)").equals("a"));
 		assert (TriplesMatch.getSubLabel("dep_de)").equals("de"));
 		assert (TriplesMatch.getSubLabel("subj").equals("subj"));
-		TriplesMatch tm = new TriplesMatch(new MetricActivationCounter());
+		TriplesMatch tm = new TriplesMatch(new MetricActivationCounter(), "DEPHEAD", "DEPLABEL");
 		tm.getLabelMatch().put("dep_b#dep_a", 2.0);
 		assert (tm.matchRules("dep_%", "dep_a"));
 		assert (tm.matchRules("dep_a", "dep_%"));
@@ -90,7 +90,7 @@ public class TripleMatchTest {
 		SentenceAlignment nalign = new AlignmentImpl(distances.source_size, distances.target_size);
 		new AlignmentBuilderFirstLeft2Rigth().build(false, nalign, distances);
 
-		TriplesMatch triples_matcher = new TriplesMatch();
+		TriplesMatch triples_matcher = new TriplesMatch("DEPHEAD", "DEPLABEL");
 		triples_matcher.load("conf/triples.conf", new BufferedReader(new StringReader("#\n"
 				+ "# Complete_WEIGHT	PARTIAL_NOMOD_WEIGHT      PARTIAL_NOHEAD_WEIGHT      PARTIAL_NOLABEL_WEIGHT \n"
 				+ "#\n" + "1.0	0.8	0.7	0.7\n" + "#\n" + "# Label matching rules\n" + "#\n" + "# label - label weight\n"
@@ -137,7 +137,7 @@ public class TripleMatchTest {
 	@MethodSource("generator")
 	public void test_matchingScorer(boolean label_match, boolean head_match, boolean mod_match,
 			MatchResult expected_result, String test_id) {
-		MatchResult result = new TriplesMatch().matchingScorer(null, null, label_match, head_match, mod_match);
+		MatchResult result = new TriplesMatch("DEPHEAD", "DEPLABEL").matchingScorer(null, null, label_match, head_match, mod_match);
 		assertEquals(expected_result, result, test_id);
 	}
 

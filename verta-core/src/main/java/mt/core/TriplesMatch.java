@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import mt.SentenceSimilarityTripleOverlapping;
 import mt.nlp.Triples;
 
 /// A simple class for Matching triples
@@ -31,19 +32,26 @@ public class TriplesMatch {
 	// to report counters
 	private MetricActivationCounter counters;
 
-	public TriplesMatch() {
+	/// Column name for the triple label
+	String label_column_name;
+	
+	/// Column name for the triple head
+	String head_column_name;
+	
+	public TriplesMatch(String head_column_name, String label_column_name) {
 		setLabelMatch(new HashMap<String, Double>());
+		this.label_column_name = label_column_name;
+		this.head_column_name = head_column_name;
 		this.setCounters(new MetricActivationCounter());
 	}
 		
-	public TriplesMatch(MetricActivationCounter counters) {
-		this();
+	public TriplesMatch(MetricActivationCounter counters, String head_column_name, String label_column_name) {
+		this(head_column_name, label_column_name);
 		this.setCounters(counters);
 	}
 
-	/// read and old file dep configuration
-	public TriplesMatch(String filename, MetricActivationCounter counters) throws FileNotFoundException, IOException {
-		this(counters);
+	public TriplesMatch(String filename, MetricActivationCounter counters, String head_column_name, String label_column_name) throws FileNotFoundException, IOException {
+		this(counters, head_column_name, label_column_name);
 		load(filename);
 	}
 		
