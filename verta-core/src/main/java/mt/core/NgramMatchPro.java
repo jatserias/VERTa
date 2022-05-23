@@ -23,26 +23,23 @@ public class NgramMatchPro extends NgramMatch {
 
 		double ngramprec = 0.0;
 		double ngramrec = 0.0;
+		
 		if (MTsimilarity.DUMP)
 			strace.println("<s2t>");
+		
 		if (minsize > s1.size() || minsize > s2.size())
 			return SimilarityResult.bad;
 
-		for (int s = Math.min(Math.min(minsize, s1.size()), s2.size()); s <= Math.min(Math.min(maxsize, s1.size()),
-				s2.size()); ++s) {
-			ngramprec += NgramMatch.compareNgrams(s, false, s1, s2, dist, strace)
-					/ NgramMatchPro.totalngrams(s, s1.size());
-		}
+		ngramprec = getNgramNormalized(s1, s2, dist, strace);
+		
 		if (MTsimilarity.DUMP) {
 			strace.println("</s2t>");
 			strace.println("<t2s>");
 		}
-		for (int s = Math.min(Math.min(minsize, s1.size()), s2.size()); s <= Math.min(Math.min(maxsize, s1.size()),
-				s2.size()); ++s) {
-			// we will need to reverese dist??
-			ngramrec += NgramMatch.compareNgrams(s, true, s2, s1, dist, strace)
-					/ NgramMatchPro.totalngrams(s, s2.size());
-		}
+		
+		SentenceAlignment dist_rev = dist.revert();
+		ngramrec = getNgramNormalized(s2, s1, dist_rev, strace);
+	
 
 		if (MTsimilarity.DUMP)
 			strace.println("</t2s>");
@@ -55,6 +52,17 @@ public class NgramMatchPro extends NgramMatch {
 		return new SimilarityResult(ngramprec == 0 ? 0.0 : ngramprec / (maxsize1 - minsize1 + 1),
 				ngramrec == 0 ? 0.0 : ngramrec / (maxsize2 - minsize2 + 1));
 
+	}
+
+	private double getNgramNormalized(final Sentence s1, final Sentence s2, final SentenceAlignment dist, PrintStream strace) {
+		double ngramprec = 0.0;
+		for (int ngram_size = Math.min(Math.min(minsize, s1.size()), s2.size()); 
+				 ngram_size <= Math.min(Math.min(maxsize, s1.size()),s2.size()); 
+				 ++ngram_size) {
+			ngramprec += NgramMatch.compareNgrams(ngram_size, s1, s2, dist, strace)
+					/ NgramMatchPro.totalngrams(ngram_size, s1.size());
+		}
+		return ngramprec;
 	}
 
 	public static double totalngrams(int ngram_size, int sentence_size) {

@@ -221,9 +221,9 @@ public class MTmetricXMLDumper {
 			int itw = 0;
 			for (Word tw : targetSentence) {
 				double simu = wm.similarity(pw, tw, out, "p2t");
-				wm.reversed = true;
+				//wm.reversed = true;
 				double simd = wm.similarity(tw, pw, out, "t2p");
-				wm.reversed = false;
+				//wm.reversed = false;
 				// @TODO we should add bestMatch info in both ways
 				out.print("<s w=\"" + XMLFormater.encodeXMLString(tw.getFeature("WORD")) + "\" st=\"" + simu
 						+ "\" ts=\"" + simd + "\" ");

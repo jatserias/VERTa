@@ -46,8 +46,7 @@ public class SentenceSimilarityNEL extends SentenceSimilarityBase implements Sen
 		}
 		// TODO fix counters
 		//
-		getCounters().increase(this.getClass().getCanonicalName(), 1, true);
-		getCounters().increase(this.getClass().getCanonicalName(), 1, false);
+		getCounters().increase(this.getClass().getCanonicalName(), 1);
 		return new SimilarityResult(sres.size(), s1.getNel().size(), s2.getNel().size());
 	}
 

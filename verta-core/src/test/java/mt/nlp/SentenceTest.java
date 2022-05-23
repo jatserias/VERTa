@@ -4,9 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import mt.nlp.Sentence;
-import mt.nlp.Word;
-
 class SentenceTest {
 
 	@Test

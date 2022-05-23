@@ -1,12 +1,6 @@
 package mt.nlp;
 
 import org.junit.jupiter.api.Test;
-
-import mt.nlp.Ngram;
-import mt.nlp.Segment;
-import mt.nlp.Sentence;
-import mt.nlp.Word;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

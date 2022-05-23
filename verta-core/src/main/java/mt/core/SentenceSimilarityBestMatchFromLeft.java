@@ -39,7 +39,7 @@ public class SentenceSimilarityBestMatchFromLeft {
 			if (align[iw] < 0) {
 
 				// propagate reverse
-				wm.reversed = reversed;
+				//wm.reversed = reversed;
 				double mdist = wm.similarity(w, targetSentence.get(iw));
 
 				// reversed on dist

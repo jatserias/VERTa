@@ -1,6 +1,7 @@
 package mt;
-import static org.junit.Assert.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class SimilarityHypernymWnMFSTest {
 		SynsetType[] lpos = {pos};
 		double res = sim.INNERsimilarity(featureNames, proposedWord, referenceWord,  lpos);
 		// TODO sim.MULTILEVEL = true;
-		assertEquals("Innersimilarity", Similarity.MAXVAL, res, 0.0001);
+		assertEquals(Similarity.MAXVAL, res, 0.0001, "Innersimilarity");
 	}
 	
 	@Test

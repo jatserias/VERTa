@@ -11,7 +11,7 @@ public class MetricActivationCounter {
 		counts = new HashMap<String, Integer>();
 	}
 
-	public void increase(String counter, double score, boolean reversed) {
+	public void increase(String counter, double score) {
 		if (counts.containsKey(counter)) {
 			counts.put(counter, counts.get(counter) + 1);
 		} else {

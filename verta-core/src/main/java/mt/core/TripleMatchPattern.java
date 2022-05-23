@@ -2,9 +2,7 @@ package mt.core;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,15 +84,16 @@ public class TripleMatchPattern extends TriplesMatch {
 	}
 
 	public TripleMatchPattern(MetricActivationCounter counters, String head_column_name, String label_column_name) {
-		super(counters, head_column_name,label_column_name);
+		super(counters, head_column_name, label_column_name);
 		LOGGER.info("Initilizing patterns");
 		// TODO load the rest of parameters
 		groups = new HashMap<String, LabelSet>();
 		lp = new ArrayList<Tpattern>();
 	}
-		
-	public TripleMatchPattern(String filename, MetricActivationCounter counters, String head_column_name, String label_column_name) throws IOException {
-		this(counters, head_column_name,label_column_name);
+
+	public TripleMatchPattern(String filename, MetricActivationCounter counters, String head_column_name,
+			String label_column_name) throws IOException {
+		this(counters, head_column_name, label_column_name);
 		load(filename);
 	}
 
@@ -105,12 +104,10 @@ public class TripleMatchPattern extends TriplesMatch {
 		load(filename, config);
 	}
 
-	
 	@Override
-	public void load(String filename, BufferedReader config) throws IOException {	
+	public void load(String filename, BufferedReader config) throws IOException {
 		readSets(config);
 		readPatterns(config);
-		dump(System.err);
 	}
 
 	private void dump(PrintStream err) {
@@ -135,8 +132,9 @@ public class TripleMatchPattern extends TriplesMatch {
 
 			if (p.match(x, y, label_match, source_match, target_match)) {
 
-				getCounters().increase(this.getClass().getName() + "[" + p.toString() + "]", 1, false);
-				return new MatchResult(p.getWeight() * (p.getLabelSet() == null ? getWeight(x.label) : p.getLabelSet().w), p);
+				getCounters().increase(this.getClass().getName() + "[" + p.toString() + "]", 1);
+				return new MatchResult(
+						p.getWeight() * (p.getLabelSet() == null ? getWeight(x.label) : p.getLabelSet().w), p);
 
 			}
 

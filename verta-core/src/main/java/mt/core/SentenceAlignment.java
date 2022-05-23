@@ -1,5 +1,7 @@
 package mt.core;
 
+import java.io.PrintStream;
+
 /**
  * 
  * An 1 to 1 alignment between the words of two sentences sentences
@@ -9,11 +11,15 @@ package mt.core;
  */
 public interface SentenceAlignment {
 
-	public boolean isAligned(boolean reversed, int i, int j);
+	public boolean isAligned(int i, int j);
 
-	int[] getAlignment(boolean reversed);
+	int[] getAlignment();
 
-	void setAligned(boolean reversed, int i, int j, String provenence);
+	void setAligned(int i, int j, String provenence);
 
-	public String provenance(boolean reversed, int i, int j);
+	public String getProvenance(int i, int j);
+
+	public void dump(PrintStream err);
+
+	public SentenceAlignment revert();
 }

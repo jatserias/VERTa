@@ -1,7 +1,6 @@
 package mt;
-import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.stream.Stream;
 
@@ -9,36 +8,33 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import mt.core.DistanceMatrix;
 import mt.core.FeatureMetric;
 import mt.core.Similarity;
 import mt.core.WeightedWordMetric;
-import mt.nlp.Sentence;
 import mt.nlp.Word;
 
 public class WordMetricTest {
 
-	  
 	private static Stream<Arguments> generator() {
 
-		 return Stream.of(
-		   Arguments.of(new Word("1", "a"), new Word("2", "a"), 1.0),
-		   Arguments.of(new Word("1", "a"), new Word("2", "b"), 0.0));
-		}
-		
+		return Stream.of(Arguments.of(new Word("1", "a"), new Word("2", "a"), 1.0),
+				Arguments.of(new Word("1", "a"), new Word("2", "b"), 0.0));
+	}
+
 	@ParameterizedTest
 	@MethodSource("generator")
 	void test_similarity(final Word proposedWord, final Word targetWord, double expected_result) {
 
 		WordMetric wm = simple_metric_helper();
-		
+
 		double actual_result = wm.similarity(proposedWord, targetWord);
 		assertEquals(expected_result, actual_result, 0.0001, "Word similarity");
-		
+
 	}
 
 	private WordMetric simple_metric_helper() {
-		// basic similarity  metric using one group, weight 100 with one feature WORD and using equality
+		// basic similarity metric using one group, weight 100 with one feature WORD and
+		// using equality
 		WordMetric wm = new WordMetric();
 		WeightedWordMetric group = new WeightedWordMetric(1.0);
 		Similarity sm = new SimilarityEqual();
@@ -46,7 +42,6 @@ public class WordMetricTest {
 		wm.featureMetrics.put("1", group);
 		return wm;
 	}
-
 
 	/*
 	 * @Test void test_bestMatch() { // not used as input Integer align[] = {1};
@@ -88,6 +83,5 @@ public class WordMetricTest {
 	 * wm.sentenceSimilarity(align, taken, dist, reversed, proposedSentence,
 	 * targetSentence), 0.0001, "test") ; }
 	 */
-	
-}
 
+}

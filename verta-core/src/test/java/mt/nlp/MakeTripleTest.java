@@ -15,7 +15,7 @@ class MakeTripleTest {
 		s.add(new Word("2", "eats").setFeature(Triples.ID_NAME, "2").setFeature("DEPHEAD", "_").setFeature("DEPLABEL", "_"));
 		s.add(new Word("3", "fish").setFeature(Triples.ID_NAME, "3").setFeature("DEPHEAD", "2").setFeature("DEPLABEL", "obj"));
 				
-		Triples triples = SentenceSimilarityTripleOverlapping.MakeTriple(s, s.elementAt(0));
+		Triples triples = SentenceSimilarityTripleOverlapping.MakeTriple(s, s.elementAt(0), "DEPHEAD", "DEPLABEL");
 		// @TODO source and target re-reversed
 		Triples expected_triple = new Triples("subj", 2, 1, "eats", "cats");
 		

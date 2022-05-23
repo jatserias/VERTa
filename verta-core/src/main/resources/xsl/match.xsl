@@ -4,14 +4,12 @@
 <xsl:template name="countsmetric">
   <xsl:param name="pgrup"/>
   <xsl:param name="metric"/>
-  <!-- <xsl:value-of select="$pgrup"/>:<xsl:value-of select="$metric"/>:-->
    <xsl:value-of select="//statistics/grup[position() = $pgrup]/metric[position() = $metric]"/>
 </xsl:template>
   
   
 <xsl:template match="exp">
 <html><head>
-<!--  <link	rel='stylesheet' type='text/css' href='wnss.css'/> -->
  </head>
  <title>Experiment</title>
 <style>
@@ -356,17 +354,6 @@
 </xsl:for-each>
 
 
- <!--
- <h2>Lexic</h2>
- <b>Precision:</b><xsl:value-of select="presults/lexprec"/><br/>
- <b>Recall:</b> <xsl:value-of select="presults/lexrec"/><br/>
- <h2>Ngrams</h2>
- <b>Precision:</b><xsl:value-of select="presults/ngramprec"/><br/>
- <b>Recall:</b> <xsl:value-of select="presults/ngramrec"/><br/>
- <h2>Dep</h2>
- <b>Precision:</b><xsl:value-of select="presults/deppre"/><br/>
- <b>Recall:</b> <xsl:value-of select="presults/deprec"/><br/>
- -->
 <hr/>
 <ul>
  <xsl:for-each select="reflink">

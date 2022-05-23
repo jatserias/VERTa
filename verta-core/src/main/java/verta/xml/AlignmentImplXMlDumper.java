@@ -2,15 +2,15 @@ package verta.xml;
 
 import java.io.PrintStream;
 
-import mt.core.AlignmentImpl;
+import mt.core.AlignmentImplSingle;
 
 public class AlignmentImplXMlDumper {
 
-	public static void dump(AlignmentImpl a, PrintStream strace) {
+	public static void dump(AlignmentImplSingle a, AlignmentImplSingle a_rev, PrintStream strace) {
 		strace.print("<align>");
 		strace.print("<st>");
 		int i = 0;
-		for (int i_a: a.getAlignment(false)) {
+		for (int i_a: a.getAlignment()) {
 			strace.println("<s  s=\"" + i + "\" t=\"" + i_a + "\"/>");
 			++i;
 		}
@@ -18,7 +18,7 @@ public class AlignmentImplXMlDumper {
 
 		strace.print("<ts>");
 		int j = 0;
-		for(int j_a : a.getAlignment(true)) {
+		for(int j_a : a_rev.getAlignment()) {
 			strace.println("<s  s=\"" + j + "\" t=\"" + j_a + "\"/>");
 			++j;		}
 		strace.print("</ts>");

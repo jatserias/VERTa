@@ -35,6 +35,7 @@ public class SentenceMetricBuilder {
 			}
 			Constructor<?> ct = cl.getConstructor(clist);
 			sm = (SentenceMetric) ct.newInstance(arglist);
+			// try setting up Wordnet (may fail if not needed
 			try {
 				@SuppressWarnings("rawtypes")
 				Class[] paramTypes = new Class[1];
@@ -42,14 +43,12 @@ public class SentenceMetricBuilder {
 				Method method = sm.getClass().getMethod("Wn", paramTypes);
 				LOGGER.info(className + " uses WN:" + wn);
 				method.invoke(sm, new Object[] { wn });
-				LOGGER.info("Metric setup!");
+				LOGGER.info("Wn setup for metric "+ className);
 			} catch (Throwable throwable) {
-				LOGGER.info("Something went wrong with " + className + ":" + throwable.getLocalizedMessage());
+				LOGGER.warning("The " + className + " may not need wordnet setup:" + throwable.getLocalizedMessage());
 			}
 		} catch (Exception e) {
-			LOGGER.severe("Error trying to load SentenceMetric>" + className + "<");
-			e.printStackTrace();
-			System.exit(-1);
+			throw new RuntimeException("Error trying to load SentenceMetric>" + className + "<", e);
 		}
 		return sm;
 	}

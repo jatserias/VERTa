@@ -1,7 +1,8 @@
 package mt.core;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Vector;
 import java.util.logging.Logger;
@@ -17,9 +18,9 @@ import verta.xml.VertaXMLDumper;
 public class Verta {
 
 	private static Logger LOGGER = Logger.getLogger(Verta.class.getName());
-	
+
 	public boolean FILTER_PUNCTUATION = false;
-	
+
 	/// Word Metrics
 	public List<WordMetric> wms;
 
@@ -28,39 +29,31 @@ public class Verta {
 
 	/// WordNet API
 	public WordNetAPI wn;
-	
+
 	private VertaXMLDumper tracer;
-	
+
 	private MetricActivationCounter counters;
-	
-	public Verta(String configFilename, WordNetAPI wn) {
-		setTracer(new VertaXMLDumper()); 
+
+	public Verta(String configFilename, WordNetAPI wn) throws FileNotFoundException {
+		setTracer(new VertaXMLDumper());
 		wms = new Vector<WordMetric>();
 		sm = new Vector<WeightedSentenceMetric>();
 		setCounters(new MetricActivationCounter());
 		this.wn = wn;
 		load(configFilename);
 	}
-	
+
 	public Verta(String configFilename, BufferedReader buffer, WordNetAPI wn) {
-		setTracer(new VertaXMLDumper()); 
+		setTracer(new VertaXMLDumper());
 		wms = new Vector<WordMetric>();
 		sm = new Vector<WeightedSentenceMetric>();
 		setCounters(new MetricActivationCounter());
 		this.wn = wn;
 		load(configFilename, buffer);
 	}
-	
-	public void load(String configFilename) {
-		BufferedReader config = null;
-		try {
-			config = new BufferedReader(new FileReader(configFilename));
-		} catch (Exception e) {
-			LOGGER.severe("ERROR can not open/find file >" + configFilename + "<");
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		load(configFilename, config);
+
+	public void load(String configFilename) throws FileNotFoundException {
+		load(configFilename, mt.nlp.io.FileManager.get_file_content(configFilename));
 	}
 
 	public void load(String configFilename, BufferedReader config) {
@@ -72,14 +65,13 @@ public class Verta {
 				if (!buff.trim().startsWith("#") && buff.trim().length() > 0) {
 
 					if (!buff.startsWith("GROUP")) {
-						LOGGER.severe("Format ERROR on the metric config file >" + configFilename + "<");
-						LOGGER.severe("At line:" + buff);
-						LOGGER.severe("GROUP head expected");
+						throw new RuntimeException("Error in metric config file GROUP expected found " + buff);
 					} else {
 						// GROUP HEAD: GROUP <tab> ID <tab> WEIGHT <tab> CLASSNAME
 						String line[] = buff.split("\t");
 						if (line.length < 5) {
-							LOGGER.severe("Format ERROR on the metric config file >" + configFilename + "<");
+							throw new RuntimeException(
+									"Format ERROR on the metric config file >" + configFilename + "<");
 						}
 						LOGGER.info("READING GROUP>" + buff + "<");
 						String classname = line[4];
@@ -101,29 +93,26 @@ public class Verta {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.severe("Format Error in Metric configuration file");
-			e.printStackTrace();
-			System.exit(-1);
+			throw new RuntimeException("Format Error in Metric configuration file", e);
 		}
 	}
-	
+
 	public void setFilter(boolean filter) {
-		FILTER_PUNCTUATION = filter;	
+		FILTER_PUNCTUATION = filter;
 	}
-	
+
 	/**
 	 * 
 	 * returns MetricResult P / R /F
 	 * 
 	 */
 	public MetricResult similarity(final Sentence referenceSentence, final Sentence proposedSentence) {
-		
+
 		getTracer().start_lexical_metrics();
-		
+
 		/// Applies word-alignment metrics
 		SentenceAlignment lex_align = null;
-		SentenceAlignment lex_align_rev = null;
-		
+
 		/// store the partial results
 		MetricResult tres = new MetricResult();
 
@@ -138,24 +127,25 @@ public class Verta {
 			// Return also dist matrix (internally uses align)
 
 			AlignmentBuilder builder = new AlignmentBuilderBestMatch();
-			
+
 			// calculate all distances
-			DistanceMatrix dist = create_word_distance_matrix(iwm, false, proposedSentence, referenceSentence);
-			AlignmentImpl align = new AlignmentImpl(proposedSentence.size(), referenceSentence.size());
+			DistanceMatrix dist = create_word_distance_matrix(iwm, proposedSentence, referenceSentence);
+			AlignmentImplSingle align = new AlignmentImplSingle(proposedSentence.size(), referenceSentence.size());
 			// TODO configure alignment strategy
-			builder.build(false, align, dist);
-			double prec = calculate_similarity_for_alignment(dist, align, false, proposedSentence, this.FILTER_PUNCTUATION);
-			
-			
-			DistanceMatrix dist_rev = create_word_distance_matrix(iwm, true,  referenceSentence, proposedSentence);
+			builder.build(align, dist);
+			double prec = calculate_similarity_for_alignment(dist, align, false, proposedSentence,
+					this.FILTER_PUNCTUATION);
+
+			DistanceMatrix dist_rev = create_word_distance_matrix(iwm, referenceSentence, proposedSentence);
 			// This was the previous heuristic: AlignmentImpl align_rev = align;
-			builder.build(true, align, dist_rev);
-			double rec = calculate_similarity_for_alignment(dist_rev, align, true, referenceSentence, this.FILTER_PUNCTUATION);
-			
-		
+			AlignmentImplSingle align_rev = new AlignmentImplSingle(referenceSentence.size(), proposedSentence.size());
+			builder.build(align_rev, dist_rev);
+			double rec = calculate_similarity_for_alignment(dist_rev, align_rev, true, referenceSentence,
+					this.FILTER_PUNCTUATION);
+
 			// dump the alignment
 			if (MTsimilarity.DUMP) {
-				AlignmentImplXMlDumper.dump(align, getTracer().strace);
+				AlignmentImplXMlDumper.dump(align, align_rev, getTracer().strace);
 			}
 
 			tres.add(iwm.getName(), iwm.getWeight(), prec, rec);
@@ -163,7 +153,7 @@ public class Verta {
 			getTracer().xml_dump_distances(referenceSentence, proposedSentence, iwm);
 
 			// use first word distance to alignments
-			if(nsim==0){
+			if (nsim == 0) {
 				lex_align = align;
 			}
 			++nsim;
@@ -185,9 +175,9 @@ public class Verta {
 			tres.add(iwm.getName(), iwm.getWeight(), prec, rec);
 
 		}
-		
+
 		getTracer().end_sentence_metrics(tres);
-		
+
 		return tres;
 	}
 
@@ -208,10 +198,11 @@ public class Verta {
 	}
 
 	// Word sentence metric
- 
+
 	/**
 	 * 
-	 * adds up all similarity for all aligned words that are not filtered (e,g, punctuation)
+	 * adds up all similarity for all aligned words that are not filtered (e,g,
+	 * punctuation)
 	 * 
 	 * @param dist
 	 * @param a
@@ -227,10 +218,10 @@ public class Verta {
 
 		double res = 0;
 		int i = 0;
-		for (int i_al: a.getAlignment(reversed)) {
-			if (! filter || !WordFilter.filter(proposedSentence.get(i))) {
+		for (int i_al : a.getAlignment()) {
+			if (!filter || !WordFilter.filter(proposedSentence.get(i))) {
 				if (i_al >= 0)
-					res += dist.getDistance(reversed, i, i_al);
+					res += dist.getDistance(i, i_al);
 				nwords++;
 			}
 			i++;
@@ -239,22 +230,34 @@ public class Verta {
 		return res / nwords++;
 	}
 
-	static DistanceMatrix create_word_distance_matrix(WordMetric iwm,  final boolean reversed,
-			final Sentence proposedSentence, final Sentence targetSentence) {
-		
-		DistanceMatrix dist = reversed ? new DistanceMatrix(targetSentence, proposedSentence) : new DistanceMatrix(proposedSentence, targetSentence);
-		
+	static DistanceMatrix create_word_distance_matrix(WordMetric iwm, final Sentence proposedSentence,
+			final Sentence targetSentence) {
+
+		DistanceMatrix dist = new DistanceMatrix(proposedSentence, targetSentence);
+
 		int w = 0;
 		for (Word sw : proposedSentence) {
 			int iw = 0;
 			for (Word tw : targetSentence) {
-				iwm.reversed = reversed;
 				double mdist = iwm.similarity(sw, tw);
-				dist.addDistance(reversed, w, iw, mdist, iwm.getName());
+				dist.addDistance(w, iw, mdist, iwm.getName());
 				++iw;
 			}
 			++w;
 		}
 		return dist;
+	}
+
+	public void dump(PrintStream err) {
+
+		err.println("--- WordMetrics ---");
+		for (WordMetric wm : this.wms) {
+			err.println(wm.getName() + " weight:" + wm.getWeight() + " group weigth " + wm.groupWeight);
+		}
+		err.println("--- WeightedSentenceMetrics ---");
+		for (WeightedSentenceMetric wsm : this.sm) {
+			err.println(wsm.toString());
+		}
+		err.println("------");
 	}
 }

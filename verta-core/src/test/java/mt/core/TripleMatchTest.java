@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.stream.Stream;
 
@@ -14,14 +12,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import mt.SentenceSimilarityTripleOverlapping;
-import mt.nlp.Segment;
 import mt.nlp.Sentence;
 import mt.nlp.Triples;
 import mt.nlp.Word;
-import mt.nlp.io.CONLLformat;
-import mt.nlp.io.ReaderCONLL;
 
 public class TripleMatchTest {
 
@@ -40,30 +33,6 @@ public class TripleMatchTest {
 		assert (tm.labelsMatch(new Triples("dep_a", 0, 0), new Triples("dep_%", 0, 0)));
 		assert (!tm.labelsMatch(new Triples("kk_a", 0, 0), new Triples("dep_%", 0, 0)));
 		assert (!tm.labelsMatch(new Triples("dep_a", 0, 0), new Triples("kk_%", 0, 0)));
-		// System.out.println(tm.matchingScorer(new Triples("dep_%", 0, 0), new
-		// Triples("dep_a", 0, 0), true, true, true));
-		// System.out.println(tm.matchingScorer(new Triples("dep_b", 0, 0), new
-		// Triples("dep_a", 0, 0), true, true, true));
-	}
-
-	public void old_main_test() throws Exception {
-
-		MetricActivationCounter counters = new MetricActivationCounter();
-		SentenceSimilarityTripleOverlapping s = new SentenceSimilarityTripleOverlapping(counters,
-				"conf/triplesmatch.conf");
-		String hypFilename = "testdep_hyp.txt";
-		String refFilename = "testdep_ref.txt";
-		CONLLformat fmt = new CONLLformat("conf/conll08.fmt");
-		BufferedReader refFile = new BufferedReader(new FileReader(refFilename));
-		BufferedReader proposedFile = new BufferedReader(new FileReader(hypFilename));
-
-		Segment seg1 = ReaderCONLL.readSegment(proposedFile, fmt);
-		Segment seg2 = ReaderCONLL.readSegment(refFile, fmt);
-		boolean reversed = false;
-		PrintStream strace = System.err;
-		// SentenceAlignment align = new Sen
-		// s.findTriple(reversed, seg1, seg2, align, strace);
-
 	}
 
 	@Test
@@ -83,19 +52,19 @@ public class TripleMatchTest {
 
 		// double[][] align={ {1,0}, {0,1}};
 		DistanceMatrix distances = new DistanceMatrix(sa1, sa1);
-		distances.setDistance(false, 0, 0, 1, "test");
-		distances.setDistance(false, 0, 1, 0, "test");
-		distances.setDistance(false, 0, 0, 0, "test");
-		distances.setDistance(false, 0, 0, 1, "test");
-		SentenceAlignment nalign = new AlignmentImpl(distances.source_size, distances.target_size);
-		new AlignmentBuilderFirstLeft2Rigth().build(false, nalign, distances);
+		distances.setDistance(0, 0, 1, "test");
+		distances.setDistance(0, 1, 0, "test");
+		distances.setDistance(0, 0, 0, "test");
+		distances.setDistance(0, 0, 1, "test");
+		SentenceAlignment nalign = new AlignmentImplSingle(distances.source_size, distances.target_size);
+		new AlignmentBuilderFirstLeft2Rigth().build(nalign, distances);
 
 		TriplesMatch triples_matcher = new TriplesMatch("DEPHEAD", "DEPLABEL");
 		triples_matcher.load("conf/triples.conf", new BufferedReader(new StringReader("#\n"
 				+ "# Complete_WEIGHT	PARTIAL_NOMOD_WEIGHT      PARTIAL_NOHEAD_WEIGHT      PARTIAL_NOLABEL_WEIGHT \n"
 				+ "#\n" + "1.0	0.8	0.7	0.7\n" + "#\n" + "# Label matching rules\n" + "#\n" + "# label - label weight\n"
 				+ "#\n" + "amod	prep_of	1.0\n" + "nsubj	agent	1.0\n" + "")));
-		assertTrue(triples_matcher.match(false, t1, t2, nalign).score > 0, "btest1");
+		assertTrue(triples_matcher.match(t1, t2, nalign).score > 0, "btest1");
 
 		String[] words = { "the", "cat", "eats", "fish", "." };
 		String[] deps = { "mod:2", "subj:3", "_:_", "obj:2", "_:_" };
@@ -137,7 +106,8 @@ public class TripleMatchTest {
 	@MethodSource("generator")
 	public void test_matchingScorer(boolean label_match, boolean head_match, boolean mod_match,
 			MatchResult expected_result, String test_id) {
-		MatchResult result = new TriplesMatch("DEPHEAD", "DEPLABEL").matchingScorer(null, null, label_match, head_match, mod_match);
+		MatchResult result = new TriplesMatch("DEPHEAD", "DEPLABEL").matchingScorer(null, null, label_match, head_match,
+				mod_match);
 		assertEquals(expected_result, result, test_id);
 	}
 

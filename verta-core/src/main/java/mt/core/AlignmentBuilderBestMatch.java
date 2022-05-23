@@ -38,16 +38,11 @@ public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 
 	}
 
-	public void build(SentenceAlignment res, final DistanceMatrix d) {
-		build(true, res, d);
-		build(false, res, d);
-	}
-
 	@Override
-	public void build(boolean reversed, SentenceAlignment res, final DistanceMatrix d) {
-		int source_size = d.getRowSize(reversed);
-		int target_size = d.getColumnSize(reversed);
-
+	public void build(SentenceAlignment res, final DistanceMatrix distances_source_target) {
+		int source_size = distances_source_target.getRowSize();
+		int target_size = distances_source_target.getColumnSize();
+		
 		PriorityQueue<Align> sorted = new PriorityQueue<Align>(10, new Comparator<Align>() {
 			public int compare(Align arg0, Align arg1) {
 				if (arg0.w == arg1.w) {
@@ -64,9 +59,9 @@ public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 
 		for (int i = 0; i < source_size; ++i)
 			for (int j = 0; j < target_size; ++j) {
-				double dd = d.getDistance(reversed, i, j);
+				double dd = distances_source_target.getDistance(i, j);
 				if (dd > 0)
-					sorted.add(new Align(i, j, dd, d.getProvenance(reversed, i, j)));
+					sorted.add(new Align(i, j, dd, distances_source_target.getProvenance(i, j)));
 			}
 		//
 		boolean[] taken = initilize_taken(target_size);
@@ -76,7 +71,8 @@ public class AlignmentBuilderBestMatch implements AlignmentBuilder {
 		while (!sorted.isEmpty()) {
 			Align a = sorted.poll();
 			if (!staken[a.source] && !taken[a.target]) {
-				res.setAligned(reversed, a.source, a.target, a.prov.toString());
+					res.setAligned(a.source, a.target, a.prov.toString());
+				
 				staken[a.source] = true;
 				taken[a.target] = true;
 			}

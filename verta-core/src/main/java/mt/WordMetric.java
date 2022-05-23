@@ -8,12 +8,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import mt.core.DistanceMatrix;
 import mt.core.FeatureMetric;
 import mt.core.MetricActivationCounter;
 import mt.core.Similarity;
 import mt.core.WeightedWordMetric;
-import mt.nlp.Sentence;
 import mt.nlp.Word;
 import verta.wn.WordNetAPI;
 import verta.xml.WordMetricXMLDumper;
@@ -29,7 +27,7 @@ public class WordMetric {
 	// we should group metrics by id
 	public HashMap<String, WeightedWordMetric> featureMetrics;
 
-	public boolean reversed;
+	//public boolean reversed;
 
 	public double groupWeight;
 
@@ -127,12 +125,12 @@ public class WordMetric {
 			boolean active = true;
 			while (contrib <= Similarity.MINVAL && f < x.size()) {
 				FeatureMetric fm = x.get(f);
-				fm.reversed = reversed;
+				//fm.reversed = reversed;
 				contrib = fm.similarity(proposedWord, targetWord);
 				active = contrib > Similarity.MINVAL;
 
 				if (counters != null)
-					counters.increase(fm.getClassName() + Arrays.asList(fm.featureNames), contrib, reversed);
+					counters.increase(fm.getClassName() + Arrays.asList(fm.featureNames), contrib);
 
 				// trace
 				WordMetricXMLDumper.xml_wm_dump(proposedWord, targetWord, pout, contrib, f, active, fm);
@@ -169,8 +167,7 @@ public class WordMetric {
 					String featureName = line[npar];
 					double weight = Double.parseDouble(line[npar + 1]);
 					if (weight > MAX_FEATURE_WEIGHT)
-						System.err
-								.println("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + line);// weight=100;
+						LOGGER.warning("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + line);// weight=100;
 
 					Similarity sm = instantiateSimilarity(className, weight, line, npar, wn);
 
@@ -200,71 +197,5 @@ public class WordMetric {
 	public String getName() {
 		return name;
 	}
-
-	/**
-	 * 
-	 * 
-	 * Sentence level
-	 * 
-	 * 
-	 * 
-	 */
-
-
-	/**
-	 * Calculates the similarity between two sentences
-	 * 
-	 * @param proposedSentence
-	 * @param targetSentence
-	 * @param wm               the word metric to be used
-	 * @return the similarity [0-1]
-	 */
-	/*
-	 * @Deprecated double sentenceSimilarity(
-	 * 
-	 * Integer align[], boolean[] taken, DistanceMatrix dist,
-	 * 
-	 * final boolean reversed, final Sentence proposedSentence, final Sentence
-	 * targetSentence) {
-	 * 
-	 * calculate_word_similarity_matrix(dist, reversed, proposedSentence,
-	 * targetSentence);
-	 * 
-	 * int proposed_size = proposedSentence.size(); int target_size =
-	 * targetSentence.size();
-	 * 
-	 * return calculate_sentence_aggregated_word_similarity(align, taken, dist,
-	 * reversed, proposed_size, target_size); }
-	 * 
-	 * private double calculate_sentence_aggregated_word_similarity(Integer[] align,
-	 * boolean[] taken, DistanceMatrix dist, final boolean reversed, int
-	 * proposed_size, int target_size) { double distBestWord[] = new
-	 * double[proposed_size];
-	 * 
-	 * for (int sw = 0; sw<proposed_size; ++sw) { double max = 0; int maxword = -1;
-	 * int iw = 0; while (iw < target_size) { // Not Aligned before double mdist =
-	 * dist.getDistance(reversed, sw, iw); if (!taken[iw]) { // TODO store the
-	 * metric info to count best-similarity usage group+metric if (mdist > max) {
-	 * max = mdist; maxword = iw; } } ++iw; }
-	 * 
-	 * // final result if (maxword > -1) { align[sw] = maxword; taken[maxword] =
-	 * true; } distBestWord[sw] = max; ++sw; }
-	 * 
-	 * double sum = 0;
-	 * 
-	 * for (int j = 0; j < distBestWord.length; ++j) { if (distBestWord[j] > 0) sum
-	 * += distBestWord[j]; }
-	 * 
-	 * // @BUG return sum+100*sum/proposedSentence.size(); return sum /
-	 * proposed_size; }
-	 * 
-	 * private void calculate_word_similarity_matrix(DistanceMatrix dist, final
-	 * boolean reversed, final Sentence proposedSentence, final Sentence
-	 * targetSentence) { this.reversed = reversed; for(int i_sw=0; i_sw <
-	 * proposedSentence.size(); ++i_sw) { for(int i_tw=0; i_tw <
-	 * targetSentence.size(); ++i_tw) { double mdist =
-	 * this.similarity(proposedSentence.get(i_sw), targetSentence.get(i_tw));
-	 * dist.setDistance(reversed, i_sw, i_tw, mdist, this.getName()); } } }
-	 */
 
 }

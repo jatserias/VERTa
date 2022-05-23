@@ -1,6 +1,7 @@
 package mt;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
@@ -9,10 +10,6 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.Parameter;
-import com.martiansoftware.jsap.StringParser;
-import com.martiansoftware.jsap.UnflaggedOption;
-
 import mt.core.MetricResult;
 import mt.core.Verta;
 import mt.nlp.Segment;
@@ -66,7 +63,7 @@ public class MTsimilarity {
 		System.err.println("plus an optional parameter: the name of the experiment");
 	}
 
-	public MTsimilarity(String configFilename, CONLLformat fmt, WordNetAPI wn) {
+	public MTsimilarity(String configFilename, CONLLformat fmt, WordNetAPI wn) throws FileNotFoundException {
 		this.verta = new Verta(configFilename, wn);
 	}
 
@@ -96,11 +93,9 @@ public class MTsimilarity {
 									JSAP.REQUIRED, JSAP.NOT_GREEDY, "metric confic file"),
 							new com.martiansoftware.jsap.UnflaggedOption("exp", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
 									JSAP.REQUIRED, JSAP.NOT_GREEDY, "experiment name"),
-							new com.martiansoftware.jsap.FlaggedOption("fmt",
-									JSAP.STRING_PARSER, "conf/conll08.fmt", JSAP.NOT_REQUIRED, 'f', JSAP.NO_LONGFLAG,
-									"input format definition file"),
-							topt, 
-							mopt,
+							new com.martiansoftware.jsap.FlaggedOption("fmt", JSAP.STRING_PARSER, "conf/conll08.fmt",
+									JSAP.NOT_REQUIRED, 'f', JSAP.NO_LONGFLAG, "input format definition file"),
+							topt, mopt,
 							new com.martiansoftware.jsap.Switch("xml", 'x', "xml", "Generate xml trace files"),
 							new com.martiansoftware.jsap.Switch("punc", 'p', "punc", "Filter punctuation"),
 							new com.martiansoftware.jsap.Switch("top", 't', "top", "Include TOP dependencies"),
@@ -118,7 +113,7 @@ public class MTsimilarity {
 			String refFilenames[] = jsapResult.getStringArray("references");
 			String language = jsapResult.getString("lang");
 			String inputFormat = jsapResult.getString("fmt");
-			
+
 			DUMP = jsapResult.getBoolean("xml", false);
 
 			LOGGER.warning("XML trace" + (DUMP ? "Activated" : "Deactivated"));

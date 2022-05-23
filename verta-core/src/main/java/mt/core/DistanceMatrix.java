@@ -3,18 +3,10 @@ package mt.core;
 import java.io.PrintStream;
 
 import mt.nlp.Sentence;
-import mt.nlp.Word;
 
 /// A direct implementation  of a sentenceAligment using the whole matrix
 public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignment {
 	
-
-	/// source Sentence
-	private Sentence source;
-
-	/// target Sentence
-	private Sentence target;
-
 	final int source_size;
 	final int target_size;
 
@@ -34,48 +26,16 @@ public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignmen
 
 	public DistanceMatrix(Sentence source, Sentence target) {
 		this(source.size(), target.size());
-		this.source = source;
-		this.target = target;
 	}
 	
 	/// Default strategy is free alignment
-	public boolean isAligned(boolean reversed, int n1, int n2) {
-		return getDistance(reversed, n1, n2) > 0;
+	public boolean isAligned(int n1, int n2) {
+		return getDistance(n1, n2) > 0;
 	}
 
 	public void dump(PrintStream s) {
-
-		s.println("Distances S2T:");
-		int wid = 0;
-		for (Word w : source) {
-			s.print(w.getFeature("WORD") + "_" + wid + ": ");
-			int tid = 0;
-			for (Word t : target) {
-				s.print(" ");
-				if (isAligned(false, wid, tid)) {
-					s.print(t.getFeature("WORD") + "_" + tid + '=');
-				}
-				s.print(dist[wid][tid]);
-				++tid;
-			}
-			s.println();
-			++wid;
-		}
-
-		s.println("Distances T2S:");
-		wid = 0;
-		for (Word w : target) {
-			s.print(w.getFeature("WORD") + "_" + wid + ": ");
-			int tid = 0;
-			for (Word t : source) {
-				if (isAligned(true, wid, tid)) {
-					s.print(" " + t.getFeature("WORD") + "_" + tid + "=");
-				}
-				++tid;
-			}
-			s.println();
-			++wid;
-		}
+		s.println("Source Length:"+source_size);
+		s.println("Target Length:"+target_size);
 	}
 
 	public int bestMatchH(int c) {
@@ -100,27 +60,32 @@ public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignmen
 		return maxp;
 	}
 
-	public int getRowSize(boolean reversed) {
-		return reversed ? target_size : source_size;
+	public int getRowSize() {
+		return  source_size;
 	}
 
-	public int getColumnSize(boolean reversed) {
-		return reversed ? source_size : target_size;
+	public int getColumnSize() {
+		return  target_size;
 	}
 
 	@Override
-	public int[] getAlignment(boolean reversed) {
+	public int[] getAlignment() {
 		throw new RuntimeException("NOT IMPLEMENTED!");
 	}
 
 	@Override
-	public void setAligned(boolean reversed, int i, int j, String provenence) {
+	public void setAligned(int i, int j, String provenence) {
 		throw new RuntimeException("NOT IMPLEMENTED!");
 	}
 
 	@Override
-	public String provenance(boolean reversed, int i, int j) {
-		return reversed ? prov[i][j].toString() : prov[j][i].toString();
+	public SentenceAlignment revert() {
+		DistanceMatrix rev = new DistanceMatrix(target_size, source_size);
+		for(int i=0;i<source_size;++i)
+			for(int j=0;j<target_size;++j) {
+				rev.setDistance(j, i, this.getDistance(i,j), this.getProvenance(i, j));
+			}
+		return rev;
 	}
 
 }

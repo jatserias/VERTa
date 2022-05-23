@@ -1,9 +1,7 @@
 package mt.nlp;
 
-import mt.SentenceSimilarityTripleOverlapping;
-
 /// Seems to be only used byt the old matching triples
-public class Triples {
+public class Triples  implements Comparable<Triples>{
 	
 	public static final String ID_NAME = "ID";
     public static final String WORD_NAME = "WORD";
@@ -65,6 +63,11 @@ public class Triples {
 
 	public String toString() {
 		return label + "(" + sourceString + ":" + source + "," + targetString + ":" + target + ")";
+	}
+
+	@Override
+	public int compareTo(Triples o) {
+	  return this.toString().compareTo(o.toString());
 	}
 
 }

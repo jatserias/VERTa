@@ -1,7 +1,5 @@
 package mt;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,8 +12,6 @@ import mt.core.SimilarityResult;
 import mt.nlp.NERC;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
-import mt.nlp.io.CONLLformat;
-import mt.nlp.io.ReaderCONLL;
 
 ///  A sentence Similarity function for NERC
 public class SentenceSimilarityNERC extends SentenceSimilarityBase implements SentenceMetric {

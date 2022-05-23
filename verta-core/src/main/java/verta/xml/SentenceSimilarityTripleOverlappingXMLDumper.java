@@ -25,10 +25,10 @@ public static void xml_dump_alignment(boolean reversed, TriplesMatch tmatch, Sen
 			final List<Triples> referenceSentence, DistanceMatrix d, PrintStream strace, int i_align) {
 		strace.println("<trips n='" + i_align + "' type=" + (reversed ? "\"t2s\">" : "\"s2t\">"));
 		int i = 0;
-		for (int i_al : a.getAlignment(reversed)) {
+		for (int i_al : a.getAlignment()) {
 			strace.println("<trip  tc=\"" + tmatch.getWeight(proposedSentence.get(i).label) + "\" sc=\""
-					+ (i_al >= 0 ? d.getDistance(reversed, i, i_al) : -1) + "\" prov=\""
-					+ (i_al >= 0 ? a.provenance(reversed, i, i_al) : "nomatch") + "\">");
+					+ (i_al >= 0 ? d.getDistance(i, i_al) : -1) + "\" prov=\""
+					+ (i_al >= 0 ? a.getProvenance(i, i_al) : "nomatch") + "\">");
 			strace.println("<src>" + XMLFormater.encodeXMLString((proposedSentence.get(i).toString())) + "</src>");
 			if (i_al >= 0) {
 				strace.println(

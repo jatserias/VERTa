@@ -52,10 +52,10 @@ class DistanceMatrixTest {
 		 *  3 4
 		 */
 		DistanceMatrix distances = new DistanceMatrix(2, 2);
-		distances.setDistance(false, 0, 0, 1, "test");
-		distances.setDistance(false, 0, 1, 2, "test");
-		distances.setDistance(false, 1, 0, 3, "test");
-		distances.setDistance(false, 1, 1, 4, "test");
+		distances.setDistance(0, 0, 1, "test");
+		distances.setDistance(0, 1, 2, "test");
+		distances.setDistance(1, 0, 3, "test");
+		distances.setDistance(1, 1, 4, "test");
 		
 		assertEquals(distances.bestMatchH(0), 1, "MatchH 0");
 		assertEquals(distances.bestMatchH(1), 1, "MatchH 1");
@@ -67,33 +67,29 @@ class DistanceMatrixTest {
 	@Test 
 	void test_distance_simple_set_get() {
 		DistanceMatrix distances = new DistanceMatrix(2, 2);
-		distances.setDistance(false, 0, 1, 0.99, "my test");
-		assertEquals(0.99, distances.getDistance(false, 0, 1),  0.00001, "simple set-get");
-		assertEquals(0.99, distances.getDistance(true, 1, 0), 0.00001, "simple set-reverse get");
-		distances.setDistance(true, 1, 0, 0.01, "my rev test");
-		assertEquals(0.01, distances.getDistance(true, 1, 0), 0.00001, "reverse set-reverse get");
-		assertEquals(0.01, distances.getDistance(false, 0, 1), 0.00001, "reverse set-simple get");
+		distances.setDistance(0, 1, 0.99, "my test");
+		assertEquals(0.99, distances.getDistance(0, 1),  0.00001, "simple set-get");
 	}
 	
 	@Test
 	void test_get_distance_no_initilized() {
 		DistanceMatrix distances = new DistanceMatrix(2, 2);
 		
-		assertEquals(distances.getDistance(false, 1, 0), 0, 0.00001, "no initialized get");
-	    assertEquals(distances.getDistance(false, 0, 1), 0, 0.00001, "no initialized reverse get");
+		assertEquals(distances.getDistance(1, 0), 0, 0.00001, "no initialized get");
+	    assertEquals(distances.getDistance(0, 1), 0, 0.00001, "no initialized reverse get");
 	}
 	
 	@Test
 	void test_get_distance_out_of_bounds() {
 		DistanceMatrix distances = new DistanceMatrix(2, 2);
 		try {
-			assertEquals(distances.getDistance(false, 3, 2), 0, 0.00001, "out of bounds distance get");
+			assertEquals(distances.getDistance(3, 2), 0, 0.00001, "out of bounds distance get");
 	    } catch (Exception e) {
 	        assertNotNull(e);
 	    }
 		
 		try {
-			assertEquals(distances.getDistance(false, 0, 4), 0, 0.00001, "out of bounds distance reverse get");
+			assertEquals(distances.getDistance(0, 4), 0, 0.00001, "out of bounds distance reverse get");
 		} catch (Exception e) {
 	        assertNotNull(e);
 	    }	

@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import mt.SentenceSimilarityTripleOverlapping;
 import mt.nlp.Triples;
 
 /// A simple class for Matching triples
 public class TriplesMatch {
-	
+
 	protected static Logger LOGGER = Logger.getLogger(TriplesMatch.class.getName());
-	
+
 	private static final String LABEL_PAIR_SEPARATOR = "#";
 	// we need to read this weight from the config file
 	static MatchResult COMPLETE_WEIGHT = new MatchResult(1.0, "(x,x,x)");
@@ -33,51 +32,52 @@ public class TriplesMatch {
 	private MetricActivationCounter counters;
 
 	/// Column name for the triple label
-	String label_column_name;
-	
+	private String label_column_name;
+
 	/// Column name for the triple head
-	String head_column_name;
-	
+	private String head_column_name;
+
 	public TriplesMatch(String head_column_name, String label_column_name) {
 		setLabelMatch(new HashMap<String, Double>());
 		this.label_column_name = label_column_name;
 		this.head_column_name = head_column_name;
 		this.setCounters(new MetricActivationCounter());
 	}
-		
+
 	public TriplesMatch(MetricActivationCounter counters, String head_column_name, String label_column_name) {
 		this(head_column_name, label_column_name);
 		this.setCounters(counters);
 	}
 
-	public TriplesMatch(String filename, MetricActivationCounter counters, String head_column_name, String label_column_name) throws FileNotFoundException, IOException {
+	public TriplesMatch(String filename, MetricActivationCounter counters, String head_column_name,
+			String label_column_name) throws FileNotFoundException, IOException {
 		this(counters, head_column_name, label_column_name);
 		load(filename);
 	}
-		
+
 	protected void load(String filename) throws FileNotFoundException, IOException {
 		BufferedReader config = null;
 		try {
 			config = new BufferedReader(new FileReader(filename));
 			load(filename, config);
 		} catch (Exception e) {
-			System.err.println("ERROR can not open/find file >" + filename + "<");
+			LOGGER.severe("ERROR can not open/find file >" + filename + "<");
 			e.printStackTrace();
-			System.exit(-1);
+			throw e;
 		}
 	}
-	
-	public void load(String filename, BufferedReader config)  throws IOException {
+
+	public void load(String filename, BufferedReader config) throws IOException {
 		String buff = null;
 		try {
 
 			// read weights
-			while ((buff = config.readLine()) != null && buff.trim().startsWith(LABEL_PAIR_SEPARATOR));
-			
+			while ((buff = config.readLine()) != null && buff.trim().startsWith(LABEL_PAIR_SEPARATOR))
+				;
+
 			if (buff == null) {
-				System.err.println("Format ERROR on the triple config file >" + filename + "<");
-				System.err.println("EMPTY FILE");
-				System.exit(-1);
+				throw new RuntimeException(
+						"Format ERROR, empty/non existing file on the triple config file >" + filename + "<");
 			}
 
 			String[] wbuff = buff.split("[\t]");
@@ -95,8 +95,9 @@ public class TriplesMatch {
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error reading triplet config file:" + buff);
+			LOGGER.severe("Error reading triplet config file:" + buff);
 			e.printStackTrace();
+			throw e;
 		}
 	}
 
@@ -120,16 +121,15 @@ public class TriplesMatch {
 		return NOMATCH;
 	}
 
-	@Deprecated
-	public MatchResult match(boolean reversed, final Triples x, final Triples y, final SentenceAlignment align) {
+	public MatchResult match(final Triples x, final Triples y, final SentenceAlignment align) {
 
 		boolean label_match = labelsMatch(x, y);
 
 		// bug head - mod. We reverse the matchings
-		boolean mod_match = align.isAligned(reversed, x.getTarget() - 1, y.getTarget() - 1);
+		boolean mod_match = align.isAligned(x.getTarget() - 1, y.getTarget() - 1);
 
 		boolean head_match = (x.getSource() > 0 && y.getSource() > 0)
-				? align.isAligned(reversed, x.getSource() - 1, y.getSource() - 1)
+				? align.isAligned(x.getSource() - 1, y.getSource() - 1)
 				: (x.getSource() == y.getSource()); // root
 
 		// how we should apply label matching rules
@@ -190,5 +190,12 @@ public class TriplesMatch {
 		this.labelMatch = labelMatch;
 	}
 
+	public String getLabel_column_name() {
+		return label_column_name;
+	}
 
+	public String getHead_column_name() {
+		return head_column_name;
+	}
+	
 }
