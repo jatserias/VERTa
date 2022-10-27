@@ -7,7 +7,7 @@ import verta.wn.JABSynset;
 
 /**
  * 
- * WordNet synonms
+ * WordNet synonyms
  * 
  * 1 if there is a common synonym 0 otherwise
  * 

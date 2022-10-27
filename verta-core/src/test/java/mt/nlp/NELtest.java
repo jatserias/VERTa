@@ -1,7 +1,5 @@
 package mt.nlp;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import mt.SentenceSimilarityNEL;
 import mt.core.MetricActivationCounter;
 import mt.core.SentenceAlignment;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NELtest {
 	@Test

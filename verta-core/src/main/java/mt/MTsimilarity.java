@@ -1,15 +1,7 @@
 package mt;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.PrintStream;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.logging.Logger;
-
 import com.martiansoftware.jsap.JSAP;
+import lombok.extern.slf4j.Slf4j;
 import mt.core.MetricResult;
 import mt.core.Verta;
 import mt.nlp.Segment;
@@ -20,261 +12,266 @@ import verta.wn.WordNetAPI;
 import verta.wn.WordNetFactory;
 import verta.xml.MTmetricXMLDumper;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
+
 /**
- * 
  * input: Multitag file and references files, and metric configuration files and
  * a name for the experiment
- * 
- * output: - a browsable XML in folder <BASEFOLDER> - a cvs tab separated per
- * segment (max F1 among the references) <precision>\t<recall>\t<f1> - a file
+ * <p>
+ * output: - a browsable XML in folder *BASEFOLDER* - a cvs tab separated per
+ * segment (max F1 among the references) *precision*\t*recall*\t*f1* - a file
  * per metric module with all the information needed to compute the metric
- * 
+ * <p>
  * each module outputs mod(segment hyp x segment ref) -> P R F1 if it is a
- * weighted module of several companents the module must putput mod(hyp x ref)
+ * weighted module of several components the module must output mod(hyp x ref)
  * c1 c2 c3 ... cn
- * 
- * 
- * convertion form old conll format
- * 
+ * </p>
+ * <p>
+ * conversion from old conll format
+ * </p>
+ * <p>
  * grep -v '%%#SEG' Sentences_with_issues_hyp.conll | awk 'BEGIN {S=2;print
  * "%%#SEG\t1";} /^[ ]*$/ { print "\n%%#SEG\t"S;S+S+1;next} { print
  * $1"\t"$2"\t"$4"\t"$4"\t"$3"\t-\t-\t-\t"$8"\t"$7}' >
  * Sentences_with_issues_Hyp.tag
- * 
+ * </p>
  */
+@Slf4j
 public class MTsimilarity {
 
-	private static Logger LOGGER = Logger.getLogger(MTsimilarity.class.getName());
+    public static final String BASEFOLDER = "exp/";
+    private static final String precrecallfile = "precrec.txt";
+    public static boolean DUMP;
+    public Verta verta;
 
-	public Verta verta;
+    public MTsimilarity(String configFilename, CONLLformat fmt, WordNetAPI wn) throws FileNotFoundException {
+        this.verta = new Verta(configFilename, wn);
+    }
 
-	public static final String BASEFOLDER = "exp/";
-	private static final String precrecallfile = "precrec.txt";
+    public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, WordNetAPI wn) {
+        this.verta = new Verta(configFilename, buffer, wn);
+    }
 
-	public static boolean DUMP;
+    public static void usage() {
+        System.err.println("Usage: Three parameters needed");
+        System.err.println("- Metric config filename");
+        System.err.println("- Metric config filename");
+        System.err.println("- Experiment Name");
+        System.err.println("- proposed filename in conll format");
+        System.err.println("- references filenames in conll format");
+        System.err.println("plus an optional parameter: the name of the experiment");
+    }
 
-	public static void usage() {
-		System.err.println("Usage: Three parameters needed");
-		System.err.println("- Metric config filename");
-		System.err.println("- Metric config filename");
-		System.err.println("- Experiment Name");
-		System.err.println("- proposed filename in conll format");
-		System.err.println("- references filenames in conll format");
-		System.err.println("plus an optional parameter: the name of the experiment");
-	}
+    public static void main(String[] args) throws Exception {
 
-	public MTsimilarity(String configFilename, CONLLformat fmt, WordNetAPI wn) throws FileNotFoundException {
-		this.verta = new Verta(configFilename, wn);
-	}
+        // Read arguments
+        try {
+            com.martiansoftware.jsap.FlaggedOption mopt = new com.martiansoftware.jsap.FlaggedOption("hypothesis",
+                    JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'h', JSAP.NO_LONGFLAG,
+                    "Proposed-hypotesis translation files");
+            mopt.setList(true);
+            mopt.setListSeparator(',');
+            com.martiansoftware.jsap.FlaggedOption topt = new com.martiansoftware.jsap.FlaggedOption("references",
+                    JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'r', JSAP.NO_LONGFLAG,
+                    "Reference Translations files");
+            topt.setList(true);
+            topt.setListSeparator(',');
 
-	public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, WordNetAPI wn) {
-		this.verta = new Verta(configFilename, buffer, wn);
-	}
+            final com.martiansoftware.jsap.SimpleJSAP jsap = new com.martiansoftware.jsap.SimpleJSAP(
+                    MTsimilarity.class.getName(), "VERTa metric  ",
+                    new com.martiansoftware.jsap.Parameter[]{
+                            new com.martiansoftware.jsap.UnflaggedOption("conf", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
+                                    JSAP.REQUIRED, JSAP.NOT_GREEDY, "metric confic file"),
+                            new com.martiansoftware.jsap.UnflaggedOption("exp", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
+                                    JSAP.REQUIRED, JSAP.NOT_GREEDY, "experiment name"),
+                            new com.martiansoftware.jsap.FlaggedOption("fmt", JSAP.STRING_PARSER, "conf/conll08.fmt",
+                                    JSAP.NOT_REQUIRED, 'f', JSAP.NO_LONGFLAG, "input format definition file"),
+                            topt, mopt,
+                            new com.martiansoftware.jsap.Switch("xml", 'x', "xml", "Generate xml trace files"),
+                            new com.martiansoftware.jsap.Switch("punc", 'p', "punc", "Filter punctuation"),
+                            new com.martiansoftware.jsap.Switch("top", 't', "top", "Include TOP dependencies"),
+                            new com.martiansoftware.jsap.Switch("old", 'o', "old", "try running OLD triples module"),
+                            new com.martiansoftware.jsap.UnflaggedOption("lang", JSAP.STRING_PARSER, "en",
+                                    JSAP.NOT_REQUIRED, JSAP.NOT_GREEDY, "traget language")});
 
-	public static void main(String[] args) throws Exception {
+            final com.martiansoftware.jsap.JSAPResult jsapResult = jsap.parse(args);
+            if (jsap.messagePrinted())
+                return;
 
-		// Read arguments
-		try {
-			com.martiansoftware.jsap.FlaggedOption mopt = new com.martiansoftware.jsap.FlaggedOption("hypothesis",
-					JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'h', JSAP.NO_LONGFLAG,
-					"Proposed-hypotesis translation files");
-			mopt.setList(true);
-			mopt.setListSeparator(',');
-			com.martiansoftware.jsap.FlaggedOption topt = new com.martiansoftware.jsap.FlaggedOption("references",
-					JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'r', JSAP.NO_LONGFLAG,
-					"Reference Translations files");
-			topt.setList(true);
-			topt.setListSeparator(',');
+            String metricConfigFile = jsapResult.getString("conf");
+            String[] hypFilenames = jsapResult.getStringArray("hypothesis");
+            String experimentName = jsapResult.getString("exp");
+            String[] refFilenames = jsapResult.getStringArray("references");
+            String language = jsapResult.getString("lang");
+            String inputFormat = jsapResult.getString("fmt");
 
-			final com.martiansoftware.jsap.SimpleJSAP jsap = new com.martiansoftware.jsap.SimpleJSAP(
-					MTsimilarity.class.getName(), "VERTa metric  ",
-					new com.martiansoftware.jsap.Parameter[] {
-							new com.martiansoftware.jsap.UnflaggedOption("conf", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
-									JSAP.REQUIRED, JSAP.NOT_GREEDY, "metric confic file"),
-							new com.martiansoftware.jsap.UnflaggedOption("exp", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
-									JSAP.REQUIRED, JSAP.NOT_GREEDY, "experiment name"),
-							new com.martiansoftware.jsap.FlaggedOption("fmt", JSAP.STRING_PARSER, "conf/conll08.fmt",
-									JSAP.NOT_REQUIRED, 'f', JSAP.NO_LONGFLAG, "input format definition file"),
-							topt, mopt,
-							new com.martiansoftware.jsap.Switch("xml", 'x', "xml", "Generate xml trace files"),
-							new com.martiansoftware.jsap.Switch("punc", 'p', "punc", "Filter punctuation"),
-							new com.martiansoftware.jsap.Switch("top", 't', "top", "Include TOP dependencies"),
-							new com.martiansoftware.jsap.Switch("old", 'o', "old", "try running OLD triples module"),
-							new com.martiansoftware.jsap.UnflaggedOption("lang", JSAP.STRING_PARSER, "en",
-									JSAP.NOT_REQUIRED, JSAP.NOT_GREEDY, "traget language") });
+            DUMP = jsapResult.getBoolean("xml", false);
 
-			final com.martiansoftware.jsap.JSAPResult jsapResult = jsap.parse(args);
-			if (jsap.messagePrinted())
-				return;
+            log.warn("XML trace" + (DUMP ? "Activated" : "Deactivated"));
+            MTmetricXMLDumper.xml_copy_files();
+            long tStart = System.currentTimeMillis();
 
-			String metricConfigFile = jsapResult.getString("conf");
-			String hypFilenames[] = jsapResult.getStringArray("hypothesis");
-			String experimentName = jsapResult.getString("exp");
-			String refFilenames[] = jsapResult.getStringArray("references");
-			String language = jsapResult.getString("lang");
-			String inputFormat = jsapResult.getString("fmt");
+            // Hack to format numbers in Spanish format (some of my machine has locale set
+            // to English)
+            Locale local = new Locale("es", "ES");
+            Locale.setDefault(local);
 
-			DUMP = jsapResult.getBoolean("xml", false);
+            NumberFormat nf = new DecimalFormat("#,###,##0.0000000");
 
-			LOGGER.warning("XML trace" + (DUMP ? "Activated" : "Deactivated"));
-			MTmetricXMLDumper.xml_copy_files();
-			long tStart = System.currentTimeMillis();
+            int nSystem = 0;
 
-			// Hack to format numbers in Spanish format (some of my machine has locale set
-			// to English)
-			Locale local = new Locale("es", "ES");
-			Locale.setDefault(local);
+            SentenceSimilarityTripleOverlapping.USE_OLD = jsapResult.getBoolean("old", false);
+            SentenceSimilarityTripleOverlapping.FILTER_TOP = !jsapResult.getBoolean("top", false);
 
-			NumberFormat nf = new DecimalFormat("#,###,##0.0000000");
+            WordNetAPI wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
+            CONLLformat fmt = new CONLLformat(inputFormat);
+            MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, wn);
+            mt.verta.setFilter(jsapResult.getBoolean("punc", false));
+            mt.verta.getTracer().DUMP = DUMP;
 
-			int nSystem = 0;
+            PrintStream precrec = null;
 
-			SentenceSimilarityTripleOverlapping.USE_OLD = jsapResult.getBoolean("old", false);
-			SentenceSimilarityTripleOverlapping.FILTER_TOP = !jsapResult.getBoolean("top", false);
+            // foreach hyp file (e.g. system)
+            for (String hypFilename : hypFilenames) {
+                ++nSystem;
 
-			WordNetAPI wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
-			CONLLformat fmt = new CONLLformat(inputFormat);
-			MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, wn);
-			mt.verta.setFilter(jsapResult.getBoolean("punc", false));
-			mt.verta.getTracer().DUMP = DUMP;
+                // Dump configuration
+                PrintStream trace = null;
+                precrec = new PrintStream(BASEFOLDER + experimentName + "_" + nSystem + "_" + precrecallfile, "UTF-8");
 
-			PrintStream precrec = null;
+                trace = MTmetricXMLDumper.start_xml_dump(metricConfigFile, experimentName, refFilenames, nSystem,
+                        hypFilename, trace);
 
-			// foreach hyp file (e.g. system)
-			for (String hypFilename : hypFilenames) {
-				++nSystem;
+                // @TODO we should generalize to Sentence Metric as NGram is not Word Metric
+                // load similarityFunction class by name
+                // create a WordSimilarity function
 
-				// Dump configuration
-				PrintStream trace = null;
-				precrec = new PrintStream(BASEFOLDER + experimentName + "_" + nSystem + "_" + precrecallfile, "UTF-8");
+                MTmetricXMLDumper.xml_dump_configuration(mt, trace);
 
-				trace = MTmetricXMLDumper.start_xml_dump(metricConfigFile, experimentName, refFilenames, nSystem,
-						hypFilename, trace);
+                // TEST reading just one sentence
+                BufferedReader proposedFile = new BufferedReader(new FileReader(hypFilename));
+                BufferedReader[] referenceFiles = new BufferedReader[refFilenames.length];
+                int j = 0;
+                for (String refFilename : refFilenames) {
+                    referenceFiles[j++] = new BufferedReader(new FileReader(refFilename));
+                }
 
-				// @TODO we should generalize to Sentence Metric as NGram is not Word Metric
-				// load similarityFunction class by name
-				// create a WordSimilarity function
+                int nseg = 1;
+                // read sentences CONLL format (Establish the possible features names WORD LEMA
+                // ...)
+                Segment proposedSeg;
+                Sentence proposedSentence;
+                try {
+                    proposedSeg = ReaderCONLL.readSegment(proposedFile, fmt);
+                    proposedSentence = proposedSeg.toSentence();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    proposedSentence = null;
+                    proposedSeg = null;
+                }
 
-				MTmetricXMLDumper.xml_dump_configuration(mt, trace);
+                int nsen = 1;
+                // for every proposed sentence
+                while (proposedSentence != null) {
 
-				// TEST reading just one sentence
-				BufferedReader proposedFile = new BufferedReader(new FileReader(hypFilename));
-				BufferedReader referenceFiles[] = new BufferedReader[refFilenames.length];
-				int j = 0;
-				for (String refFilename : refFilenames) {
-					referenceFiles[j++] = new BufferedReader(new FileReader(refFilename));
-				}
+                    PrintStream gtrace = null;
+                    PrintStream strace = null;
 
-				int nseg = 1;
-				// read sentences CONLL format (Establish the possible features names WORD LEMA
-				// ...)
-				Segment proposedSeg;
-				Sentence proposedSentence;
-				try {
-					proposedSeg = ReaderCONLL.readSegment(proposedFile, fmt);
-					proposedSentence = proposedSeg.toSentence();
-				} catch (Exception e) {
-					e.printStackTrace();
-					proposedSentence = null;
-					proposedSeg = null;
-				}
+                    gtrace = MTmetricXMLDumper.xml_dump_sentence(experimentName, nSystem, mt, nseg, proposedSentence,
+                            nsen, gtrace);
 
-				int nsen = 1;
-				// for every proposed sentence
-				while (proposedSentence != null) {
+                    MetricResult MAXRes = null;
 
-					PrintStream gtrace = null;
-					PrintStream strace = null;
+                    int nref = 0;
+                    /**
+                     * for every reference we should create a different file dump??
+                     */
+                    for (BufferedReader referenceFile : referenceFiles) {
 
-					gtrace = MTmetricXMLDumper.xml_dump_sentence(experimentName, nSystem, mt, nseg, proposedSentence,
-							nsen, gtrace);
+                        Segment referenceSeg = null;
+                        Sentence referenceSentence = null;
+                        try {
+                            referenceSeg = ReaderCONLL.readSegment(referenceFile, fmt);
+                            referenceSentence = referenceSeg.toSentence();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
-					MetricResult MAXRes = null;
+                        // it should be always a "sentence" per segment
+                        if (referenceSentence != null) {
 
-					int nref = 0;
-					/**
-					 * for every reference we should create a different file dump??
-					 */
-					for (BufferedReader referenceFile : referenceFiles) {
+                            strace = MTmetricXMLDumper.xml_dump_sentence_ref(experimentName, nSystem, mt, nseg,
+                                    proposedSentence, nsen, gtrace, strace, nref, referenceSentence);
+                            nref++;
 
-						Segment referenceSeg = null;
-						Sentence referenceSentence = null;
-						try {
-							referenceSeg = ReaderCONLL.readSegment(referenceFile, fmt);
-							referenceSentence = referenceSeg.toSentence();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
+                            // Read the metric configuration: featureValue SimiliarityFunction weigh
+                            mt.verta.getTracer().strace = strace;
+                            MetricResult res = mt.verta.similarity(referenceSentence, proposedSentence); // , DUMP,
+                            // strace);
 
-						// it should be always a "sentence" per segment
-						if (referenceSentence != null) {
+                            MTmetricXMLDumper.xml_similarity_dump(gtrace, res);
 
-							strace = MTmetricXMLDumper.xml_dump_sentence_ref(experimentName, nSystem, mt, nseg,
-									proposedSentence, nsen, gtrace, strace, nref, referenceSentence);
-							nref++;
+                            // get the better F1
+                            if (MAXRes == null || res.getWF1() > MAXRes.getWF1()) {
+                                MAXRes = res;
+                            }
 
-							// Read the metric configuration: featureValue SimiliarityFunction weigh
-							mt.verta.getTracer().strace = strace;
-							MetricResult res = mt.verta.similarity(referenceSentence, proposedSentence); // , DUMP,
-							// strace);
+                            nsen++;
+                        }
 
-							MTmetricXMLDumper.xml_similarity_dump(gtrace, res);
+                    } // for references file
 
-							// get the better F1
-							if (MAXRes == null || res.getWF1() > MAXRes.getWF1()) {
-								MAXRes = res;
-							}
+                    // final result
+                    MTmetricXMLDumper.xml_dump_global_results(experimentName, nSystem, trace, nseg, nsen, gtrace,
+                            MAXRes);
 
-							nsen++;
-						}
+                    // VERTA
+                    MAXRes.textdump(precrec, nf);
 
-					} // for references file
+                    // next pair
+                    try {
+                        proposedSeg = ReaderCONLL.readSegment(proposedFile, fmt);
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
 
-					// final result
-					MTmetricXMLDumper.xml_dump_global_results(experimentName, nSystem, trace, nseg, nsen, gtrace,
-							MAXRes);
+                    nseg++;
+                    nsen = 1;
 
-					// VERTA
-					MAXRes.textdump(precrec, nf);
+                    if (proposedSeg != null) {
+                        MTmetricXMLDumper.xml_add_sentence_link(experimentName, nSystem, nseg, gtrace);
+                        proposedSentence = proposedSeg.toSentence();
+                        // referenceSentence = referenceSeg.toSentence();
+                    } else
+                        proposedSentence = null;
 
-					// next pair
-					try {
-						proposedSeg = ReaderCONLL.readSegment(proposedFile, fmt);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+                    MTmetricXMLDumper.xml_close_experiment(gtrace, strace);
 
-					nseg++;
-					nsen = 1;
+                    if (nseg % 10 == 0)
+                        log.warn("Processed sys: " + nSystem + " seg:" + nseg + " ...  milsec: "
+                                + (System.currentTimeMillis() - tStart));
 
-					if (proposedSeg != null) {
-						MTmetricXMLDumper.xml_add_sentence_link(experimentName, nSystem, nseg, gtrace);
-						proposedSentence = proposedSeg.toSentence();
-						// referenceSentence = referenceSeg.toSentence();
-					} else
-						proposedSentence = null;
+                }
+                // proposed sentence
 
-					MTmetricXMLDumper.xml_close_experiment(gtrace, strace);
+                MTmetricXMLDumper.xml_dump_statistics(mt, trace);
 
-					if (nseg % 10 == 0)
-						LOGGER.warning("Processed sys: " + nSystem + " seg:" + nseg + " ...  milsec: "
-								+ (System.currentTimeMillis() - tStart));
+                precrec.close();
+            }
 
-				}
-				// proposed sentence
+            mt.verta.getCounters().dump();
+            log.warn("TOTAL TIME milsec: " + (System.currentTimeMillis() - tStart));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-				MTmetricXMLDumper.xml_dump_statistics(mt, trace);
-
-				precrec.close();
-			}
-
-			mt.verta.getCounters().dump();
-			LOGGER.warning("TOTAL TIME milsec: " + (System.currentTimeMillis() - tStart));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
+    }
 
 }

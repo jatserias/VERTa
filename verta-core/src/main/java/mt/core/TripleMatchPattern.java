@@ -22,7 +22,7 @@ import mt.nlp.io.FileManager;
  * 
  * Define patterns of matchings of triples (pattens to be applied in order)
  * 
- * =: same vale s<NUM>: label on set *: any
+ * =: same vale s&lt;NUM&gt;: label on set *: any
  * 
  * (S,H,T)
  * 

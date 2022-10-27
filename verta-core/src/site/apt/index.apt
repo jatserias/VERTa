@@ -1,0 +1,18 @@
+VERTa
+
+  VERTa is a linguistically motivated Machine Translation metric. It allows you to compare (evaluate) a translation (translated text) with (against) one or more reference translation, and evaluate adequacy, fluency and ranking of sentences.
+
+  In Machine Translation (MT) evaluation plays a key role both in their development and improvement of the systems. BLEU is one of the most well-known and widely used but BLEU has its weaknesses regarding translation quality and its tendency to favour statistically-based MT systems. VERTa is trying to address the evaluation of the MT from a more linguistically-motivated point of view.
+
+  VERTa is part of the research that intends to emphasize the effectiveness of linguistic analysis in order to identify and test those linguistic features that help in evaluating traditional concepts of adequacy and fluency.
+
+  VERTA combines different modules: Lexical module, Morphological, Syntactic module, Ngram module, Semantic module and can be easily adapted to different evaluation types (fluency, adequacy, MT quality) and to different languages or genres.
+
+  We have focused on MT output in English (2014 WMT competition as part of the ACL 2014 WMT workshop) with an application to Spanish so as to test the portability of our approach.
+
+  {{{https://verta.demo.atserias.cat/VERTaDemo/}Give a try to the simplified resurrected VERTa Demo for Spanish}}
+
+References
+
+*   {{{https://link.springer.com/article/10.1007/s10579-018-9430-2}VERTa: a linguistic approach to automatic machine translation evaluation}}
+*   {{{http://diposit.ub.edu/dspace/bitstream/2445/65906/1/ECP_PhD_THESIS.pdf}Automatic Machine Translation Evaluation: A Qualitative Approach}}

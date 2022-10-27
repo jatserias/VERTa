@@ -7,11 +7,7 @@ import verta.wn.JABSynset;
 
 /**
  * 
- * Similaritat de synomims a Wordnet tenin en compte el PoS
- * 
- * @TODO Necesita un camp de nom POS (parametre)
- * @TODO Adjectius satelit (?)
- * 
+ * Synonym Similarity in Wordnet using PoS
  *
  */
 public class SimilaritySynonymWnPos extends SimilaritySynonymWn {

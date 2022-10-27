@@ -1,0 +1,19 @@
+VERTa
+
+  VERTa és una mètrica de traducció automàtica motivada lingüísticament. Permet comparar (avaluar) una traducció (text traduït) amb una o més traduccions de referència. Permet tant avaluar l'adequació com la fluïdesa.
+
+  En la traducció automàtica (MT) l'avaluació té un paper clau tant en el seu desenvolupament com en la millora dels sistemes. BLEU és una de les mètriques més coneguda i utilitzada, però BLEU té les seves debilitats pel que fa a la qualitat de la traducció, per exemple afavorint els sistemes de MT basats en estadística. VERTa aborda l'avaluació de la traducció automàtica des d'un punt de vista més lingüístic.
+
+  VERTa forma part de la recerca que posa èmfasi en l'eficàcia de l'anàlisi lingüística per identificar i provar aquells trets lingüístics que ajuden a avaluar els conceptes tradicionals d'adequació i la fluïdesa.
+
+  VERTA combina diferents mòduls: mòdul lèxic, mòdul morfològic, mòdul sintàctic, mòdul Ngram, mòdul semàntic i es pot adaptar fàcilment tant a diferents tipus d'avaluació (fluïdesa, adequació, qualitat MT) com a diferents llenguatges o gèneres.
+
+  Ens hem centrat en la producció de MT en anglès (competició WMT 2014 com a part del taller ACL 2014 WMT) i en una aplicació al castellà per provar la portabilitat del nostre enfocament.
+
+  {{{https://verta.demo.atserias.cat/VERTaDemo/}Proveu la demostració simplificada de VERTa ressuscitada per a espanyol}}
+
+
+Referencias
+
+*   {{{https://link.springer.com/article/10.1007/s10579-018-9430-2}VERTa: a linguistic approach to automatic machine translation evaluation}}
+*   {{{http://diposit.ub.edu/dspace/bitstream/2445/65906/1/ECP_PhD_THESIS.pdf}Automatic Machine Translation Evaluation: A Qualitative Approach}}

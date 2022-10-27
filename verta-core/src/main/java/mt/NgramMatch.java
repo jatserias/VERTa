@@ -2,6 +2,7 @@ package mt;
 
 import java.io.PrintStream;
 
+import lombok.extern.slf4j.Slf4j;
 import mt.core.MetricActivationCounter;
 import mt.core.SentenceAlignment;
 import mt.core.SentenceMetric;
@@ -16,6 +17,7 @@ import mt.nlp.Sentence;
  * ngramS2) = 1 sii existeix un alinacio entre ngramS1 i ngramS2
  * 
  */
+@Slf4j
 public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric {
 
 	/// block selected ngrams
@@ -53,7 +55,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 			throw new RuntimeException(
 					"NGram module configure with inconsistent minsize (" + minsize + ")> maxsize (" + maxsize + ")");
 
-		LOGGER.info("NGram configured min " + minsize + "-" + maxsize);
+		log.info("NGram configured min " + minsize + "-" + maxsize);
 	}
 
 	/**
@@ -118,7 +120,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 			SentenceAlignment align, PrintStream strace) {
 		int fn1 = 0;
 		int match;
-		boolean blocked[] = new boolean[target_ngrams.length];
+		boolean[] blocked = new boolean[target_ngrams.length];
 		
 		for (Ngram source_ngram : source_ngrams) {
 			if (MTsimilarity.DUMP)

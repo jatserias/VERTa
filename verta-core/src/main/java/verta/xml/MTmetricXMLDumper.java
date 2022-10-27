@@ -197,8 +197,8 @@ public class MTmetricXMLDumper {
 
 	/**
 	 * 
-	 * dumps a table s1 X s2 <simmatrix> <tw w="WORD_T"> <s w="WORD_R" bst=""
-	 * bts""/> ... </tw> <simmatrix>
+	 * dumps a table s1 X s2 &lt;simmatrix&gt; &lt;tw w="WORD_T"&gt;  &lt;s w="WORD_R" bst=""
+	 * bts""/&gt; ...  &lt;/tw&gt;  &lt;simmatrix&gt;
 	 * 
 	 * bst: 1 iif bestmatch source target bts: 2 iif bestmatch target source
 	 * 

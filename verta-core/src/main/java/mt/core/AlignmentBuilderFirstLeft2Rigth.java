@@ -15,7 +15,6 @@ public class AlignmentBuilderFirstLeft2Rigth implements AlignmentBuilder {
 
 		for (int i = 0; i < d.getRowSize(); ++i) {
 			int pos = -1;
-			;
 			double max = -1;
 
 			for (int j = 0; j < d.getColumnSize(); ++j) {

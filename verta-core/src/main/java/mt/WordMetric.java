@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import lombok.extern.slf4j.Slf4j;
 import mt.core.FeatureMetric;
 import mt.core.MetricActivationCounter;
 import mt.core.Similarity;
@@ -16,9 +17,8 @@ import mt.nlp.Word;
 import verta.wn.WordNetAPI;
 import verta.xml.WordMetricXMLDumper;
 
+@Slf4j
 public class WordMetric {
-	private static Logger LOGGER = Logger.getLogger(WordMetric.class.getName());
-
 	MetricActivationCounter counters;
 	private static final int MAX_FEATURE_WEIGHT = 100;
 
@@ -56,9 +56,9 @@ public class WordMetric {
 				Class[] paramTypes = new Class[1];
 				paramTypes[0] = WordNetAPI.class;
 				Method method = sm.getClass().getMethod("Wn", paramTypes);
-				LOGGER.info(className + " uses WN:" + wn);
+				log.info(className + " uses WN:" + wn);
 				method.invoke(sm, new Object[] { wn });
-				LOGGER.info("Metric setup!");
+				log.info("Metric setup!");
 			} catch (java.lang.NoSuchMethodException v) {
 				// No wn set up method
 			}
@@ -66,7 +66,7 @@ public class WordMetric {
 			sm.setWeight(weight);
 
 		} catch (Exception e) {
-			LOGGER.severe("Error trying to load Similarity Class >" + className + "<");
+			log.error("Error trying to load Similarity Class >" + className + "<");
 			System.exit(-1);
 
 		}
@@ -101,15 +101,15 @@ public class WordMetric {
 	 * 
 	 * trace
 	 * 
-	 * <ft type ="TYPE_PARAM"/> <group id="NGROUP">
-	 * <mt feat="FEATURE_NAME" sim="JAVACLASS" simid="ID" active="COLOR" pword=
-	 * "PROOSEDWORD" rword="TARGETWORD" weight="DIST"/> ... </group> </ft>
+	 * &lt; ft type ="TYPE_PARAM"/&gt; &lt;group id="NGROUP"&gt;
+	 * &lt;mt feat="FEATURE_NAME" sim="JAVACLASS" simid="ID" active="COLOR" pword=
+	 * "PROOSEDWORD" rword="TARGETWORD" weight="DIST"/&gt; ... &lt;/group&gt; &lt;/ft&gt;
 	 * 
 	 */
 	public double similarity(final Word proposedWord, final Word targetWord, PrintStream pout, String type) {
 		double sum = 0;
 
-		// @TODO FIX WEIGHT
+		//TODO FIX WEIGHT
 		WordMetricXMLDumper.xml_wm_start_ft(pout, type);
 
 		/**
@@ -150,24 +150,23 @@ public class WordMetric {
 			String buff;
 			while ((buff = config.readLine()) != null && !buff.trim().startsWith("FGROUP")) {
 
-				LOGGER.info("proc:" + buff);
+				log.info("proc:" + buff);
 
 				// comments start with #
 				if (!buff.trim().startsWith("#")) {
 					String line[] = buff.split("[ \t]+");
 					if (line.length < 4) {
-						LOGGER.severe("Format ERROR on the metric config file >" + filename + "<");
-						LOGGER.severe("AT LINE:" + buff);
+						log.error("Format ERROR on the metric config file >" + filename + "< AT LINE:" + buff);
 						System.exit(-1);
 					}
-					// Similarity sm = null;//@TODO Load Class by name line[1];
+					// Similarity sm = null;//TODO Load Class by name line[1];
 					int npar = 1;
 					String grupId = line[0];
 					String className = line[npar + 2];
 					String featureName = line[npar];
 					double weight = Double.parseDouble(line[npar + 1]);
 					if (weight > MAX_FEATURE_WEIGHT)
-						LOGGER.warning("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + line);// weight=100;
+						log.warn("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + line);
 
 					Similarity sm = instantiateSimilarity(className, weight, line, npar, wn);
 
@@ -175,7 +174,7 @@ public class WordMetric {
 					WeightedWordMetric group = featureMetrics.get(grupId);
 					// ERROR we should relate ngroup to grouID (it may be inconsistent)
 					if (group == null)
-						group = new WeightedWordMetric(1.0); // @TODO CHECK what we need weight (groupWeight);
+						group = new WeightedWordMetric(1.0); //TODO CHECK what we need weight (groupWeight);
 					group.add(new FeatureMetric(featureName, sm, weight));
 					featureMetrics.put(grupId, group);
 				}
@@ -184,8 +183,7 @@ public class WordMetric {
 			}
 
 		} catch (Exception e) {
-			LOGGER.severe("Format Error in Metric configuration file");
-			e.printStackTrace();
+			log.error("Format Error in Metric configuration file", e);
 			System.exit(-1);
 		}
 	}
