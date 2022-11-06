@@ -10,7 +10,7 @@ class SegmentTest {
 
 	
 	@Test
-	public void add_single_sentence_test() {
+	public void testAddSingleSentence() {
 		Sentence s = new Sentence();
 	    Segment segment = new Segment();
 	    assertEquals(0, segment.getSentences().size());
@@ -19,7 +19,7 @@ class SegmentTest {
 	}
 
 	@Test
-	public void ngram_size_0_test() {
+	public void testNgramSize0() {
 	
 		try {
 			Segment segment = new Segment();
@@ -32,7 +32,7 @@ class SegmentTest {
 	}
 	
 	@Test
-	public void ngram_test() {
+	public void testNgramHappyPath() {
 		Segment segment = new Segment();
 		Sentence sentence = new Sentence();
 		sentence.add(new Word("1", "a"));
@@ -46,7 +46,7 @@ class SegmentTest {
 	}
 
 	@Test
-	public void segment_size_test() {
+	public void testSegmentSize() {
 		Segment segment = new Segment();
 		Sentence sentence = new Sentence();
 		sentence.add(new Word("1", "a"));

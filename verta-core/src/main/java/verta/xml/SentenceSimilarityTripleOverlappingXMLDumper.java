@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import mt.core.DistanceMatrix;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.TriplesMatch;
 import mt.nlp.Triples;
 
@@ -21,8 +21,8 @@ public class SentenceSimilarityTripleOverlappingXMLDumper {
 		strace.println("</trip>");
 	}
 
-public static void xml_dump_alignment(boolean reversed, TriplesMatch tmatch, SentenceAlignment a, final List<Triples> proposedSentence,
-			final List<Triples> referenceSentence, DistanceMatrix d, PrintStream strace, int i_align) {
+public static void xml_dump_alignment(boolean reversed, TriplesMatch tmatch, ISentenceAlignment a, final List<Triples> proposedSentence,
+                                      final List<Triples> referenceSentence, DistanceMatrix d, PrintStream strace, int i_align) {
 		strace.println("<trips n='" + i_align + "' type=" + (reversed ? "\"t2s\">" : "\"s2t\">"));
 		int i = 0;
 		for (int i_al : a.getAlignment()) {

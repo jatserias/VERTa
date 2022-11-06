@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import mt.core.DistanceMatrix;
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.Similarity;
 import mt.nlp.Sentence;
 import mt.nlp.Triples;
@@ -51,7 +51,7 @@ class SentenceSimilarityTripleOverlappingTest {
 		List<Triples> ts2 = new ArrayList<Triples>();
 		ts2.add(new Triples("a", 1, 2));
 		double t_dist[][] = { { 0.5, 0.5, 0.5 }, { 0.5, 0.5, 0.5 } };
-		SentenceAlignment dist = new DistanceMatrix(t_dist);
+		ISentenceAlignment dist = new DistanceMatrix(t_dist);
 		MetricActivationCounter counters = new MetricActivationCounter();
 		SentenceSimilarityTripleOverlapping sim = new SentenceSimilarityTripleOverlapping(counters, "test",
 				new BufferedReader(
@@ -64,7 +64,7 @@ class SentenceSimilarityTripleOverlappingTest {
 				"DEPHEAD", "DEPLABEL");
 
 		DistanceMatrix result = sim.createDist(ts1, ts2, dist);
-		assertEquals(result.getDistance(0, 0), Similarity.MAXVAL, "one perfect triple");
+		assertEquals(result.getDistance(0, 0), Similarity.MAX_VAL, "one perfect triple");
 	}
 
 }

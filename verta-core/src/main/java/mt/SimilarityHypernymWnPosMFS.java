@@ -17,11 +17,11 @@ public class SimilarityHypernymWnPosMFS extends SimilarityHypernymWnMFS implemen
 		String featPOS = featureNames[FT_POST];
 
 		if (proposedWord.getFeature(featPOS).compareTo(referenceWord.getFeature(featPOS)) != 0)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 
 		SynsetType[] ppos = wn.getSynsetTypeFromPos(proposedWord.getFeature(featPOS));
 		if (ppos == null)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 		return super.INNERsimilarity(featureNames, proposedWord, referenceWord, ppos);
 	}
 

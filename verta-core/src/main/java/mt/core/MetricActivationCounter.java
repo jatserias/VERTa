@@ -8,14 +8,14 @@ public class MetricActivationCounter {
 	Map<String, Integer> counts;
 
 	public MetricActivationCounter() {
-		counts = new HashMap<String, Integer>();
+		counts = new HashMap<>();
 	}
 
-	public void increase(String counter, double score) {
+	public void increase(String counter, int score) {
 		if (counts.containsKey(counter)) {
-			counts.put(counter, counts.get(counter) + 1);
+			counts.put(counter, counts.get(counter) + score);
 		} else {
-			counts.put(counter, 1);
+			counts.put(counter, score);
 		}
 	}
 

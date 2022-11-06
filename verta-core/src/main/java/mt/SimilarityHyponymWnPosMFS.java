@@ -17,11 +17,11 @@ public class SimilarityHyponymWnPosMFS extends SimilarityHyponymWnMFS implements
 		String featPos = featureNames[FT_POS];
 
 		if (proposedWord.getFeature(featPos).compareTo(referenceWord.getFeature(featPos)) != 0)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 
 		SynsetType[] ppos = wn.getSynsetTypeFromPos(proposedWord.getFeature(featPos));
 		if (ppos == null)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 		return super.INNERsimilarity(featureNames, proposedWord, referenceWord, ppos);
 	}
 

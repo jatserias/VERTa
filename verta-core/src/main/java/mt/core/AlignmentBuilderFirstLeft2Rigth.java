@@ -6,9 +6,9 @@ import java.util.Set;
 public class AlignmentBuilderFirstLeft2Rigth implements AlignmentBuilder {
 
 	@Override
-	public void build(SentenceAlignment align, final DistanceMatrix d) {
+	public void build(ISentenceAlignment align, final DistanceMatrix d) {
 
-		Set<Integer> taken = new HashSet<Integer>();
+		Set<Integer> taken = new HashSet<>();
 
 		double x;
 		String prov = "null";

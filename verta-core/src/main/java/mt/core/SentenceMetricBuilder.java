@@ -1,7 +1,7 @@
 package mt.core;
 
 import lombok.extern.slf4j.Slf4j;
-import verta.wn.WordNetAPI;
+import verta.wn.IWordNet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 public class SentenceMetricBuilder {
 
     static public SentenceMetric instantiateSentenceMetric(String className, String[] line,
-                                                           MetricActivationCounter counters, WordNetAPI wn) {
+                                                           MetricActivationCounter counters, IWordNet wn) {
         SentenceMetric sm = null;
         try {
             @SuppressWarnings("rawtypes")
@@ -39,7 +39,7 @@ public class SentenceMetricBuilder {
             try {
                 @SuppressWarnings("rawtypes")
                 Class[] paramTypes = new Class[1];
-                paramTypes[0] = WordNetAPI.class;
+                paramTypes[0] = IWordNet.class;
                 Method method = sm.getClass().getMethod("Wn", paramTypes);
                 log.info(className + " uses WN:" + wn);
                 method.invoke(sm, wn);

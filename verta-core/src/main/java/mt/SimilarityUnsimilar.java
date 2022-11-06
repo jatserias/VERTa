@@ -7,7 +7,7 @@ import mt.nlp.Word;
 public class SimilarityUnsimilar extends BaseSimilarity implements Similarity {
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
-		return Similarity.MINVAL;
+		return Similarity.MIN_VAL;
 	}
 
 	@Override

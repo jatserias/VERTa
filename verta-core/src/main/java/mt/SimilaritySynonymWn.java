@@ -3,7 +3,7 @@ package mt;
 import mt.core.Similarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
-import verta.wn.JABSynset;
+import verta.wn.ISynset;
 
 /**
  * 
@@ -20,17 +20,17 @@ public class SimilaritySynonymWn extends WnBaseSimilarity implements Similarity 
 		String featureReference = referenceWord.getFeature(featureNames[0]);
 
 		if (featureReference.equals(featureProposed))
-			return Similarity.MAXVAL;
+			return Similarity.MAX_VAL;
 
-		JABSynset[] proposedSynsets = wn.getSynsets(featureProposed);
-		JABSynset[] referenceSynsets = wn.getSynsets(featureReference);
+		ISynset[] proposedSynsets = wn.getSynsets(featureProposed);
+		ISynset[] referenceSynsets = wn.getSynsets(featureReference);
 
 		return similarity(featureProposed, featureReference, proposedSynsets, referenceSynsets);
 
 	}
 
-	public double similarity(String featureProposed, String featureReference, final JABSynset[] proposedSynsets,
-			final JABSynset[] referenceSynsets) {
+	public double similarity(String featureProposed, String featureReference, final ISynset[] proposedSynsets,
+			final ISynset[] referenceSynsets) {
 		int i = 0;
 		boolean found = false;
 		while (!found && i < proposedSynsets.length) {
@@ -42,7 +42,7 @@ public class SimilaritySynonymWn extends WnBaseSimilarity implements Similarity 
 			++i;
 		}
 
-		return found ? Similarity.MAXVAL : Similarity.MINVAL;
+		return found ? Similarity.MAX_VAL : Similarity.MIN_VAL;
 	}
 
 	public String getClassName() {

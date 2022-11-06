@@ -6,7 +6,7 @@ import java.util.Collection;
 import org.apache.commons.collections.CollectionUtils;
 
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
@@ -19,7 +19,7 @@ public class SentenceSimilarityNEL extends SentenceSimilarityBase implements Sen
 	}
 
 	@Override
-	public SimilarityResult similarity(Sentence s1, Sentence s2, SentenceAlignment dist, PrintStream strace) {
+	public SimilarityResult similarity(Sentence s1, Sentence s2, ISentenceAlignment dist, PrintStream strace) {
 
 		@SuppressWarnings("unchecked")
 		Collection<String> sres = CollectionUtils.intersection(s1.getNel(), s2.getNel());

@@ -8,7 +8,7 @@ import mt.nlp.Segment;
 import mt.nlp.Sentence;
 import mt.nlp.io.CONLLformat;
 import mt.nlp.io.ReaderCONLL;
-import verta.wn.WordNetAPI;
+import verta.wn.IWordNet;
 import verta.wn.WordNetFactory;
 import verta.xml.MTmetricXMLDumper;
 
@@ -50,11 +50,11 @@ public class MTsimilarity {
     public static boolean DUMP;
     public Verta verta;
 
-    public MTsimilarity(String configFilename, CONLLformat fmt, WordNetAPI wn) throws FileNotFoundException {
+    public MTsimilarity(String configFilename, CONLLformat fmt, IWordNet wn) throws FileNotFoundException {
         this.verta = new Verta(configFilename, wn);
     }
 
-    public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, WordNetAPI wn) {
+    public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, IWordNet wn) {
         this.verta = new Verta(configFilename, buffer, wn);
     }
 
@@ -129,7 +129,7 @@ public class MTsimilarity {
             SentenceSimilarityTripleOverlapping.USE_OLD = jsapResult.getBoolean("old", false);
             SentenceSimilarityTripleOverlapping.FILTER_TOP = !jsapResult.getBoolean("top", false);
 
-            WordNetAPI wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
+            IWordNet wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
             CONLLformat fmt = new CONLLformat(inputFormat);
             MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, wn);
             mt.verta.setFilter(jsapResult.getBoolean("punc", false));

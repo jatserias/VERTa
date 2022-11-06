@@ -1,8 +1,8 @@
 package verta.wn;
 
-public interface JABSynset {
+public interface ISynset {
 
-	JABSynset[] getHypernyms();
+	ISynset[] getHypernyms();
 
 	String[] getWordForms();
 
@@ -13,5 +13,5 @@ public interface JABSynset {
 	 */
 	int getTagCount(String wf);
 	
-	public boolean equals(Object aThat);
+	boolean equals(Object aThat);
 }

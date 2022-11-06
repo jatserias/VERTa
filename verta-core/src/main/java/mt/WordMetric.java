@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 import mt.core.FeatureMetric;
@@ -14,15 +13,13 @@ import mt.core.MetricActivationCounter;
 import mt.core.Similarity;
 import mt.core.WeightedWordMetric;
 import mt.nlp.Word;
-import verta.wn.WordNetAPI;
+import verta.wn.IWordNet;
 import verta.xml.WordMetricXMLDumper;
 
 @Slf4j
 public class WordMetric {
 	MetricActivationCounter counters;
 	private static final int MAX_FEATURE_WEIGHT = 100;
-
-	static int NOWORDMETRICS = 2;
 
 	// we should group metrics by id
 	public HashMap<String, WeightedWordMetric> featureMetrics;
@@ -34,27 +31,26 @@ public class WordMetric {
 	/// name
 	String name;
 
-	public static Similarity instantiateSimilarity(String className, double weight, String[] line, int npar,
-			WordNetAPI wn) {
+	public static Similarity instantiateSimilarity(String className, double weight, String[] line, int nPar,
+			IWordNet wn) {
 		Similarity sm = null;
 		try {
-			Class<?> partypes[] = new Class[1];
-			partypes[0] = java.lang.String.class;
+			Class<?>[] parTypes = new Class[1];
+			parTypes[0] = java.lang.String.class;
 			Class<?> cl = Class.forName(className);
 
 			// @TODO check which constructor to call
 			Constructor<?> ct = cl.getConstructors()[0];
 
-			int narg = 3 + npar;
-			Object arglist[] = new Object[line.length - narg];
-			for (int i = narg; i < line.length; ++i)
-				arglist[i - narg] = line[i];
-			sm = (Similarity) ct.newInstance(arglist);
+			int nArgs = 3 + nPar;
+			Object[] argList = new Object[line.length - nArgs];
+			if (line.length - nArgs >= 0) System.arraycopy(line, nArgs, argList, 0, line.length - nArgs);
+			sm = (Similarity) ct.newInstance(argList);
 
 			try {
 				@SuppressWarnings("rawtypes")
 				Class[] paramTypes = new Class[1];
-				paramTypes[0] = WordNetAPI.class;
+				paramTypes[0] = IWordNet.class;
 				Method method = sm.getClass().getMethod("Wn", paramTypes);
 				log.info(className + " uses WN:" + wn);
 				method.invoke(sm, new Object[] { wn });
@@ -74,14 +70,14 @@ public class WordMetric {
 	}
 
 	public WordMetric() {
-		featureMetrics = new HashMap<String, WeightedWordMetric>();
+		featureMetrics = new HashMap<>();
 	}
 
 	public WordMetric(String name, BufferedReader config, double groupWeight, String configFilename,
-			MetricActivationCounter counters, WordNetAPI wn) {
+			MetricActivationCounter counters, IWordNet wn) {
 		this.name = name;
 		this.counters = counters;
-		featureMetrics = new HashMap<String, WeightedWordMetric>();
+		featureMetrics = new HashMap<>();
 		load(config, groupWeight, configFilename, wn);
 	}
 
@@ -97,10 +93,8 @@ public class WordMetric {
 
 	/**
 	 * 
-	 * How a set of metrics is applied to a pair of words
-	 * 
+	 * How a set of metrics is applied to a pair of words*
 	 * trace
-	 * 
 	 * &lt; ft type ="TYPE_PARAM"/&gt; &lt;group id="NGROUP"&gt;
 	 * &lt;mt feat="FEATURE_NAME" sim="JAVACLASS" simid="ID" active="COLOR" pword=
 	 * "PROOSEDWORD" rword="TARGETWORD" weight="DIST"/&gt; ... &lt;/group&gt; &lt;/ft&gt;
@@ -112,25 +106,25 @@ public class WordMetric {
 		//TODO FIX WEIGHT
 		WordMetricXMLDumper.xml_wm_start_ft(pout, type);
 
-		/**
+		/*
 		 * there is an inconsistency between groupId and group number
 		 */
 		// for every group metric
-		int ngroup = 0;
+		int nGroup = 0;
 		for (String group : featureMetrics.keySet()) {
-			WordMetricXMLDumper.xml_wm_start_group(pout, ngroup);
+			WordMetricXMLDumper.xml_wm_start_group(pout, nGroup);
 			WeightedWordMetric x = featureMetrics.get(group);
 			double contrib = 0.0;
 			int f = 0;
-			boolean active = true;
-			while (contrib <= Similarity.MINVAL && f < x.size()) {
+			// initilized to true
+			boolean active;
+			while (contrib <= Similarity.MIN_VAL && f < x.size()) {
 				FeatureMetric fm = x.get(f);
-				//fm.reversed = reversed;
 				contrib = fm.similarity(proposedWord, targetWord);
-				active = contrib > Similarity.MINVAL;
+				active = contrib > Similarity.MIN_VAL;
 
 				if (counters != null)
-					counters.increase(fm.getClassName() + Arrays.asList(fm.featureNames), contrib);
+					counters.increase(fm.getClassName() + Arrays.asList(fm.featureNames), 1);
 
 				// trace
 				WordMetricXMLDumper.xml_wm_dump(proposedWord, targetWord, pout, contrib, f, active, fm);
@@ -138,14 +132,14 @@ public class WordMetric {
 			}
 
 			sum = sum + x.getWeight() * contrib;
-			ngroup++;
+			nGroup++;
 			WordMetricXMLDumper.xml_wm_end_group(pout);
 		}
 		WordMetricXMLDumper.xml_wm_end_ft(pout);
 		return sum / MAX_FEATURE_WEIGHT;
 	}
 
-	public void load(BufferedReader config, double groupWeight, String filename, WordNetAPI wn) {
+	public void load(BufferedReader config, double groupWeight, String filename, IWordNet wn) {
 		try {
 			String buff;
 			while ((buff = config.readLine()) != null && !buff.trim().startsWith("FGROUP")) {
@@ -154,29 +148,29 @@ public class WordMetric {
 
 				// comments start with #
 				if (!buff.trim().startsWith("#")) {
-					String line[] = buff.split("[ \t]+");
+					String[] line = buff.split("[ \t]+");
 					if (line.length < 4) {
 						log.error("Format ERROR on the metric config file >" + filename + "< AT LINE:" + buff);
 						System.exit(-1);
 					}
 					// Similarity sm = null;//TODO Load Class by name line[1];
-					int npar = 1;
-					String grupId = line[0];
-					String className = line[npar + 2];
-					String featureName = line[npar];
-					double weight = Double.parseDouble(line[npar + 1]);
+					int nPar = 1;
+					String groupId = line[0];
+					String className = line[nPar + 2];
+					String featureName = line[nPar];
+					double weight = Double.parseDouble(line[nPar + 1]);
 					if (weight > MAX_FEATURE_WEIGHT)
-						log.warn("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + line);
+						log.warn("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + buff);
 
-					Similarity sm = instantiateSimilarity(className, weight, line, npar, wn);
+					Similarity sm = instantiateSimilarity(className, weight, line, nPar, wn);
 
 					// Add a feature metric into the grup
-					WeightedWordMetric group = featureMetrics.get(grupId);
+					WeightedWordMetric group = featureMetrics.get(groupId);
 					// ERROR we should relate ngroup to grouID (it may be inconsistent)
 					if (group == null)
 						group = new WeightedWordMetric(1.0); //TODO CHECK what we need weight (groupWeight);
 					group.add(new FeatureMetric(featureName, sm, weight));
-					featureMetrics.put(grupId, group);
+					featureMetrics.put(groupId, group);
 				}
 
 				this.groupWeight = groupWeight;

@@ -3,7 +3,7 @@ package mt;
 import edu.smu.tspell.wordnet.SynsetType;
 import mt.core.Similarity;
 import mt.nlp.Word;
-import verta.wn.JABSynset;
+import verta.wn.ISynset;
 
 /**
  * 
@@ -26,27 +26,27 @@ public class SimilaritySynonymWnPos extends SimilaritySynonymWn {
 		String posReference = referenceWord.getFeature(featureNames[FT_POS]);
 
 		if (posProposed.compareTo(posReference) != 0)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 
 		if (featureReference.equals(featureProposed) && posProposed.equals(posReference))
-			return Similarity.MAXVAL;
+			return Similarity.MAX_VAL;
 		SynsetType[] typeProposed = wn.getSynsetTypeFromPos(posProposed);
 		SynsetType[] typeReference = wn.getSynsetTypeFromPos(posReference);
 
 		if (typeProposed == null || typeReference == null)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 
 		// since both type must be the same, just checking one of the list is enough
 		// (intersection will be even more efficient)
 		for (SynsetType s : typeReference) {
-			JABSynset[] proposedSynsets = wn.getSynsets(featureProposed, s);
-			JABSynset[] referenceSynsets = wn.getSynsets(featureReference, s);
+			ISynset[] proposedSynsets = wn.getSynsets(featureProposed, s);
+			ISynset[] referenceSynsets = wn.getSynsets(featureReference, s);
 
 			double res = similarity(featureProposed, featureReference, proposedSynsets, referenceSynsets);
-			if (res > Similarity.MINVAL)
+			if (res > Similarity.MIN_VAL)
 				return res;
 		}
-		return Similarity.MINVAL;
+		return Similarity.MIN_VAL;
 	}
 
 	@Override

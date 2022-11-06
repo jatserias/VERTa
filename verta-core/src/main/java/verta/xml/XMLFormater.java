@@ -8,7 +8,7 @@ public class XMLFormater {
 	Element sentencesRoot;
 
 	public void addTag(String tagName) {
-		Element root = (Element) document.createElement("s");
+		Element root = document.createElement("s");
 		sentencesRoot.appendChild(root);
 	}
 
@@ -17,7 +17,7 @@ public class XMLFormater {
 	}
 
 	public static String encodeXMLString(String str) {
-		String result = new String(str);
+		String result = str;
 		result = result.replace("&", "&amp;");
 		result = result.replace("<", "&lt;");
 		result = result.replace(">", "&gt;");

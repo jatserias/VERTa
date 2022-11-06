@@ -8,7 +8,7 @@ public class SimilarityPerfect extends BaseSimilarity implements Similarity {
 
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
-		return Similarity.MAXVAL;
+		return Similarity.MAX_VAL;
 	}
 
 	@Override

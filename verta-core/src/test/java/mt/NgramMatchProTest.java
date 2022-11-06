@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import mt.core.DistanceMatrix;
 import mt.core.MetricActivationCounter;
 import mt.core.NgramMatchPro;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
@@ -28,7 +28,7 @@ class NgramMatchProTest {
 				{0, 0, 0, 1, 0}, 
 				{0 ,0, 0 ,0, 1}, 
 			};
-		final SentenceAlignment dist = new DistanceMatrix(t_dist);
+		final ISentenceAlignment dist = new DistanceMatrix(t_dist);
 		assertTrue(mt.NgramMatch.compareNgramSameSize(source_ngram, target_ngram, dist), "ngram different position aligned");
 	}
 
@@ -42,7 +42,7 @@ class NgramMatchProTest {
 				{0, 0, 0, 1, 0}, 
 				{0 ,0, 0 ,0, 1}, 
 			};
-		final SentenceAlignment dist = new DistanceMatrix(t_dist);
+		final ISentenceAlignment dist = new DistanceMatrix(t_dist);
 		assertTrue(mt.NgramMatch.compareNgramSameSize(source_ngram, target_ngram, dist), "ngram different position aligned");
 	}
 	
@@ -74,7 +74,7 @@ class NgramMatchProTest {
 				{0 ,0, 0 ,0, 1}, 
 			};
 		
-		final SentenceAlignment dist = new DistanceMatrix(t_dist);
+		final ISentenceAlignment dist = new DistanceMatrix(t_dist);
 		
 		assertEquals(2.0, NgramMatch.compareNgrams(2, s1, s2, dist, System.err), 0.0000001, "ngrams mid extra word");
 	}
@@ -100,7 +100,7 @@ class NgramMatchProTest {
 								{0, 0, 0, 1, 0}, 
 								{0, 0, 0, 0, 0}
 							};
-		final SentenceAlignment dist = new DistanceMatrix(t_dist);
+		final ISentenceAlignment dist = new DistanceMatrix(t_dist);
 		
 		SimilarityResult result = matcher.similarity(s1, s2, dist, System.err);
 		assertEquals(0.166666666666, result.getPrec(), 0.0000001, "size 4, 1 ngram-2, 4 ngram-1");
@@ -131,7 +131,7 @@ class NgramMatchProTest {
 								{0, 0, 0, 0, 1, 0}, 
 								{0, 0, 0, 0, 0, 1}
 							};
-		final SentenceAlignment dist = new DistanceMatrix(t_dist);
+		final ISentenceAlignment dist = new DistanceMatrix(t_dist);
 
 		SimilarityResult result = matcher.similarity(s1, s2, dist, System.err);
 		assertEquals(2.0 / 3.0, result.getPrec(), 0.0000001, "2 / 3 ngrams");

@@ -5,7 +5,7 @@ import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.VerbSynset;
 
-public class ENSynset implements JABSynset {
+public class ENSynset implements ISynset {
 
 	public Synset s;
 	
@@ -14,10 +14,10 @@ public class ENSynset implements JABSynset {
 	}
 
 	@Override
-	public JABSynset[] getHypernyms() {
+	public ISynset[] getHypernyms() {
 	   SynsetType t = s.getType();
-	   if(t==SynsetType.NOUN) return WordNetApiEnImpl.convert(((NounSynset) s).getHypernyms());
-	   if(t==SynsetType.VERB) return WordNetApiEnImpl.convert(((VerbSynset) s).getHypernyms());
+	   if(t==SynsetType.NOUN) return WordNetEnImpl.convert(((NounSynset) s).getHypernyms());
+	   if(t==SynsetType.VERB) return WordNetEnImpl.convert(((VerbSynset) s).getHypernyms());
 	   return null;
 	}
 

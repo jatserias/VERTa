@@ -17,7 +17,6 @@ import java.util.Vector;
  * compare to sentences by the overlapping of the triplets generated
  * <p>
  * generate a distance matrix i /j then apply the alignment strategy
- *
  * TODO enforce that the target triple is taken only once
  * </p>
  **/
@@ -27,7 +26,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
     /**
      * Default column names for syntactic dependencies triples
      * Used as default for backward compatible configuration
-     */
+     **/
     private static final String DEPHEAD_NAME = "DEPHEAD";
     private static final String DEPLABEL_NAME = "DEPLABEL";
     public static boolean FILTER_TOP = false;
@@ -72,7 +71,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
      * @return a list of triples
      */
     static List<Triples> tripleGenerator(final Sentence sentence, String head_column, String label_column) {
-        List<Triples> res = new Vector<Triples>();
+        List<Triples> res = new Vector<>();
         for (Word w : sentence) {
             Triples t = SentenceSimilarityTripleOverlapping.MakeTriple(sentence, w, head_column, label_column);
 
@@ -82,7 +81,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
         return res;
     }
 
-    double compare(final Sentence s1, final Sentence s2, final SentenceAlignment alignment,
+    double compare(final Sentence s1, final Sentence s2, final ISentenceAlignment alignment,
                    PrintStream strace) {
         List<Triples> ts1 = tripleGenerator(s1);
         List<Triples> ts2 = tripleGenerator(s2);
@@ -91,21 +90,15 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 
     /**
      * Gets the best triple that match
-     *
-     * @param n1
-     * @param s2
-     * @param align
-     * @param strace
-     * @return
-     */
-    public double findTriple(final Triples n1, final Triples[] s2, final SentenceAlignment align,
+     **/
+    public double findTriple(final Triples n1, final Triples[] s2, final ISentenceAlignment align,
                              PrintStream strace) {
 
         double res = 0.0;
         Triples btrip = null;
 
         for (Triples ts2 : s2) {
-            double cres = tmatch.match(n1, ts2, align).score;
+            double cres = tmatch.match(n1, ts2, align).getScore();
             if (cres > res) {
                 btrip = ts2;
                 res = cres;
@@ -119,7 +112,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
     }
 
     private double compare(final List<Triples> ts1, final List<Triples> ts2,
-                           final SentenceAlignment alignment, PrintStream strace) {
+                           final ISentenceAlignment alignment, PrintStream strace) {
         // That may no be symmetric if align is not symmetric
         double res = 0.0;
 
@@ -133,32 +126,28 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
     }
 
     public List<Triples> tripleGenerator(final Sentence sentence) {
-        return tripleGenerator(sentence, tmatch.getHead_column_name(), tmatch.getLabel_column_name());
-    }
-
-    double getMax() {
-        return 0;
+        return tripleGenerator(sentence, tmatch.getHeadColumnName(), tmatch.getLabelColumnName());
     }
 
     @Override
     public SimilarityResult similarity(final Sentence proposedSentence, final Sentence referenceSentence,
-                                       final SentenceAlignment word_alignment, PrintStream strace) {
+                                       final ISentenceAlignment word_alignment, PrintStream strace) {
         List<Triples> ts1 = tripleGenerator(proposedSentence);
         List<Triples> ts2 = tripleGenerator(referenceSentence);
 
-        SentenceAlignment triples_align = new AlignmentImplSingle(ts1.size(), ts2.size());
+        ISentenceAlignment triples_align = new AlignmentImplSingle(ts1.size(), ts2.size());
         double prec = calculate_metric(word_alignment, strace, ts1, ts2, triples_align);
 
-        SentenceAlignment triples_align_rev = new AlignmentImplSingle(ts2.size(), ts1.size());
+        ISentenceAlignment triples_align_rev = new AlignmentImplSingle(ts2.size(), ts1.size());
         double recall = calculate_metric(word_alignment.revert(), strace, ts2, ts1, triples_align_rev);
 
         return new SimilarityResult(prec, recall);
     }
 
-    private double calculate_metric(final SentenceAlignment word_alignment, PrintStream strace,
+    private double calculate_metric(final ISentenceAlignment word_alignment, PrintStream strace,
                                     List<Triples> triples_source,
                                     List<Triples> triples_target,
-                                    SentenceAlignment triples_align) {
+                                    ISentenceAlignment triples_align) {
 
         DistanceMatrix distances = createDist(triples_source, triples_target, word_alignment);
 
@@ -172,7 +161,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 
     /// new internal similarity function
     public double INsimilarity(
-            SentenceAlignment triple_alignment,
+            ISentenceAlignment triple_alignment,
             final List<Triples> proposedSentence,
             final List<Triples> referenceSentence,
             DistanceMatrix distances,
@@ -202,7 +191,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
 
 
     protected DistanceMatrix createDist(final List<Triples> ts1, final List<Triples> ts2,
-                                        final SentenceAlignment word_alignment) {
+                                        final ISentenceAlignment word_alignment) {
         DistanceMatrix res = new DistanceMatrix(ts1.size(), ts2.size());
 
         int i = 0;
@@ -212,7 +201,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
                 // distance inverse the indexes while align keeps 2 different representation
 
                 MatchResult tres = tmatch.match(n1, n2, word_alignment);
-                res.setDistance(i, j, tres.score, tres.prov);
+                res.setDistance(i, j, tres.getScore(), tres.getProv());
                 ++j;
             }
             ++i;

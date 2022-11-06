@@ -14,47 +14,47 @@ import mt.nlp.Sentence;
 import mt.nlp.Word;
 import mt.nlp.io.CONLLformat;
 import mt.nlp.io.ReaderCONLL;
-import verta.wn.JABSynset;
-import verta.wn.WordNetAPI;
+import verta.wn.ISynset;
+import verta.wn.IWordNet;
 import mt.nlp.Triples;
 
 class VertaTest {
 
 	@Test
 	void test_word_similarity() {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
 
 		Verta verta = new Verta("metric definition",
 				new BufferedReader(
 						new StringReader("GROUP\tLEX\t1\t10\tmt.WordMetric\n" + "1\tWORD\t100\tmt.SimilarityEqual\n")),
-				wordnetApi);
+				wordnetI);
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
 
 // single same word Sentence using only word metric
 		referenceSentence.add(new Word("1", "1"));
 		MetricResult result = verta.similarity(referenceSentence, referenceSentence);
-		assertEquals(Similarity.MAXVAL, result.getPrec(), 0.0000001, "Empty sentences have rec 0");
-		assertEquals(Similarity.MAXVAL, result.getRec(), 0.0000001, "Empty sentences have prec 0");
+		assertEquals(Similarity.MAX_VAL, result.getPrec(), 0.0000001, "Empty sentences have rec 0");
+		assertEquals(Similarity.MAX_VAL, result.getRec(), 0.0000001, "Empty sentences have prec 0");
 
 // different single word Sentence using only word metric
 		referenceSentence.add(new Word("1", "1"));
 		proposedSentence.add(new Word("1", "2"));
 		result = verta.similarity(referenceSentence, proposedSentence);
-		assertEquals(Similarity.MINVAL, result.getPrec(), 0.0000001, "Empty sentences have rec 0");
-		assertEquals(Similarity.MINVAL, result.getRec(), 0.0000001, "Empty sentences have prec 0");
+		assertEquals(Similarity.MIN_VAL, result.getPrec(), 0.0000001, "Empty sentences have rec 0");
+		assertEquals(Similarity.MIN_VAL, result.getRec(), 0.0000001, "Empty sentences have prec 0");
 
 	}
 
 	@Test
 	void test_ngram_sentence_similarity_happypath() {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
 
 		Verta verta = new Verta("metric definition",
 				new BufferedReader(
 						new StringReader("GROUP\tLEX\t1\t0\tmt.WordMetric\n" + "1\tWORD\t100\tmt.SimilarityEqual\n"
 								+ "FGROUP\n" + "GROUP\tNGRAM\t2\t10\tmt.NgramMatch\t-1\n")),
-				wordnetApi);
+				wordnetI);
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
 
@@ -75,13 +75,13 @@ class VertaTest {
 
 	@Test
 	void test_triples_sentence_similarity_happypath() {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
 
 		Verta verta = new Verta("metric definition",
 				new BufferedReader(new StringReader("GROUP	LEX	1	0	mt.WordMetric\n"
 						+ "1	WORD	100	mt.SimilarityEqual\n" + "FGROUP\n"
 						+ "GROUP\tDEP\t2\t100\tmt.SentenceSimilarityTripleOverlapping\tjar:/fluency_en/triplesmatch.conf\n")),
-				wordnetApi);
+				wordnetI);
 
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
@@ -117,13 +117,13 @@ class VertaTest {
 
 	@Test
 	void test_triples_sentence_similarity_target_longer_sentence() {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
 
 		Verta verta = new Verta("metric definition",
 				new BufferedReader(new StringReader("GROUP\tLEX\t1\t0\tmt.WordMetric\n"
 						+ "1\tWORD\t100	mt.SimilarityEqual\n" + "FGROUP\n"
 						+ "GROUP\tDEP\t2\t100\tmt.SentenceSimilarityTripleOverlapping\tjar:/fluency_en/triplesmatch.conf\n")),
-				wordnetApi);
+				wordnetI);
 
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
@@ -151,13 +151,13 @@ class VertaTest {
 
 	@Test
 	void test_triples_sentence_similarity_source_longer_sentence() {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
 
 		Verta verta = new Verta("metric definition",
 				new BufferedReader(new StringReader("GROUP	LEX	1	1	mt.WordMetric\n"
 						+ "1	WORD	100	mt.SimilarityEqual\n" + "FGROUP"
 						+ "GROUP\tDEP\t2\t100\tmt.SentenceSimilarityTripleOverlapping\tjar:/fluency_en/triplesmatch.conf\n")),
-				wordnetApi);
+				wordnetI);
 		
 		Sentence referenceSentence = new Sentence();
 		Sentence proposedSentence = new Sentence();
@@ -204,16 +204,16 @@ class VertaTest {
 
 	@Test
 	void test_demo_example() throws Exception {
-		WordNetAPI wordnetApi = Mockito.mock(WordNetAPI.class);
-		JABSynset[] no_synset = new JABSynset[0];
-		when(wordnetApi.getSynsets(org.mockito.ArgumentMatchers.anyString())).thenReturn(no_synset);
-		when(wordnetApi.getSynsets(org.mockito.ArgumentMatchers.anyString(),
+		IWordNet wordnetI = Mockito.mock(IWordNet.class);
+		ISynset[] no_synset = new ISynset[0];
+		when(wordnetI.getSynsets(org.mockito.ArgumentMatchers.anyString())).thenReturn(no_synset);
+		when(wordnetI.getSynsets(org.mockito.ArgumentMatchers.anyString(),
 				org.mockito.ArgumentMatchers.any(SynsetType.class))).thenReturn(no_synset);
 
 		// /conf/triplesmatch_spa_adeq.conf
 		Verta verta = new Verta("jar:conf/jabmetric_spa_adeq_new.conf", new BufferedReader(
 				new InputStreamReader(this.getClass().getResourceAsStream("/conf/jabmetric_spa_adeq_new.conf"))),
-				wordnetApi);
+				wordnetI);
 
 		CONLLformat fmt = new CONLLformat("jar:/conf/conllFreeling.fmt");
 
@@ -251,21 +251,21 @@ class VertaTest {
 		AlignmentImplSingle align = new AlignmentImplSingle(proposedSentence1.size(), referenceSentence.size());
 		// TODO configure alignment strategy
 		builder.build(align, dist1);
-		double prec = Verta.calculate_similarity_for_alignment(dist1, align, false, proposedSentence1, false);
+		double prec = Verta.calculate_similarity_for_alignment(dist1, align, proposedSentence1, false);
 
 		DistanceMatrix dist_rev = Verta.create_word_distance_matrix(wm, referenceSentence, proposedSentence1);
 		AlignmentImplSingle align_rev = align = new AlignmentImplSingle(proposedSentence1.size(),
 				referenceSentence.size());
 		builder.build(align_rev, dist_rev);
-		double rec = Verta.calculate_similarity_for_alignment(dist_rev, align_rev, true, referenceSentence, false);
+		double rec = Verta.calculate_similarity_for_alignment(dist_rev, align_rev, referenceSentence, false);
 
 		res[0] = prec;
 		res[1] = rec;
 
 		double[] similarity = res;
 
-		assertEquals(Similarity.MAXVAL, similarity[0], 0.00000001, "prec sim(A,A)=1");
-		assertEquals(Similarity.MAXVAL, similarity[0], 0.00000001, "rec  sim(A,A)=1");
+		assertEquals(Similarity.MAX_VAL, similarity[0], 0.00000001, "prec sim(A,A)=1");
+		assertEquals(Similarity.MAX_VAL, similarity[0], 0.00000001, "rec  sim(A,A)=1");
 
 	}
 }

@@ -5,8 +5,8 @@ import org.mockito.Mockito;
 
 import edu.smu.tspell.wordnet.SynsetType;
 import mt.nlp.Word;
-import verta.wn.JABSynset;
-import verta.wn.WordNetAPI;
+import verta.wn.ISynset;
+import verta.wn.IWordNet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,21 +37,21 @@ public class MetricTest {
 		
 		assertEquals(0.0,sm.similarity(featlemmaArray, proposedWord2, referenceWord2),"to vs t");
 		
-		WordNetAPI wn = Mockito.mock(WordNetAPI.class);
-		JABSynset s1_cat = Mockito.mock(JABSynset.class);
-		JABSynset s1_felines = Mockito.mock(JABSynset.class);
-		JABSynset s1_carnivore = Mockito.mock(JABSynset.class);
+		IWordNet wn = Mockito.mock(IWordNet.class);
+		ISynset s1_cat = Mockito.mock(ISynset.class);
+		ISynset s1_felines = Mockito.mock(ISynset.class);
+		ISynset s1_carnivore = Mockito.mock(ISynset.class);
 		
 
-		JABSynset senses_cat[]  = {s1_cat};
-		JABSynset senses_felines[]  = {s1_felines};
-		JABSynset senses_carnivore[]  = {s1_carnivore};
+		ISynset senses_cat[]  = {s1_cat};
+		ISynset senses_felines[]  = {s1_felines};
+		ISynset senses_carnivore[]  = {s1_carnivore};
 		
-		JABSynset s1_cat_hypernyms[]  = {s1_felines};
-		JABSynset s1_felines_hypernyms[]  = {s1_carnivore};
-		JABSynset s1_carnivore_hypernyms[]  = {};
+		ISynset s1_cat_hypernyms[]  = {s1_felines};
+		ISynset s1_felines_hypernyms[]  = {s1_carnivore};
+		ISynset s1_carnivore_hypernyms[]  = {};
 			
-		JABSynset no_synset[]  = {};
+		ISynset no_synset[]  = {};
 		
 		Mockito.when(wn.getSynsets("cat", SynsetType.NOUN)).thenReturn(senses_cat);
 		Mockito.when(wn.getSynsets("felines", SynsetType.NOUN)).thenReturn(senses_felines);
@@ -95,9 +95,9 @@ public class MetricTest {
 		
 		//Checking synonims
 		
-		JABSynset common_sense = Mockito.mock(JABSynset.class);
-		JABSynset senses_for_serious[] = {common_sense};
-		JABSynset senses_for_dangerous[] = {common_sense};
+		ISynset common_sense = Mockito.mock(ISynset.class);
+		ISynset senses_for_serious[] = {common_sense};
+		ISynset senses_for_dangerous[] = {common_sense};
 		Mockito.when(wn.getSynsets("serious", SynsetType.ADJECTIVE)).thenReturn(senses_for_serious);
 		Mockito.when(wn.getSynsets("dangerous", SynsetType.ADJECTIVE)).thenReturn(senses_for_dangerous);
 		SynsetType[] possible_pos = {SynsetType.ADJECTIVE};

@@ -1,13 +1,17 @@
 package mt.core;
 
-public class MatchResult {
-	public MatchResult(double d, Object s) {
-		score = d;
-		prov = s;
-	}
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-	public double score;
-	public Object prov;
+@Getter
+@Setter
+@AllArgsConstructor
+public class MatchResult {
+
+	private double score;
+
+	private Object prov;
 
 	public String toString() {
 		return "" + score + ":" + prov;

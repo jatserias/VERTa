@@ -36,7 +36,7 @@ public class TripleMatchTest {
 	}
 
 	@Test
-	public void testVaris_from_refactor() throws IOException {
+	public void testFromRefactoredLegacy() throws IOException {
 
 		Triples t1 = new Triples("s", 1, 2);
 		Triples t2 = new Triples("s", 1, 2);
@@ -56,7 +56,7 @@ public class TripleMatchTest {
 		distances.setDistance(0, 1, 0, "test");
 		distances.setDistance(0, 0, 0, "test");
 		distances.setDistance(0, 0, 1, "test");
-		SentenceAlignment nalign = new AlignmentImplSingle(distances.source_size, distances.target_size);
+		ISentenceAlignment nalign = new AlignmentImplSingle(distances.source_size, distances.target_size);
 		new AlignmentBuilderFirstLeft2Rigth().build(nalign, distances);
 
 		TriplesMatch triples_matcher = new TriplesMatch("DEPHEAD", "DEPLABEL");
@@ -64,7 +64,7 @@ public class TripleMatchTest {
 				+ "# Complete_WEIGHT	PARTIAL_NOMOD_WEIGHT      PARTIAL_NOHEAD_WEIGHT      PARTIAL_NOLABEL_WEIGHT \n"
 				+ "#\n" + "1.0	0.8	0.7	0.7\n" + "#\n" + "# Label matching rules\n" + "#\n" + "# label - label weight\n"
 				+ "#\n" + "amod	prep_of	1.0\n" + "nsubj	agent	1.0\n" + "")));
-		assertTrue(triples_matcher.match(t1, t2, nalign).score > 0, "btest1");
+		assertTrue(triples_matcher.match(t1, t2, nalign).getScore() > 0, "btest1");
 
 		String[] words = { "the", "cat", "eats", "fish", "." };
 		String[] deps = { "mod:2", "subj:3", "_:_", "obj:2", "_:_" };
@@ -80,7 +80,7 @@ public class TripleMatchTest {
 			s1.add(w);
 		}
 
-		Sentence s2 = s1;
+		Sentence s2 = new Sentence();;
 		n = 0;
 		for (String s : words2) {
 			Word w = new Word("" + n, s);
@@ -93,13 +93,13 @@ public class TripleMatchTest {
 
 	private static Stream<Arguments> generator() {
 		return Stream.of(Arguments.of(true, true, true, TriplesMatch.COMPLETE_WEIGHT, "perfect match"),
-				Arguments.of(true, true, false, TriplesMatch.PARTIAL_NOMOD_WEIGHT, "no mod match"),
-				Arguments.of(true, false, true, TriplesMatch.PARTIAL_NOHEAD_WEIGHT, "no head match"),
-				Arguments.of(true, false, false, TriplesMatch.NOMATCH, "only label match"),
-				Arguments.of(false, true, true, TriplesMatch.PARTIAL_NOLABEL_WEIGHT, "only label match"),
-				Arguments.of(false, true, false, TriplesMatch.NOMATCH, "no label match but mod amtch"),
-				Arguments.of(false, false, true, TriplesMatch.NOMATCH, "no label match but head match"),
-				Arguments.of(false, false, false, TriplesMatch.NOMATCH, "nothing match"));
+				Arguments.of(true, true, false, TriplesMatch.PARTIAL_NO_MOD_WEIGHT, "no mod match"),
+				Arguments.of(true, false, true, TriplesMatch.PARTIAL_NO_HEAD_WEIGHT, "no head match"),
+				Arguments.of(true, false, false, TriplesMatch.NO_MATCH, "only label match"),
+				Arguments.of(false, true, true, TriplesMatch.PARTIAL_NO_LABEL_WEIGHT, "only label match"),
+				Arguments.of(false, true, false, TriplesMatch.NO_MATCH, "no label match but mod amtch"),
+				Arguments.of(false, false, true, TriplesMatch.NO_MATCH, "no label match but head match"),
+				Arguments.of(false, false, false, TriplesMatch.NO_MATCH, "nothing match"));
 	}
 
 	@ParameterizedTest

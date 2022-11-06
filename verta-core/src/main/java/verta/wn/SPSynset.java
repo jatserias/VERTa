@@ -5,20 +5,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class SPSynset implements JABSynset {
+public class SPSynset implements ISynset {
     public String id;
 	Set<String> variants;
 	Set<SPSynset> hypers;
 	//
 	public SPSynset(String id) {
 		this.id=id;
-		variants = new HashSet<String>();
-		hypers= new HashSet<SPSynset>();
+		variants = new HashSet<>();
+		hypers= new HashSet<>();
 	}
 	
 	// hyernyms
 	@Override
-	public JABSynset[] getHypernyms() {
+	public ISynset[] getHypernyms() {
 		return hypers.toArray(new SPSynset[0]);
 	}
 
@@ -40,14 +40,18 @@ public class SPSynset implements JABSynset {
 	
 	
 	public String toString() {
-		StringBuffer res =new StringBuffer();
-		res.append("Synset spa-30-"+id+" #w:"+variants.size());
+		StringBuilder res =new StringBuilder();
+		res.append("Synset spa-30-");
+		res.append(id);
+		res.append(" #w:");
+		res.append(variants.size());
 		for(String v:variants) {
 			res.append(v);
 			res.append("\n");
 		}
 		for(SPSynset s:hypers) {
-			res.append("hyper:"+s.id);
+			res.append("hyper:");
+			res.append(s.id);
 			for(String v: s.getWordForms()) {
 				res.append(" ");
 				res.append(v);

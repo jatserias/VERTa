@@ -13,7 +13,7 @@ public class LabelSet {
 		String[] wv = buff.split("[\t ]+");
 		w = Double.parseDouble(wv[0]);
 		id = wv[1];
-		labels = new HashSet<String>();
+		labels = new HashSet<>();
 		for (int i = 2; i < wv.length; ++i) {
 			labels.add(wv[i].toLowerCase());
 		}
@@ -24,11 +24,13 @@ public class LabelSet {
 	}
 
 	public String toString() {
-		StringBuffer s = new StringBuffer();
-		s.append("W:" + w + "\n");
-		s.append("ID:" + id + "\n");
+		StringBuilder s = new StringBuilder();
+		s.append("W:"); s.append(w);s.append("\n");
+		s.append("ID:");s.append(id); s.append("\n");
 		for (String label : labels) {
-			s.append("L:" + label + "\n");
+			s.append("L:");
+			s.append(label);
+			s.append("\n");
 		}
 		return s.toString();
 	}

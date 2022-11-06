@@ -1,201 +1,175 @@
 package mt.core;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
+import lombok.extern.slf4j.Slf4j;
 import mt.nlp.Triples;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.HashMap;
+
 /// A simple class for Matching triples
+@Slf4j
 public class TriplesMatch {
 
-	protected static Logger LOGGER = Logger.getLogger(TriplesMatch.class.getName());
+    private static final String LABEL_PAIR_SEPARATOR = "#";
+    public static  final MatchResult NO_MATCH = new MatchResult(0.0, "(o,o,o)");
+    // we need to read this weight from the config file
+    static final MatchResult COMPLETE_WEIGHT = new MatchResult(1.0, "(x,x,x)");
+    static final MatchResult PARTIAL_NO_MOD_WEIGHT = new MatchResult(0.8, "(x,x,o)");
+    static final MatchResult PARTIAL_NO_HEAD_WEIGHT = new MatchResult(0.7, "(x,o,x)");
+    static final MatchResult PARTIAL_NO_LABEL_WEIGHT = new MatchResult(0.7, "(o,x,x)");
+    /// Column name for the triple label
+    private final String labelColumnName;
 
-	private static final String LABEL_PAIR_SEPARATOR = "#";
-	// we need to read this weight from the config file
-	static MatchResult COMPLETE_WEIGHT = new MatchResult(1.0, "(x,x,x)");
-	static MatchResult PARTIAL_NOMOD_WEIGHT = new MatchResult(0.8, "(x,x,o)");
-	static MatchResult PARTIAL_NOHEAD_WEIGHT = new MatchResult(0.7, "(x,o,x)");
-	static MatchResult PARTIAL_NOLABEL_WEIGHT = new MatchResult(0.7, "(o,x,x)");
-	public static MatchResult NOMATCH = new MatchResult(0.0, "(o,o,o)");
+    // we also need to incorporate equivalent labels
+    // <label label weight>
+    /// Column name for the triple head
+    private final String headColumnName;
+    /// label # label matching table
+    private HashMap<String, Double> labelMatch;
+    // to report counters
+    private MetricActivationCounter counters;
 
-	/// label # label matching table
-	private HashMap<String, Double> labelMatch;
+    public TriplesMatch(String headColumnName, String labelColumnName) {
+        setLabelMatch(new HashMap<>());
+        this.labelColumnName = labelColumnName;
+        this.headColumnName = headColumnName;
+        this.setCounters(new MetricActivationCounter());
+    }
 
-	// we also need to incorporate equivalent labels
-	// label label weight
+    public TriplesMatch(MetricActivationCounter counters, String headColumnName, String labelColumnName) {
+        this(headColumnName, labelColumnName);
+        this.setCounters(counters);
+    }
 
-	// to report counters
-	private MetricActivationCounter counters;
+    static public String getSubLabel(String label) {
+        int pos = label.indexOf('_');
+        return pos > 0 ? label.substring(0, pos) : label;
+    }
 
-	/// Column name for the triple label
-	private String label_column_name;
+    static public boolean isPatternLabel(String label) {
+        return label.endsWith("_%");
+    }
 
-	/// Column name for the triple head
-	private String head_column_name;
+    public void load(String filename, BufferedReader config) throws IOException {
+        String buff = null;
+        try {
 
-	public TriplesMatch(String head_column_name, String label_column_name) {
-		setLabelMatch(new HashMap<String, Double>());
-		this.label_column_name = label_column_name;
-		this.head_column_name = head_column_name;
-		this.setCounters(new MetricActivationCounter());
-	}
+            // read weights
+            while ((buff = config.readLine()) != null && buff.trim().startsWith(LABEL_PAIR_SEPARATOR))
+                ;
 
-	public TriplesMatch(MetricActivationCounter counters, String head_column_name, String label_column_name) {
-		this(head_column_name, label_column_name);
-		this.setCounters(counters);
-	}
+            if (buff == null) {
+                throw new RuntimeException(
+                        "Format ERROR, empty/non existing file on the triple config file >" + filename + "<");
+            }
 
-	public TriplesMatch(String filename, MetricActivationCounter counters, String head_column_name,
-			String label_column_name) throws FileNotFoundException, IOException {
-		this(counters, head_column_name, label_column_name);
-		load(filename);
-	}
+            String[] wbuff = buff.split("\t");
+            int i = 0;
+            COMPLETE_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
+            PARTIAL_NO_MOD_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
+            PARTIAL_NO_HEAD_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
+            PARTIAL_NO_LABEL_WEIGHT.setScore(Double.parseDouble(wbuff[i]));
 
-	protected void load(String filename) throws FileNotFoundException, IOException {
-		BufferedReader config = null;
-		try {
-			config = new BufferedReader(new FileReader(filename));
-			load(filename, config);
-		} catch (Exception e) {
-			LOGGER.severe("ERROR can not open/find file >" + filename + "<");
-			e.printStackTrace();
-			throw e;
-		}
-	}
+            /// Read rules
+            while ((buff = config.readLine()) != null) {
+                if (!buff.trim().startsWith(LABEL_PAIR_SEPARATOR)) {
+                    String[] label = buff.split("\t");
+                    getLabelMatch().put(label[0] + LABEL_PAIR_SEPARATOR + label[1], Double.parseDouble(label[2]));
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error reading triplet config file:" + buff, e);
+            throw e;
+        }
+    }
 
-	public void load(String filename, BufferedReader config) throws IOException {
-		String buff = null;
-		try {
+    public double getWeight(String label) {
+        return 1.0;
+    }
 
-			// read weights
-			while ((buff = config.readLine()) != null && buff.trim().startsWith(LABEL_PAIR_SEPARATOR))
-				;
+    /// returns the score given the matching pattern
+    public MatchResult matchingScorer(final Triples x, final Triples y, boolean label_match, boolean head_match,
+                                      boolean mod_match) {
+        // This is the part to be customized
+        if (label_match && head_match && mod_match)
+            return COMPLETE_WEIGHT;
+        if (label_match && head_match)
+            return PARTIAL_NO_MOD_WEIGHT;
+        if (label_match && mod_match)
+            return PARTIAL_NO_HEAD_WEIGHT;
+        if (head_match && mod_match)
+            return PARTIAL_NO_LABEL_WEIGHT;
 
-			if (buff == null) {
-				throw new RuntimeException(
-						"Format ERROR, empty/non existing file on the triple config file >" + filename + "<");
-			}
+        return NO_MATCH;
+    }
 
-			String[] wbuff = buff.split("[\t]");
-			int i = 0;
-			COMPLETE_WEIGHT.score = Double.parseDouble(wbuff[i++]);
-			PARTIAL_NOMOD_WEIGHT.score = Double.parseDouble(wbuff[i++]);
-			PARTIAL_NOHEAD_WEIGHT.score = Double.parseDouble(wbuff[i++]);
-			PARTIAL_NOLABEL_WEIGHT.score = Double.parseDouble(wbuff[i++]);
+    public MatchResult match(final Triples x, final Triples y, final ISentenceAlignment align) {
 
-			/// Read rules
-			while ((buff = config.readLine()) != null) {
-				if (!buff.trim().startsWith(LABEL_PAIR_SEPARATOR)) {
-					String[] label = buff.split("[\t]");
-					getLabelMatch().put(label[0] + LABEL_PAIR_SEPARATOR + label[1], Double.parseDouble(label[2]));
-				}
-			}
-		} catch (Exception e) {
-			LOGGER.severe("Error reading triplet config file:" + buff);
-			e.printStackTrace();
-			throw e;
-		}
-	}
+        boolean label_match = labelsMatch(x, y);
 
-	public double getWeight(String label) {
-		return 1.0;
-	}
+        // bug head - mod. We reverse the matchings
+        boolean mod_match = align.isAligned(x.getTarget() - 1, y.getTarget() - 1);
 
-	/// returns the score given the matching pattern
-	public MatchResult matchingScorer(final Triples x, final Triples y, boolean label_match, boolean head_match,
-			boolean mod_match) {
-		// This is the part to be customized
-		if (label_match && head_match && mod_match)
-			return COMPLETE_WEIGHT;
-		if (label_match && head_match)
-			return PARTIAL_NOMOD_WEIGHT;
-		if (label_match && mod_match)
-			return PARTIAL_NOHEAD_WEIGHT;
-		if (head_match && mod_match)
-			return PARTIAL_NOLABEL_WEIGHT;
+        boolean head_match = (x.getSource() > 0 && y.getSource() > 0)
+                ? align.isAligned(x.getSource() - 1, y.getSource() - 1)
+                : (x.getSource() == y.getSource()); // root
 
-		return NOMATCH;
-	}
+        // how we should apply label matching rules
+        label_match = label_match || matchRules(x.label, y.label);
 
-	public MatchResult match(final Triples x, final Triples y, final SentenceAlignment align) {
+        return matchingScorer(x, y, label_match, head_match, mod_match);
+    }
 
-		boolean label_match = labelsMatch(x, y);
+    public boolean labelsMatch(final Triples x, final Triples y) {
+        String elabelx = getSubLabel(x.label);
+        String elabely = getSubLabel(y.label);
 
-		// bug head - mod. We reverse the matchings
-		boolean mod_match = align.isAligned(x.getTarget() - 1, y.getTarget() - 1);
+        return (x.label.compareTo(y.label) == 0)
+                || ((isPatternLabel(x.label) || isPatternLabel(y.label)) && (elabelx.compareTo(elabely) == 0));
+    }
 
-		boolean head_match = (x.getSource() > 0 && y.getSource() > 0)
-				? align.isAligned(x.getSource() - 1, y.getSource() - 1)
-				: (x.getSource() == y.getSource()); // root
+    /**
+     * TODO this function seems to be call but labelMatch is empty (for the new dep
+     * match version)
+     */
+    public boolean matchRules(String label, String label2) {
+        // extended
+        String elabel = getSubLabel(label);
+        String elabel2 = getSubLabel(label2);
 
-		// how we should apply label matching rules
-		label_match = label_match || matchRules(x.label, y.label);
+        return
+                // direct match
+                (getLabelMatch().get(label + LABEL_PAIR_SEPARATOR + label2) != null
+                        || getLabelMatch().get(label2 + LABEL_PAIR_SEPARATOR + label) != null) ||
+                        // pattern label match
+                        ((isPatternLabel(label) || isPatternLabel(label2))
+                                && (getLabelMatch().get(elabel + LABEL_PAIR_SEPARATOR + elabel2) != null
+                                || getLabelMatch().get(elabel2 + LABEL_PAIR_SEPARATOR + elabel) != null));
+    }
 
-		return matchingScorer(x, y, label_match, head_match, mod_match);
-	}
+    public MetricActivationCounter getCounters() {
+        return counters;
+    }
 
-	public boolean labelsMatch(final Triples x, final Triples y) {
-		String elabelx = getSubLabel(x.label);
-		String elabely = getSubLabel(y.label);
+    public void setCounters(MetricActivationCounter counters) {
+        this.counters = counters;
+    }
 
-		return (x.label.compareTo(y.label) == 0)
-				|| ((isPatternLabel(x.label) || isPatternLabel(y.label)) && (elabelx.compareTo(elabely) == 0));
-	}
+    public HashMap<String, Double> getLabelMatch() {
+        return labelMatch;
+    }
 
-	/**
-	 * TODO this function seems to be call but labelMatch is empty (for the new dep
-	 * match version)
-	 */
-	public boolean matchRules(String label, String label2) {
-		// extended
-		String elabel = getSubLabel(label);
-		String elabel2 = getSubLabel(label2);
+    public void setLabelMatch(HashMap<String, Double> labelMatch) {
+        this.labelMatch = labelMatch;
+    }
 
-		return
-		// direct match
-		(getLabelMatch().get(label + LABEL_PAIR_SEPARATOR + label2) != null
-				|| getLabelMatch().get(label2 + LABEL_PAIR_SEPARATOR + label) != null) ||
-		// pattern label match
-				((isPatternLabel(label) || isPatternLabel(label2))
-						&& (getLabelMatch().get(elabel + LABEL_PAIR_SEPARATOR + elabel2) != null
-								|| getLabelMatch().get(elabel2 + LABEL_PAIR_SEPARATOR + elabel) != null));
-	}
+    public String getLabelColumnName() {
+        return labelColumnName;
+    }
 
-	static public String getSubLabel(String label) {
-		int pos = label.indexOf('_');
-		return pos > 0 ? label.substring(0, pos) : label;
-	}
+    public String getHeadColumnName() {
+        return headColumnName;
+    }
 
-	static public boolean isPatternLabel(String label) {
-		return label.endsWith("_%");
-	}
-
-	public MetricActivationCounter getCounters() {
-		return counters;
-	}
-
-	public void setCounters(MetricActivationCounter counters) {
-		this.counters = counters;
-	}
-
-	public HashMap<String, Double> getLabelMatch() {
-		return labelMatch;
-	}
-
-	public void setLabelMatch(HashMap<String, Double> labelMatch) {
-		this.labelMatch = labelMatch;
-	}
-
-	public String getLabel_column_name() {
-		return label_column_name;
-	}
-
-	public String getHead_column_name() {
-		return head_column_name;
-	}
-	
 }

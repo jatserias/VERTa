@@ -13,7 +13,7 @@ public class SimilarityEqual extends BaseSimilarity implements Similarity {
 			hold = (referenceWord.getFeature(featureNames[i]).compareTo(proposedWord.getFeature(featureNames[i])) == 0);
 			++i;
 		}
-		return hold ? Similarity.MAXVAL : Similarity.MINVAL;
+		return hold ? Similarity.MAX_VAL : Similarity.MIN_VAL;
 	}
 
 	public String getClassName() {

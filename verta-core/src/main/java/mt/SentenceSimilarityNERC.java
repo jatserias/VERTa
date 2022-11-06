@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
@@ -73,7 +73,7 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 	}
 
 	@Override
-	public SimilarityResult similarity(Sentence s1, Sentence s2, SentenceAlignment dist, PrintStream strace) {
+	public SimilarityResult similarity(Sentence s1, Sentence s2, ISentenceAlignment dist, PrintStream strace) {
 
 		Collection<NERC> ne1 = generateNERC(s1);
 		Collection<NERC> ne2 = generateNERC(s2);

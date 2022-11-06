@@ -3,7 +3,7 @@ package mt;
 import java.io.PrintStream;
 
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
@@ -16,7 +16,7 @@ public class SentenceSimilaritySentiment extends SentenceSimilarityBase implemen
 	}
 
 	@Override
-	public SimilarityResult similarity(Sentence s1, Sentence s2, SentenceAlignment dist, PrintStream strace) {
+	public SimilarityResult similarity(Sentence s1, Sentence s2, ISentenceAlignment dist, PrintStream strace) {
 
 		if (strace != null) {
 			strace.println("<senti>");

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import mt.SentenceSimilarityNEL;
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ public class NELtest {
 	public void happy_path_test() throws IOException {
 		MetricActivationCounter c = new MetricActivationCounter();
 		SentenceSimilarityNEL m = new mt.SentenceSimilarityNEL(c);
-		SentenceAlignment dist = null;
+		ISentenceAlignment dist = null;
 
 		Sentence s2 = new Sentence();
 		Sentence s1 = new Sentence();

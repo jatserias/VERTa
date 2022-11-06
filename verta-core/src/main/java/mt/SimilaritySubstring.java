@@ -23,7 +23,7 @@ public class SimilaritySubstring extends BaseSimilarity implements Similarity {
 					.compareTo(proposedValue.substring(0, Math.min(nchars, proposedValue.length()))) == 0);
 			++i;
 		}
-		return hold ? MAXVAL : MINVAL;
+		return hold ? MAX_VAL : MIN_VAL;
 	}
 
 	public String getClassName() {

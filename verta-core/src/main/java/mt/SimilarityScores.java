@@ -10,7 +10,7 @@ public class SimilarityScores extends BaseSimilarity implements Similarity {
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
 		// note: only works if MINVAL is o0
-		double score = MINVAL;
+		double score = MIN_VAL;
 
 		for (String f : featureNames) {
 			double sc1 = Double.parseDouble(referenceWord.getFeature(f));

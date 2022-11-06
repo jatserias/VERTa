@@ -6,7 +6,7 @@ import edu.smu.tspell.wordnet.SynsetType;
 import mt.core.Similarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
-import verta.wn.JABSynset;
+import verta.wn.ISynset;
 
 public class SimilarityHypernymWn extends WnBaseSimilarity implements Similarity {
 
@@ -35,35 +35,35 @@ public class SimilarityHypernymWn extends WnBaseSimilarity implements Similarity
 
 		// @TODO we probably need to check the Pos
 		if (featureReference.equals(featureProposed))
-			return Similarity.MAXVAL;
+			return Similarity.MAX_VAL;
 
 		boolean found = false;
 		for (SynsetType pos : lpos) {
 			
-			JABSynset[] referenceSynsets = wn.getSynsets(featureReference, pos);
-			JABSynset[] proposedSynsets = wn.getSynsets(featureProposed, pos);
+			ISynset[] referenceSynsets = wn.getSynsets(featureReference, pos);
+			ISynset[] proposedSynsets = wn.getSynsets(featureProposed, pos);
 
-			Stack<JABSynset> pending = new Stack<JABSynset>();
+			Stack<ISynset> pending = new Stack<ISynset>();
 			// @TODO To use MFS proposedSynsets[0].getTagCount("word form");
 
-			for (JABSynset s : proposedSynsets)
+			for (ISynset s : proposedSynsets)
 				pending.add(s);
 
 			while (!found && !pending.isEmpty()) {
-				JABSynset n = pending.pop();
-				JABSynset hypos[] = n.getHypernyms();
+				ISynset n = pending.pop();
+				ISynset hypos[] = n.getHypernyms();
 				found = searchLists(referenceSynsets, hypos);
 				if (MULTILEVEL)
-					for (JABSynset s : hypos)
+					for (ISynset s : hypos)
 						pending.add(s);
 			}
 			if (found)
-				return Similarity.MAXVAL;
+				return Similarity.MAX_VAL;
 		}
-		return Similarity.MINVAL;
+		return Similarity.MIN_VAL;
 	}
 
-	private boolean searchLists(JABSynset[] referenceSynsets, JABSynset[] hypos) {
+	private boolean searchLists(ISynset[] referenceSynsets, ISynset[] hypos) {
 
 		if (hypos == null)
 			return false;

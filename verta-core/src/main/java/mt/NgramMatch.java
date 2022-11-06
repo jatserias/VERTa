@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import lombok.extern.slf4j.Slf4j;
 import mt.core.MetricActivationCounter;
-import mt.core.SentenceAlignment;
+import mt.core.ISentenceAlignment;
 import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
@@ -68,7 +68,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 * @return
 	 */
 	public static boolean compareNgramSameSize(final Ngram source_ngram, final Ngram target_ngram,
-			final SentenceAlignment align) {
+			final ISentenceAlignment align) {
 		boolean ngram_match = true;
 		int source_token_offset = source_ngram.getStart();
 		int target_token_offset = target_ngram.getStart();
@@ -96,7 +96,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 * @return
 	 */
 	public static int findNgram(final Ngram source_ngram, final Ngram[] ngram_list, final boolean blocked[],
-			final SentenceAlignment align) {
+			final ISentenceAlignment align) {
 		int ngram = 0;
 		boolean found = false;
 		while (!found && ngram < ngram_list.length) {
@@ -117,7 +117,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 * @return
 	 */
 	public static int compareNgramsSameSize(final Ngram[] source_ngrams, final Ngram[] target_ngrams,
-			SentenceAlignment align, PrintStream strace) {
+                                            ISentenceAlignment align, PrintStream strace) {
 		int fn1 = 0;
 		int match;
 		boolean[] blocked = new boolean[target_ngrams.length];
@@ -155,7 +155,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 * @return
 	 */
 	public static int compareNgrams(int minsize, int maxsize, final Sentence s1,
-			final Sentence s2, final SentenceAlignment align, PrintStream strace) {
+                                    final Sentence s2, final ISentenceAlignment align, PrintStream strace) {
 
 		int nf1 = 0;
 		if (minsize > s1.size() || minsize > s2.size())
@@ -202,7 +202,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 * @param strace
 	 * @return
 	 */
-	public SimilarityResult similarity(final Sentence s1, final Sentence s2, final SentenceAlignment dist,
+	public SimilarityResult similarity(final Sentence s1, final Sentence s2, final ISentenceAlignment dist,
 			PrintStream strace) {
 
 		if (MTsimilarity.DUMP)
@@ -214,7 +214,7 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 			strace.println("<t2s>");
 		}
 		
-		SentenceAlignment dist_rev = dist.revert();
+		ISentenceAlignment dist_rev = dist.revert();
 		double ngramrec = NgramMatch.compareNgrams(minsize, maxsize, s2, s1, dist_rev, strace);
 		ngramrec = ngramrec / NgramMatch.sumatori(minsize, maxsize, s2.size());
 		if (MTsimilarity.DUMP)
@@ -245,10 +245,10 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	}
 
 	/// compare ngrams of a given size
-	public static double compareNgrams(final int ngramSize, 
-			final Sentence s1,
-			final Sentence s2, 
-			final SentenceAlignment align, PrintStream strace) {
+	public static double compareNgrams(final int ngramSize,
+                                       final Sentence s1,
+                                       final Sentence s2,
+                                       final ISentenceAlignment align, PrintStream strace) {
 		
 		int nf1 = 0;
 

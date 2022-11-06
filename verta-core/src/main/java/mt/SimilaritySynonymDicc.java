@@ -57,7 +57,7 @@ public class SimilaritySynonymDicc extends BaseSimilarity implements Similarity 
 					|| dicc.contains(featureProposed + JOINWORDS + featureReference));
 			++i;
 		}
-		return hold ? MAXVAL : MINVAL;
+		return hold ? MAX_VAL : MIN_VAL;
 	}
 
 	public String getClassName() {

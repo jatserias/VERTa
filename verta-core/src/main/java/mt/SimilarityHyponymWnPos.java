@@ -15,11 +15,11 @@ public class SimilarityHyponymWnPos extends SimilarityHyponymWn implements Simil
 		String featPOS = featureNames[1];
 
 		if (proposedWord.getFeature(featPOS).compareTo(referenceWord.getFeature(featPOS)) != 0)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 
 		SynsetType[] ppos = wn.getSynsetTypeFromPos(proposedWord.getFeature(featPOS));
 		if (ppos == null)
-			return Similarity.MINVAL;
+			return Similarity.MIN_VAL;
 		return super.INNERsimilarity(featureNames, proposedWord, referenceWord, ppos);
 	}
 

@@ -26,10 +26,10 @@ public class SimilarityLemma extends WnBaseSimilarity implements Similarity {
 			for (String lemmaS : lemmasS)
 				for (String lemmaT : lemmasT) {
 					if (lemmaT.compareTo(lemmaS) == 0)
-						return Similarity.MAXVAL;
+						return Similarity.MAX_VAL;
 				}
 		}
-		return Similarity.MINVAL;
+		return Similarity.MIN_VAL;
 	}
 
 }

@@ -5,7 +5,7 @@ import mt.nlp.Sentence;
 import java.io.PrintStream;
 
 /// A direct implementation  of a sentenceAligment using the whole matrix
-public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignment {
+public class DistanceMatrix extends SimilarityMatrix implements ISentenceAlignment {
 
     final int source_size;
     final int target_size;
@@ -79,7 +79,7 @@ public class DistanceMatrix extends SimilarityMatrix implements SentenceAlignmen
     }
 
     @Override
-    public SentenceAlignment revert() {
+    public ISentenceAlignment revert() {
         DistanceMatrix rev = new DistanceMatrix(target_size, source_size);
         for (int i = 0; i < source_size; ++i)
             for (int j = 0; j < target_size; ++j) {
