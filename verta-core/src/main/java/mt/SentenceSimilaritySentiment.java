@@ -4,12 +4,11 @@ import java.io.PrintStream;
 
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
-import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 
-public class SentenceSimilaritySentiment extends SentenceSimilarityBase implements SentenceMetric {
+public class SentenceSimilaritySentiment extends SentenceSimilarityBase {
 
 	public SentenceSimilaritySentiment(MetricActivationCounter counters) {
 		super(counters);

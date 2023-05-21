@@ -86,7 +86,7 @@ public class TripleMatchPattern extends TriplesMatch {
 
                 getCounters().increase(this.getClass().getName() + "[" + p + "]", 1);
                 return new MatchResult(
-                        p.getWeight() * (p.getLabelSet() == null ? getWeight(x.label) : p.getLabelSet().w), p);
+                        p.getWeight() * (p.getLabelSet() == null ? getWeight(x.getLabel()) : p.getLabelSet().w), p);
 
             }
 

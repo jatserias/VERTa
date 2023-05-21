@@ -116,17 +116,17 @@ public class TriplesMatch {
                 : (x.getSource() == y.getSource()); // root
 
         // how we should apply label matching rules
-        label_match = label_match || matchRules(x.label, y.label);
+        label_match = label_match || matchRules(x.getLabel(), y.getLabel());
 
         return matchingScorer(x, y, label_match, head_match, mod_match);
     }
 
     public boolean labelsMatch(final Triples x, final Triples y) {
-        String elabelx = getSubLabel(x.label);
-        String elabely = getSubLabel(y.label);
+        String elabelx = getSubLabel(x.getLabel());
+        String elabely = getSubLabel(y.getLabel());
 
-        return (x.label.compareTo(y.label) == 0)
-                || ((isPatternLabel(x.label) || isPatternLabel(y.label)) && (elabelx.compareTo(elabely) == 0));
+        return (x.getLabel().compareTo(y.getLabel()) == 0)
+                || ((isPatternLabel(x.getLabel()) || isPatternLabel(y.getLabel())) && (elabelx.compareTo(elabely) == 0));
     }
 
     /**

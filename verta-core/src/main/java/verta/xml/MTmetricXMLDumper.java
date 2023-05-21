@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.text.DateFormat;
 import java.util.Date;
 
 import mt.MTsimilarity;
@@ -27,7 +28,7 @@ public class MTmetricXMLDumper {
 			trace.println("<?xml-stylesheet type=\"text/xsl\" href=\"conf.xsl\" ?>");
 			trace.println("<exp><name>" + XMLFormater.encodeXMLString(experimentName) + "</name>");
 			Date d = new Date(System.currentTimeMillis());
-			trace.println("<date>" + XMLFormater.encodeXMLString(d.toLocaleString()) + "</date>");
+			trace.println("<date>" + XMLFormater.encodeXMLString(DateFormat.getInstance().format(d)) + "</date>");
 			trace.println("<conf>");
 			trace.println("<hypotesis filename=\"" + XMLFormater.encodeXMLString(hypFilename) + "\"/>");
 			for (String refFilename : refFilenames) {
@@ -171,7 +172,7 @@ public class MTmetricXMLDumper {
 		trace.println("<?xml-stylesheet type=\"text/xsl\" href=\"" + topxsl + ".xsl\" ?>");
 		trace.println("<exp><name>" + XMLFormater.encodeXMLString(experimentName) + "</name>");
 		Date d = new Date(System.currentTimeMillis());
-		trace.println("<date>" + XMLFormater.encodeXMLString(d.toLocaleString()) + "</date>");
+		trace.println("<date>" + XMLFormater.encodeXMLString(DateFormat.getDateInstance().format(d)) + "</date>");
 	}
 
 	// @TODO redu XML trace

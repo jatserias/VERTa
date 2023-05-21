@@ -4,14 +4,13 @@ import java.io.PrintStream;
 
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
-import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
 
 /// SentenceSimilarity to match and count NODEP triples
-public class SentenceSimilarityCountDeps extends SentenceSimilarityBase implements SentenceMetric {
+public class SentenceSimilarityCountDeps extends SentenceSimilarityBase {
 
 	private static final String DEPFIELD = "DEPLABEL";
 	String NODEP = "dep";

@@ -66,7 +66,7 @@ class ReaderCONLLTest {
 		String buff = "%%#TIMEX\t3470\t3473\tDURATION\tP1D";
 		ReaderCONLL.processHeader(seg, buff);
 		TimeExpressions expected_result[] = { new TimeExpressions(3470, 3473,  "P1D", "DURATION")};
-		assertArrayEquals(expected_result, seg.timex.toArray(),  String.format("simple TIMEX"));
+		assertArrayEquals(expected_result, seg.getTimex().toArray(),  String.format("simple TIMEX"));
 	}
 
 	@Test
@@ -82,7 +82,7 @@ class ReaderCONLLTest {
 		Segment seg = new Segment();
 		String buff = "%%#LMN\t1.1492748316660314E-12";
 		ReaderCONLL.processHeader(seg, buff);
-		assertEquals(1.1492748316660314E-12, seg.getLmn(),  0.0000001, String.format("LMN"));
+		assertEquals(1.1492748316660314E-12, seg.getLmnorm(),  0.0000001, String.format("LMN"));
 	}
 	
 	@Test

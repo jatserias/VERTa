@@ -128,8 +128,8 @@ public class Tpattern {
 		return (
 
 		// check group only for x
-		(label == null && ((getLabelSet() == null || getLabelSet().contains(x.label) || checkLabel(getLabelSet(), x.label))
-				&& (targetLabelSet == null || targetLabelSet.contains(y.label) || checkLabel(targetLabelSet, y.label))
+		(label == null && ((getLabelSet() == null || getLabelSet().contains(x.getLabel()) || checkLabel(getLabelSet(), x.getLabel()))
+				&& (targetLabelSet == null || targetLabelSet.contains(y.getLabel()) || checkLabel(targetLabelSet, y.getLabel()))
 
 		)) || ((label != null) && (label_match || label == OPERATOR.O)));
 	}

@@ -91,8 +91,8 @@ class VertaTest {
 		 * 
 		 * align (lex) s-t ot t-s: w1-w1, w2-w2, w3-w3
 		 * 
-		 * align triples s-t: (ts1 , tt1, "0XX"), (ts2 , tt3, "XXX), (ts3 , tt2, "0XX"),
-		 * align triples t-s: (ts1 , tt1, "0XX"), (ts2 , tt3, "0XX), (ts3 , tt2, "XXX"),
+		 * align triples s-t: (ts1 , tt1, "0XX"), (ts2 , tt3, "XXX"), (ts3 , tt2, "0XX"),
+		 * align triples t-s: (ts1 , tt1, "0XX"), (ts2 , tt3, "0XX"), (ts3 , tt2, "XXX"),
 		 */
 		referenceSentence.add(new Word("1", "w1").setFeature(Triples.ID_NAME, "1").setFeature("DEPLABEL", "nsubj")
 				.setFeature("DEPHEAD", "2"));

@@ -4,9 +4,8 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
-import mt.core.SentenceMetric;
+import mt.core.MetricActivationCounter;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.NERC;
@@ -14,7 +13,7 @@ import mt.nlp.Sentence;
 import mt.nlp.Word;
 
 ///  A sentence Similarity function for NERC
-public class SentenceSimilarityNERC extends SentenceSimilarityBase implements SentenceMetric {
+public class SentenceSimilarityNERC extends SentenceSimilarityBase {
 
 	public SentenceSimilarityNERC(MetricActivationCounter counters) {
 		super(counters);
@@ -23,8 +22,8 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 	static final String NOTAG = "0";
 	static final String B_TAG = "B-";
 	static final String I_TAG = "I-";
-	static String TFORM = "WORD";
-	static String TNERC = "CONL";
+	static final String TFORM = "WORD";
+	static final String TNERC = "CONL";
 
 	/**
 	 * Extract NEs from a BIO annotations
@@ -33,8 +32,6 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 		Collection<NERC> res = new ArrayList<NERC>();
 		// iterate through sentence and convert NERC BIO annotation into a sequence of
 		// NERCs
-		int nsen = 0;
-
 		NERC cnerc = null;
 		int pos = 0;
 
@@ -45,14 +42,14 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 
 			// current NERC end
 			if (cnerc != null && !nerc.startsWith(I_TAG)) {
-				cnerc.end = pos - 1;
+				cnerc.setEnd(pos - 1);
 				res.add(cnerc);
 				cnerc = null;
 			}
 
 			/// consider NERC if we are not cwiki
 			if (nerc.startsWith(B_TAG)) {
-				cnerc = new NERC(nsen, pos, pos, w.getFeature(TFORM), nerc.substring(2));
+				cnerc = new NERC(pos, pos, w.getFeature(TFORM), nerc.substring(2));
 			}
 
 			if (cnerc != null && nerc.startsWith(I_TAG)) {
@@ -64,7 +61,7 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 
 		// Add last nerc
 		if (cnerc != null) {
-			cnerc.end = pos - 1;
+			cnerc.setEnd(pos - 1);
 			res.add(cnerc);
 		}
 
@@ -96,7 +93,6 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 			ne++;
 		}
 
-		// TODO check formulas
 		double prec = ne > 0 ? ((1.0 * nef) / ne) : 0.0;
 
 		ne = 0;
@@ -117,6 +113,11 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 		/**
 		 * trace
 		 */
+		dumpXML(strace, ne1, ne2);
+		return new SimilarityResult(prec, recall);
+	}
+
+	private void dumpXML(PrintStream strace, Collection<NERC> ne1, Collection<NERC> ne2) {
 		if (strace != null) {
 			strace.println("<nerc>");
 			strace.println("<src>");
@@ -136,7 +137,6 @@ public class SentenceSimilarityNERC extends SentenceSimilarityBase implements Se
 			strace.println("</trg>");
 			strace.println("</nerc>");
 		}
-		return new SimilarityResult(prec, recall);
 	}
 
 	@Override

@@ -7,12 +7,11 @@ import org.apache.commons.collections.CollectionUtils;
 
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
-import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 
-public class SentenceSimilarityNEL extends SentenceSimilarityBase implements SentenceMetric {
+public class SentenceSimilarityNEL extends SentenceSimilarityBase {
 
 	public SentenceSimilarityNEL(MetricActivationCounter counters) {
 		super(counters);

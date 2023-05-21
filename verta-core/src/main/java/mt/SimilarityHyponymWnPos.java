@@ -4,7 +4,7 @@ import edu.smu.tspell.wordnet.SynsetType;
 import mt.core.Similarity;
 import mt.nlp.Word;
 
-public class SimilarityHyponymWnPos extends SimilarityHyponymWn implements Similarity {
+public class SimilarityHyponymWnPos extends SimilarityHyponymWn {
 
 	public SimilarityHyponymWnPos(String multilevel) {
 		super(multilevel);

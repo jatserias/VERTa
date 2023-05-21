@@ -4,6 +4,9 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+import lombok.Setter;
+
+@Setter
 
 public class Sentence extends Vector<Word> {
 

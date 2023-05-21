@@ -5,7 +5,7 @@ import mt.core.Similarity;
 import mt.nlp.Word;
 
 /// A class to apply wn hypernym similarity but taking into account PoS
-public class SimilarityHypernymWnPos extends SimilarityHypernymWn implements Similarity {
+public class SimilarityHypernymWnPos extends SimilarityHypernymWn {
 	// this should be parametrized
 	static final int FT_POS = 1;
 

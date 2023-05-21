@@ -5,7 +5,7 @@ import mt.core.Similarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
 
-public class SimilarityLemma extends WnBaseSimilarity implements Similarity {
+public class SimilarityLemma extends WnBaseSimilarity {
 
 	public String getClassName() {
 		return "SimilarityLemma";

@@ -12,7 +12,7 @@ import verta.wn.ISynset;
  * 1 if there is a common synonym 0 otherwise
  * 
  */
-public class SimilaritySynonymWn extends WnBaseSimilarity implements Similarity {
+public class SimilaritySynonymWn extends WnBaseSimilarity {
 
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
 

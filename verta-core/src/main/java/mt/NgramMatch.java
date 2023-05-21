@@ -5,7 +5,6 @@ import java.io.PrintStream;
 import lombok.extern.slf4j.Slf4j;
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
-import mt.core.SentenceMetric;
 import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Ngram;
@@ -18,7 +17,7 @@ import mt.nlp.Sentence;
  * 
  */
 @Slf4j
-public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric {
+public class NgramMatch extends SentenceSimilarityBase {
 
 	/// block selected ngrams
 	static boolean USE_BLOCKING = true;
@@ -118,29 +117,22 @@ public class NgramMatch extends SentenceSimilarityBase implements SentenceMetric
 	 */
 	public static int compareNgramsSameSize(final Ngram[] source_ngrams, final Ngram[] target_ngrams,
                                             ISentenceAlignment align, PrintStream strace) {
-		int fn1 = 0;
+		int matched_ngrams = 0;
 		int match;
 		boolean[] blocked = new boolean[target_ngrams.length];
 		
 		for (Ngram source_ngram : source_ngrams) {
-			if (MTsimilarity.DUMP)
-				strace.print("<ngram s='" + source_ngram.getStart() + "' l='" + source_ngram.getSize() + "' found='");
 		
-			if ((match = findNgram(source_ngram, target_ngrams, blocked, align)) >= 0) {
-				blocked[match] = USE_BLOCKING;
-				
-				if (MTsimilarity.DUMP)
-					strace.print("1'/>");
-				
-				fn1++;
-			} else {
-				if (MTsimilarity.DUMP) {
-					strace.print("0'/>");
-				}
-			}
-		}
+			boolean found = (match = findNgram(source_ngram, target_ngrams, blocked, align)) >= 0;
 
-		return fn1;
+			if (found) {
+				blocked[match] = USE_BLOCKING;
+				matched_ngrams++;
+			}
+			if (MTsimilarity.DUMP)
+				strace.print("<ngram s='" + source_ngram.getStart() + "' l='" + source_ngram.getSize() + "' found='"+ (found ?"1" : "0") + "'/>");
+		}
+		return matched_ngrams;
 	}
 
 	/**

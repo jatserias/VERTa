@@ -6,7 +6,7 @@ import mt.core.Similarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
 
-public class SimilarityHypernymWnMFS extends SimilarityHypernymWn implements  Similarity {
+public class SimilarityHypernymWnMFS extends SimilarityHypernymWn {
 
 	public SimilarityHypernymWnMFS(String multilevel) {
 		super(multilevel);
@@ -16,14 +16,13 @@ public class SimilarityHypernymWnMFS extends SimilarityHypernymWn implements  Si
 		ISynset[] res = wn.getSynsets(word_form, pos);
 		int lsize = res.length>0 ? 1 : 0;
 		ISynset[] lmax = new ISynset[lsize];
-		int max=-1; int nsense=1; int maxs=0;
+		int max=-1;
 		for(ISynset c: res) {
 			int nmax =0;
 			for(String wf: c.getWordForms()) {
 		    	nmax+=c.getTagCount(wf);
 		    }		
-			if(max<nmax) { lmax[0]=c; max=nmax; maxs=nsense;}
-			nsense++;
+			if(max<nmax) { lmax[0]=c; max=nmax; }
 		}
 		return lmax;
 	}

@@ -21,7 +21,7 @@ import java.util.Vector;
  * </p>
  **/
 @Slf4j
-public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase implements SentenceMetric {
+public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase {
 
     /**
      * Default column names for syntactic dependencies triples
@@ -154,7 +154,7 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
         // TODO Normalization is going to hell
         double sum = 0.0;
         for (Triples t : triples_source) {
-            sum += tmatch.getWeight(t.label);
+            sum += tmatch.getWeight(t.getLabel());
         }
         return sum > 0 ? INsimilarity(triples_align, triples_source, triples_target, distances, strace) / sum : 0.0;
     }

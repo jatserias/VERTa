@@ -7,16 +7,41 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import lombok.Getter;
+import lombok.Setter;
 import mt.NgramMatch;
 
+@Setter
+@Getter
 public class Segment {
 
 	private List<Sentence> sentences;
+	
+	private List<TimeExpressions> timex;
+
+	private double sentiment;
+
+	private double depScore;
+
+	private Set<String> nel;
+
+	private double lmnorm;
+
+	private float lm;
+
 
 	public Segment() {
 		timex = new ArrayList<TimeExpressions>();
 		setSentences(new Vector<Sentence>());
 		setNel(new HashSet<String>());
+	}
+
+	public void addDepScore(double depScore) {
+		this.depScore = this.depScore == 0 ? depScore : ((this.depScore + depScore) / 2);
+	}
+
+	public void addNEL(String enel) {
+		this.getNel().add(enel);
 	}
 
 	public void addSen(Sentence s) {
@@ -50,10 +75,10 @@ public class Segment {
 		/// propagate
 		res.setTimex(timex);
 		res.setNel(getNel());
-		res.setSentimentScore(sentimentScore);
+		res.setSentimentScore(sentiment);
 		res.setDepscore(depScore);
 		res.setLm(getLm());
-		res.setLmn(getLmn());
+		res.setLmn(getLmnorm());
 
 		int nsen = 1;
 		for (Sentence s : getSentences()) {
@@ -81,106 +106,9 @@ public class Segment {
 		out.println("</SEGMENT>");
 	}
 
-	/**
-	 * TIMEX
-	 */
-	public List<TimeExpressions> timex;
-
-	public void addTimes(List<TimeExpressions> x) {
-		timex = x;
+	public void timexAdd(TimeExpressions timeExpressions) {
+		timex.add(timeExpressions);
 	}
 
-	private double sentimentScore;
-
-	public void addSentiment(double sentimentScore) {
-		this.sentimentScore = sentimentScore;
-	}
-
-	/**
-	 * Sentiment
-	 */
-	public double getSentiment() {
-		return this.sentimentScore;
-	}
-
-	/**
-	 * DEP score
-	 */
-	private double depScore;
-
-	public void addDepScore(double depScore) {
-		this.depScore = this.depScore == 0 ? depScore : ((this.depScore + depScore) / 2);
-	}
-
-	public double getDepScore() {
-		return this.depScore;
-	}
-
-	/**
-	 * NEL
-	 */
-	private Set<String> nel;
-
-	public void addNEL(String enel) {
-		this.getNel().add(enel);
-	}
-
-	public Set<String> getNEL() {
-		return this.getNel();
-	}
-
-	/**
-	 * LM
-	 */
-	private double lmn;
-	private float lm;
-
-	public void addLM(float lm) {
-		this.setLm(lm);
-	};
-
-	public float getLM() {
-		return getLm();
-	}
-
-	public void addLMnorm(double r) {
-		setLmn(r);
-	}
-
-	public double getLMnorm() {
-		return getLmn();
-	}
-
-	public float getLm() {
-		return lm;
-	}
-
-	public void setLm(float lm) {
-		this.lm = lm;
-	}
-
-	public double getLmn() {
-		return lmn;
-	}
-
-	public void setLmn(double lmn) {
-		this.lmn = lmn;
-	}
-
-	public Set<String> getNel() {
-		return nel;
-	}
-
-	public void setNel(Set<String> nel) {
-		this.nel = nel;
-	}
-
-	public List<Sentence> getSentences() {
-		return sentences;
-	}
-
-	public void setSentences(List<Sentence> sentences) {
-		this.sentences = sentences;
-	}
 
 }

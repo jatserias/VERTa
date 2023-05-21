@@ -1,15 +1,24 @@
 package mt.nlp;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 /// Seems to be only used byt the old matching triples
+@AllArgsConstructor
+@Getter
+@Setter
+@EqualsAndHashCode
+@ToString
 public class Triples  implements Comparable<Triples>{
 	
 	public static final String ID_NAME = "ID";
     public static final String WORD_NAME = "WORD";
 	
-	
-	private String sourceString;
-	
-	private String targetString;
+	/// label
+	private String label;
 
 	/// label
 	private int source;
@@ -17,52 +26,19 @@ public class Triples  implements Comparable<Triples>{
 	/// head
 	private int target;
 
-	// label
-	public String label;
+	@EqualsAndHashCode.Exclude
+	private String sourceString;
 
-	public int getSource() {
-		return source;
-	}
+	@EqualsAndHashCode.Exclude
+	private String targetString;
 
-	public int getTarget() {
-		return target;
-	}
+
+
 
 	public Triples(String label, int source, int target) {
 		this.source = source;
 		this.target = target;
 		this.label = label;
-	}
-	
-	public Triples(String label, int source, int target, String sourceString, String targetString) {
-		this.source = source;
-		this.target = target;
-		this.label = label;
-		this.sourceString = sourceString; 
-		this.targetString = targetString;
-	}
-	
-	@Override
-    public boolean equals(Object obj)
-    {
-          
-		if(this == obj) return true;
-          
-        if(obj == null || obj.getClass()!= this.getClass())
-            return false;
-          
-        Triples triple = (Triples) obj;
-          
-        return (triple.source == this.source && triple.target == this.target && triple.label.equals(this.label));
-    }
-	
-	public int hashCode() {
-		return this.toString().hashCode();
-	}
-	
-
-	public String toString() {
-		return label + "(" + sourceString + ":" + source + "," + targetString + ":" + target + ")";
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import verta.xml.XMLFormater;
 public class Word {
 
 	HashMap<String, String> features;
+	
 	// TODO make consistent the use of the id and the feature named ID
 	String id;
 

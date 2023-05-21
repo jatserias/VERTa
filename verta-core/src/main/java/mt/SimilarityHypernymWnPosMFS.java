@@ -4,7 +4,7 @@ import edu.smu.tspell.wordnet.SynsetType;
 import mt.core.Similarity;
 import mt.nlp.Word;
 
-public class SimilarityHypernymWnPosMFS extends SimilarityHypernymWnMFS implements Similarity {
+public class SimilarityHypernymWnPosMFS extends SimilarityHypernymWnMFS {
 
 	private static final int FT_POST = 1;
 

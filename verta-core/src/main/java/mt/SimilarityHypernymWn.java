@@ -8,7 +8,7 @@ import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
 
-public class SimilarityHypernymWn extends WnBaseSimilarity implements Similarity {
+public class SimilarityHypernymWn extends WnBaseSimilarity {
 
 	// More than one hyper level
 	public boolean MULTILEVEL = false;

@@ -1,10 +1,9 @@
 package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
 import mt.nlp.Word;
 
-public class SimilarityHyponymWnMFS extends SimilarityHypernymWnMFS implements Similarity {
+public class SimilarityHyponymWnMFS extends SimilarityHypernymWnMFS {
 
 	public SimilarityHyponymWnMFS(String multilevel) {
 		super(multilevel);

@@ -112,10 +112,10 @@ public class ReaderCONLL {
 			int end = Integer.parseInt(fields[2]);
 			String date = fields[4];
 			String type = fields[3];
-			seg.timex.add(new TimeExpressions(start, end, date, type));
+			seg.timexAdd(new TimeExpressions(start, end, date, type));
 		} else if (buff.startsWith("%%#SENTI")) {
 			if (buff.split("[\t ]").length > 1)
-				seg.addSentiment(Double.parseDouble(buff.split("[\t ]")[1]));
+				seg.setSentiment(Double.parseDouble(buff.split("[\t ]")[1]));
 		} else if (buff.startsWith("%%#DEP")) {
 			if (buff.split("[\t ]*").length > 0)
 				seg.addDepScore(Double.parseDouble(buff.split("[\t ]")[1]));
@@ -126,11 +126,11 @@ public class ReaderCONLL {
 			}
 		} else if (buff.startsWith("%%#LM")) {
 			if (buff.split("[\t ]*").length > 0)
-				seg.addLM(Float.parseFloat(buff.split("[\t ]")[1]));
+				seg.setLm(Float.parseFloat(buff.split("[\t ]")[1]));
 
 		} else if (buff.startsWith("%%#LMN")) {
 			if (buff.split("[\t ]*").length > 0)
-				seg.addLMnorm(Double.parseDouble(buff.split("[\t ]")[1]));
+				seg.setLmnorm(Double.parseDouble(buff.split("[\t ]")[1]));
 		}
 	}
 
@@ -165,14 +165,14 @@ public class ReaderCONLL {
 		nout.println("%%#" + "SEG" + "\t" + i);
 		nout.println("%%#" + "DEP" + "\t" + seg.getDepScore());
 		nout.println("%%#" + "SENTI" + "\t" + seg.getSentiment());
-		for (TimeExpressions t : seg.timex) {
-			nout.println("%%#" + "TIMEX" + "\t" + t.start + "\t" + t.end + "\t" + t.type + "\t" + t.date);
+		for (TimeExpressions t : seg.getTimex()) {
+			nout.println("%%#" + "TIMEX" + "\t" + t.getStart() + "\t" + t.getEnd() + "\t" + t.getType() + "\t" + t.getDate());
 		}
 		for (String t : seg.getNel()) {
 			nout.println("%%#" + "NEL" + "\t" + t);
 		}
-		nout.println("%%#" + "LM" + "\t" + seg.getLM());
-		nout.println("%%#" + "LMN" + "\t" + seg.getLMnorm());
+		nout.println("%%#" + "LM" + "\t" + seg.getLm());
+		nout.println("%%#" + "LMN" + "\t" + seg.getLmnorm());
 		Sentence s = seg.toSentence();
 
 		for (Word w : s) {

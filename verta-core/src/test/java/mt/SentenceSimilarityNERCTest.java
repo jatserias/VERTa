@@ -27,9 +27,9 @@ class SentenceSimilarityNERCTest {
 		
 		Collection<NERC> nerc = SentenceSimilarityNERC.generateNERC(s);
 		NERC[] expected_ner = {
-				new NERC(1, 2, 4, "George F. Bush", "PER"),
+				new NERC(2, 4, "George F. Bush", "PER"),
 				// @TODO position is not correct, this should be 7,7
-				new NERC(1, 6, 6, "Mike", "LOC")
+				new NERC(6, 6, "Mike", "LOC")
 				};
 		Assertions.assertArrayEquals(expected_ner, nerc.toArray());
 	}
