@@ -3,22 +3,44 @@ package mt;
 import java.util.Stack;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import mt.core.IFeaturesWordSimilarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
+import verta.wn.IWordNet;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@Slf4j
 public class SimilarityHypernymWn extends WnBaseSimilarity {
 
 	// More than one hyper level
-	public boolean MULTILEVEL = false;
+	@Builder.Default
+	public boolean multilevel = false;
 
 	// to reverse the behavior (so target,source hyper == source,target hypo)
+	@Builder.Default
 	protected boolean reversed = false;
 
-	public SimilarityHypernymWn(String multilevel) {
-		MULTILEVEL = (multilevel.compareToIgnoreCase("MULTILEVEL") == 0);
+	public SimilarityHypernymWn(IWordNet wn, String multilevel) {
+		super(wn);
+		this.multilevel = (multilevel.compareToIgnoreCase("MULTILEVEL") == 0);
 	}
+
+	public SimilarityHypernymWn(String multilevel) {
+		super();
+		this.multilevel = (multilevel.compareToIgnoreCase("MULTILEVEL") == 0);
+	}
+
 
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
 
@@ -35,7 +57,7 @@ public class SimilarityHypernymWn extends WnBaseSimilarity {
 
 		// @TODO we probably need to check the Pos
 		if (featureReference.equals(featureProposed))
-			return Similarity.MAX_VAL;
+			return IFeaturesWordSimilarity.MAX_VAL;
 
 		boolean found = false;
 		for (SynsetType pos : lpos) {
@@ -43,24 +65,37 @@ public class SimilarityHypernymWn extends WnBaseSimilarity {
 			ISynset[] referenceSynsets = wn.getSynsets(featureReference, pos);
 			ISynset[] proposedSynsets = wn.getSynsets(featureProposed, pos);
 
+			log.warn("references");
+			for(ISynset synset: referenceSynsets)
+				log.warn(synset.toString());
+			
+			log.warn("proposed");
+			for(ISynset synset: proposedSynsets)
+				log.warn(synset.toString());
+
 			Stack<ISynset> pending = new Stack<ISynset>();
 			// @TODO To use MFS proposedSynsets[0].getTagCount("word form");
 
-			for (ISynset s : proposedSynsets)
-				pending.add(s);
+			for (ISynset s : proposedSynsets) pending.add(s);
+			
+			log.warn("pending");
+			for(ISynset synset: pending)
+				log.warn(synset.toString());
 
 			while (!found && !pending.isEmpty()) {
+				log.warn("loop");
 				ISynset n = pending.pop();
 				ISynset hypos[] = n.getHypernyms();
+				log.warn(String.format("hyper %d",hypos.length));
 				found = searchLists(referenceSynsets, hypos);
-				if (MULTILEVEL)
+				if (multilevel)
 					for (ISynset s : hypos)
 						pending.add(s);
 			}
 			if (found)
-				return Similarity.MAX_VAL;
+				return IFeaturesWordSimilarity.MAX_VAL;
 		}
-		return Similarity.MIN_VAL;
+		return IFeaturesWordSimilarity.MIN_VAL;
 	}
 
 	private boolean searchLists(ISynset[] referenceSynsets, ISynset[] hypos) {
@@ -72,6 +107,7 @@ public class SimilarityHypernymWn extends WnBaseSimilarity {
 		while (!found && i < hypos.length) {
 			int j = 0;
 			while (!found && j < referenceSynsets.length) {
+				log.warn(String.format("comparing %s with %s", hypos[i].toString(), referenceSynsets[j].toString()));
 				found = (hypos[i].equals(referenceSynsets[j]));
 				++j;
 			}
@@ -81,17 +117,8 @@ public class SimilarityHypernymWn extends WnBaseSimilarity {
 		return found;
 	}
 
-	public String getClassName() {
-		return getClassName(this.getClass().getName());
-	}
-
-	private String getClassName(String classname) {
-		return classname + "." + (MULTILEVEL ? "MULTILEVEL" : "DIRECT");
-	}
-
-	public void setReversed(boolean reversed) {
-		this.reversed = reversed;
-
+	public String toString() {
+		return this.getClass().getName() + "." + (multilevel ? "MULTILEVEL" : "DIRECT");
 	}
 
 }

@@ -1,9 +1,10 @@
 package verta.wn;
 
+
 public class WordNetFactory {
 
-    public static IWordNet getWordNet(String lang, String path) {
-        return (lang.compareToIgnoreCase("EN") == 0) ? new WordNetEnImpl() : new WordNetSpImpl(lang, path);
+    public static IWordNet getWordNet(String language, String path) {
+        return (language.compareToIgnoreCase("EN") == 0) ? new WordNetEnImpl() : new WordNetSpImpl(language, path);
     }
 
 }

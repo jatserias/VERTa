@@ -4,10 +4,14 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
-
+@Getter
+@NoArgsConstructor
 public class Sentence extends Vector<Word> {
 
 	private double sentimentScore;
@@ -16,8 +20,6 @@ public class Sentence extends Vector<Word> {
 	private double depscore;
 	private float lm;
 	private double lmn;
-
-	private static final long serialVersionUID = 1L;
 
 	public static void dump(Sentence s, PrintStream out) {
 		out.println("<sen>");

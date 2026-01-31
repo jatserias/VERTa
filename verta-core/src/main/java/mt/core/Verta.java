@@ -1,11 +1,17 @@
 package mt.core;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import mt.MTsimilarity;
 import mt.WordMetric;
 import mt.nlp.Sentence;
 import mt.nlp.Word;
 import verta.wn.IWordNet;
+import verta.wn.WordNetFactory;
 import verta.xml.AlignmentImplXMlDumper;
 import verta.xml.VertaXMLDumper;
 
@@ -15,40 +21,45 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Vector;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Slf4j
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
 public class Verta {
 
-    public boolean FILTER_PUNCTUATION = false;
+    @Builder.Default
+    private  boolean filterPuntuation = false;
 
     /// Word Metrics
-    public List<WordMetric> wms;
+    private List<WordMetric> wms;
 
     /// Sentence Level metrics
-    public List<WeightedSentenceMetric> sm;
+    private List<WeightedSentenceMetric> sm;
 
-    /// WordNet API
-    public IWordNet wn;
-
+    @JsonIgnore
     private VertaXMLDumper tracer;
 
+    @JsonIgnore
     private MetricActivationCounter counters;
 
-    public Verta(String configFilename, IWordNet wn) throws FileNotFoundException {
+    public Verta(String language, String configFilename) throws FileNotFoundException {
         setTracer(new VertaXMLDumper());
         wms = new Vector<>();
         sm = new Vector<>();
         setCounters(new MetricActivationCounter());
-        this.wn = wn;
-        load(configFilename);
+        load(language, configFilename);
     }
 
-    public Verta(String configFilename, BufferedReader buffer, IWordNet wn) {
+    public Verta(String language, String configFilename, BufferedReader buffer) {
         setTracer(new VertaXMLDumper());
         wms = new Vector<>();
         sm = new Vector<>();
         setCounters(new MetricActivationCounter());
-        this.wn = wn;
-        load(configFilename, buffer);
+        load(language, configFilename, buffer);
     }
 
     /**
@@ -92,11 +103,11 @@ public class Verta {
         return dist;
     }
 
-    public void load(String configFilename) throws FileNotFoundException {
-        load(configFilename, mt.nlp.io.FileManager.get_file_content(configFilename));
+    public void load(String language, String configFilename) throws FileNotFoundException {
+        load(language, configFilename, mt.nlp.io.FileManager.get_file_content(configFilename));
     }
 
-    public void load(String configFilename, BufferedReader config) {
+    public void load(String language, String configFilename, BufferedReader config) {
         String buff;
         try {
 
@@ -119,14 +130,14 @@ public class Verta {
 
                         // int id
                         String name = line[2];
-
+                        IWordNet wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
                         if (classname.compareTo("mt.WordMetric") == 0) {
                             // add wordmetric group
-                            wms.add(new WordMetric(name, config, groupWeight, configFilename, getCounters(), this.wn));
+                            wms.add(new WordMetric(name, config, groupWeight, configFilename, getCounters(), wn));
                         } else {
                             // instantiate class
                             sm.add(new WeightedSentenceMetric(name, groupWeight, SentenceMetricBuilder
-                                    .instantiateSentenceMetric(classname, line, getCounters(), this.wn)));
+                                    .instantiateSentenceMetric(classname, line, getCounters(), wn)));
                         }
                     }
 
@@ -138,7 +149,7 @@ public class Verta {
     }
 
     public void setFilter(boolean filter) {
-        FILTER_PUNCTUATION = filter;
+        filterPuntuation = filter;
     }
 
     /**
@@ -172,14 +183,14 @@ public class Verta {
             // TODO configure alignment strategy
             builder.build(align, dist);
             double prec = calculate_similarity_for_alignment(dist, align, proposedSentence,
-                    this.FILTER_PUNCTUATION);
+                    this.filterPuntuation);
 
             DistanceMatrix dist_rev = create_word_distance_matrix(iwm, referenceSentence, proposedSentence);
             // This was the previous heuristic: AlignmentImpl align_rev = align;
             AlignmentImplSingle align_rev = new AlignmentImplSingle(referenceSentence.size(), proposedSentence.size());
             builder.build(align_rev, dist_rev);
             double rec = calculate_similarity_for_alignment(dist_rev, align_rev, referenceSentence,
-                    this.FILTER_PUNCTUATION);
+                    this.filterPuntuation);
 
             // dump the alignment
             if (MTsimilarity.DUMP) {
@@ -241,7 +252,7 @@ public class Verta {
 
         err.println("--- WordMetrics ---");
         for (WordMetric wm : this.wms) {
-            err.println(wm.getName() + " weight:" + wm.getWeight() + " group weight " + wm.groupWeight);
+            err.println(wm.getName() + " weight:" + wm.getWeight() + " group weight " + wm.getWeight());
         }
         err.println("--- WeightedSentenceMetrics ---");
         for (WeightedSentenceMetric wsm : this.sm) {
@@ -249,4 +260,22 @@ public class Verta {
         }
         err.println("------");
     }
+
+    void compile(IWordNet wordnet) {
+		for(WordMetric kk : getWms()) {
+            for(WeightedWordMetric mkk : kk.getFeatureMetrics().values()) {
+              for(FeatureMetric mmkk : mkk) {
+                 try { 
+                 mmkk.getSimilarityFunction().getClass().getMethod("setWn", IWordNet.class).invoke(mmkk.getSimilarityFunction(), wordnet);
+                 } catch(Exception e) {
+                  System.err.println(e);
+                 }
+             }
+         }
+    }
+}
+
+public void compile(String language) {
+    this.compile(WordNetFactory.getWordNet(language, "/usr/local/wordnets"));
+}
 }

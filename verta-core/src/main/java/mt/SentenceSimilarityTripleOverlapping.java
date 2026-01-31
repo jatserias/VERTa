@@ -1,5 +1,8 @@
 package mt;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import mt.core.*;
 import mt.nlp.Sentence;
@@ -21,6 +24,9 @@ import java.util.Vector;
  * </p>
  **/
 @Slf4j
+@Setter
+@Getter
+@NoArgsConstructor
 public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase {
 
     /**
@@ -29,11 +35,11 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
      **/
     private static final String DEPHEAD_NAME = "DEPHEAD";
     private static final String DEPLABEL_NAME = "DEPLABEL";
+
     public static boolean FILTER_TOP = false;
-    /// USE OLD MATCHING (LREC version)
-    static boolean USE_OLD = false;
+
     /// matching triples
-    TriplesMatch tmatch;
+    private TriplePatternMatcher tmatch;
 
 
     public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile) throws IOException {
@@ -49,8 +55,10 @@ public class SentenceSimilarityTripleOverlapping extends SentenceSimilarityBase 
     public SentenceSimilarityTripleOverlapping(MetricActivationCounter counters, String configFile,
                                                BufferedReader config, String head_column, String label_column) throws IOException {
         super(counters);
-        tmatch = USE_OLD ? new TriplesMatch(counters, head_column, label_column) : new TripleMatchPattern(counters, head_column, label_column);
-        tmatch.load(configFile, config);
+        tmatch = TriplePatternMatcherLoader.load(configFile, config);
+        tmatch.setCounters(counters);
+        tmatch.setHeadColumnName(head_column);
+        tmatch.setLabelColumnName(label_column);
     }
 
     public static Triples MakeTriple(Sentence sentence, Word word, String head_column, String label_column) {

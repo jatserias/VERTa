@@ -1,18 +1,18 @@
 package mt;
 
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 
-public class SimilarityPerfect extends BaseSimilarity implements Similarity {
+public class SimilarityPerfect extends BaseSimilarity {
 
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
-		return Similarity.MAX_VAL;
+		return IFeaturesWordSimilarity.MAX_VAL;
 	}
 
 	@Override
-	public String getClassName() {
+	public String toString() {
 		return this.getClass().getName();
 	}
 

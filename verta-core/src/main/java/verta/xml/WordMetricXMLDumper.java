@@ -12,7 +12,7 @@ public class WordMetricXMLDumper {
 
 	public static void wm_dump(WordMetric wm, PrintStream trace) {
 	
-		trace.println("<fms weightsum=\"" + wm.groupWeight + "\">");
+		trace.println("<fms weightsum=\"" + wm.getWeight() + "\">");
 		for (String key : wm.featureMetrics.keySet()) {
 			Vector<FeatureMetric> x = wm.featureMetrics.get(key);
 			trace.println("<group>");
@@ -28,13 +28,13 @@ public class WordMetricXMLDumper {
 			boolean active, FeatureMetric fm) {
 		if (pout != null) {
 			pout.print(
-					"<mt feat=\"" + XMLFormater.encodeXMLString(Arrays.deepToString(fm.featureNames)) + "\"");
-			pout.print(" sim=\"" + fm.getClassName() + "\" simid=\"" + (f + 1) + "\"");
+					"<mt feat=\"" + XMLFormater.encodeXMLString(Arrays.deepToString(fm.getFeatureNames())) + "\"");
+			pout.print(" sim=\"" + fm.toString() + "\" simid=\"" + (f + 1) + "\"");
 			pout.print(" active=\"" + (active ? "#20B020" : "#B02020") + "\"");
 			pout.print(" pword=\"" + XMLFormater
-					.encodeXMLString(Arrays.deepToString(proposedWord.getFeatures(fm.featureNames))) + "\" ");
+					.encodeXMLString(Arrays.deepToString(proposedWord.getFeatures(fm.getFeatureNames()))) + "\" ");
 			pout.print(" rword=\""
-					+ XMLFormater.encodeXMLString(Arrays.deepToString(targetWord.getFeatures(fm.featureNames)))
+					+ XMLFormater.encodeXMLString(Arrays.deepToString(targetWord.getFeatures(fm.getFeatureNames())))
 					+ "\" ");
 			pout.println(" weight=\"" + contrib + "\">");
 			pout.println("</mt>");

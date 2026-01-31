@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
-import mt.core.WnBaseSimilarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
 import verta.wn.IWordNet;
@@ -41,8 +40,7 @@ class SimilarityHypernymWnMFSTest {
 				s1, s2, s3
 		};
 		Mockito.when(wn.getSynsets(word_form, pos)).thenReturn(res_wn);
-		SimilarityHypernymWnMFS sim = new SimilarityHypernymWnMFS(word_form);
-		WnBaseSimilarity.wn = wn;
+		SimilarityHypernymWnMFS sim = new SimilarityHypernymWnMFS(wn, word_form);
 		
 		ISynset[] res = sim.getMFS(word_form, pos);
 		ISynset[] expected_res = {s2};
@@ -94,13 +92,13 @@ class SimilarityHypernymWnMFSTest {
 		Mockito.when(s2.getHypernyms()).thenReturn(ancestors);
 		Mockito.when(s1.getHypernyms()).thenReturn(ancestors);
 		
-		SimilarityHypernymWnMFS sim = new SimilarityHypernymWnMFS(featureReference);
-		WnBaseSimilarity.wn = wn;
+		SimilarityHypernymWnMFS sim = new SimilarityHypernymWnMFS(wn, featureReference);
+
 		String[] featureNames = {featureReference};
 		SynsetType[] lpos = {pos};
 		double res = sim.INNERsimilarity(featureNames, proposedWord, referenceWord,  lpos);
 		// TODO sim.MULTILEVEL = true;
-		assertEquals(Similarity.MAX_VAL, res, 0.0001, "Innersimilarity");
+		assertEquals(IFeaturesWordSimilarity.MAX_VAL, res, 0.0001, "Innersimilarity");
 	}
 	
 	@Test

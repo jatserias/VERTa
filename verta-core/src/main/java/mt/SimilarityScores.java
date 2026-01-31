@@ -2,10 +2,9 @@ package mt;
 
 import mt.core.BaseSimilarity;
 import mt.core.ScoreNormalizer;
-import mt.core.Similarity;
 import mt.nlp.Word;
 
-public class SimilarityScores extends BaseSimilarity implements Similarity {
+public class SimilarityScores extends BaseSimilarity {
 
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
@@ -32,7 +31,7 @@ public class SimilarityScores extends BaseSimilarity implements Similarity {
 	}
 
 	@Override
-	public String getClassName() {
+	public String toString() {
 		return SimilarityScores.class.getName();
 	}
 

@@ -2,72 +2,40 @@ package mt;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+
+import lombok.Getter;
+import lombok.Setter;
 import mt.core.FeatureMetric;
 import mt.core.MetricActivationCounter;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.core.WeightedWordMetric;
 import mt.nlp.Word;
 import verta.wn.IWordNet;
 import verta.xml.WordMetricXMLDumper;
 
-@Slf4j
+
+@Getter
+@Setter
 public class WordMetric {
+	@JsonIgnore
 	MetricActivationCounter counters;
-	private static final int MAX_FEATURE_WEIGHT = 100;
+	static final int MAX_FEATURE_WEIGHT = 100;
 
 	// we should group metrics by id
 	public HashMap<String, WeightedWordMetric> featureMetrics;
-
-	//public boolean reversed;
-
-	public double groupWeight;
-
+	/// group weigth
+	private double weight;
 	/// name
-	String name;
-
-	public static Similarity instantiateSimilarity(String className, double weight, String[] line, int nPar,
-			IWordNet wn) {
-		Similarity sm = null;
-		try {
-			Class<?>[] parTypes = new Class[1];
-			parTypes[0] = java.lang.String.class;
-			Class<?> cl = Class.forName(className);
-
-			// @TODO check which constructor to call
-			Constructor<?> ct = cl.getConstructors()[0];
-
-			int nArgs = 3 + nPar;
-			Object[] argList = new Object[line.length - nArgs];
-			if (line.length - nArgs >= 0) System.arraycopy(line, nArgs, argList, 0, line.length - nArgs);
-			sm = (Similarity) ct.newInstance(argList);
-
-			try {
-				@SuppressWarnings("rawtypes")
-				Class[] paramTypes = new Class[1];
-				paramTypes[0] = IWordNet.class;
-				Method method = sm.getClass().getMethod("Wn", paramTypes);
-				log.info(className + " uses WN:" + wn);
-				method.invoke(sm, new Object[] { wn });
-				log.info("Metric setup!");
-			} catch (java.lang.NoSuchMethodException v) {
-				// No wn set up method
-			}
-
-			sm.setWeight(weight);
-
-		} catch (Exception e) {
-			log.error("Error trying to load Similarity Class >" + className + "<");
-			System.exit(-1);
-
-		}
-		return sm;
-	}
+	private String name;
 
 	public WordMetric() {
 		featureMetrics = new HashMap<>();
@@ -78,13 +46,11 @@ public class WordMetric {
 		this.name = name;
 		this.counters = counters;
 		featureMetrics = new HashMap<>();
-		load(config, groupWeight, configFilename, wn);
+		WordMetricLoader.load(this, config, groupWeight, configFilename, wn);
 	}
 
 	/**
-	 * 
-	 * 
-	 * /* word similarity is just the sum of feature similarity (@TODO normalization
+     * word similarity is just the sum of feature similarity (@TODO normalization
 	 * on the number of features maybe needed)
 	 */
 	public double similarity(Word proposedWord, Word targetWord) {
@@ -118,13 +84,13 @@ public class WordMetric {
 			int f = 0;
 			// initilized to true
 			boolean active;
-			while (contrib <= Similarity.MIN_VAL && f < x.size()) {
+			while (contrib <= IFeaturesWordSimilarity.MIN_VAL && f < x.size()) {
 				FeatureMetric fm = x.get(f);
 				contrib = fm.similarity(proposedWord, targetWord);
-				active = contrib > Similarity.MIN_VAL;
+				active = contrib > IFeaturesWordSimilarity.MIN_VAL;
 
 				if (counters != null)
-					counters.increase(fm.getClassName() + Arrays.asList(fm.featureNames), 1);
+					counters.increase(fm.toString() + Arrays.asList(fm.getFeatureNames()), 1);
 
 				// trace
 				WordMetricXMLDumper.xml_wm_dump(proposedWord, targetWord, pout, contrib, f, active, fm);
@@ -139,55 +105,26 @@ public class WordMetric {
 		return sum / MAX_FEATURE_WEIGHT;
 	}
 
-	public void load(BufferedReader config, double groupWeight, String filename, IWordNet wn) {
-		try {
-			String buff;
-			while ((buff = config.readLine()) != null && !buff.trim().startsWith("FGROUP")) {
-
-				log.info("proc:" + buff);
-
-				// comments start with #
-				if (!buff.trim().startsWith("#")) {
-					String[] line = buff.split("[ \t]+");
-					if (line.length < 4) {
-						log.error("Format ERROR on the metric config file >" + filename + "< AT LINE:" + buff);
-						System.exit(-1);
-					}
-					// Similarity sm = null;//TODO Load Class by name line[1];
-					int nPar = 1;
-					String groupId = line[0];
-					String className = line[nPar + 2];
-					String featureName = line[nPar];
-					double weight = Double.parseDouble(line[nPar + 1]);
-					if (weight > MAX_FEATURE_WEIGHT)
-						log.warn("Warning Weight>>" + MAX_FEATURE_WEIGHT + " in metric config file at " + buff);
-
-					Similarity sm = instantiateSimilarity(className, weight, line, nPar, wn);
-
-					// Add a feature metric into the grup
-					WeightedWordMetric group = featureMetrics.get(groupId);
-					// ERROR we should relate ngroup to grouID (it may be inconsistent)
-					if (group == null)
-						group = new WeightedWordMetric(1.0); //TODO CHECK what we need weight (groupWeight);
-					group.add(new FeatureMetric(featureName, sm, weight));
-					featureMetrics.put(groupId, group);
-				}
-
-				this.groupWeight = groupWeight;
-			}
-
-		} catch (Exception e) {
-			log.error("Format Error in Metric configuration file", e);
-			System.exit(-1);
-		}
-	}
-
-	public double getWeight() {
-		return groupWeight;
-	}
-
-	public String getName() {
-		return name;
-	}
-
+	public static void main(String args[]) {
+		YAMLFactory f = new YAMLFactory();
+		f.disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID);
+		final ObjectMapper mapper = new ObjectMapper(f);
+		IWordNet wordnetI = null;
+		MetricActivationCounter counters = new MetricActivationCounter();
+		WordMetric serializedEx = new WordMetric("word metric",
+				new BufferedReader(new StringReader("1\tWORD\t100\tmt.SimilarityEqual\n"))
+		, 1.0, "config filename", counters,  wordnetI);
+		String jsonDataString;
+		
+	 try {
+		 jsonDataString = mapper.writeValueAsString(serializedEx);
+		 System.err.println(jsonDataString);
+		 WordMetric reread = mapper.readValue(jsonDataString, WordMetric.class);
+		 System.err.println(reread.toString());
+	 } catch (JsonProcessingException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+	 }
+	 }
 }
+

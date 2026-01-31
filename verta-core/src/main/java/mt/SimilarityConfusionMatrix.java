@@ -6,12 +6,11 @@ import java.util.HashMap;
 
 import lombok.extern.slf4j.Slf4j;
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
 import mt.nlp.Word;
 
 ///similarity using a confusion matrix
 @Slf4j
-public class SimilarityConfusionMatrix extends BaseSimilarity implements Similarity {
+public class SimilarityConfusionMatrix extends BaseSimilarity {
 	private static final String JOIN_STRING = "+";
 	double defaultValue;
 	HashMap<String, Double> confusionMatrix;
@@ -73,7 +72,7 @@ public class SimilarityConfusionMatrix extends BaseSimilarity implements Similar
 		return w / featureNames.length;
 	}
 
-	public String getClassName() {
+	public String toString() {
 		return SimilarityConfusionMatrix.class.getName();
 	}
 

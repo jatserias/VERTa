@@ -3,22 +3,30 @@ package mt.core;
 import java.io.PrintStream;
 import java.util.Arrays;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import mt.nlp.Word;
+import verta.wn.IWordNet;
 
 /// Similarity function over a list of attributes and a weight
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class FeatureMetric {
 
 	/// names of the features
-	public String[] featureNames;
+	private String[] featureNames;
 	/// similarity function
-	Similarity similarityFunction;
-
+	private IFeaturesWordSimilarity similarityFunction;
 	/// feature Weight
-	double weight;
+	private double weight;
+	/// reversed function
+	private boolean reversed;
 
-	public boolean reversed;
-
-	public FeatureMetric(String featureName, Similarity similarityFunction, double weight) {
+	public FeatureMetric(String featureName, IFeaturesWordSimilarity similarityFunction, double weight) {
 		this.weight = weight;
 		this.featureNames = featureName.split(",");
 		this.similarityFunction = similarityFunction;
@@ -34,7 +42,11 @@ public class FeatureMetric {
 				+ similarityFunction.getClass().getCanonicalName() + "\"/>");
 	}
 
-	public String getClassName() {
-		return similarityFunction.getClassName();
+	public String toString() {
+		return this.getClass().getCanonicalName()+"."+similarityFunction.toString();
+	}
+
+	public void compile(IWordNet wordNet) {
+		similarityFunction.compile(wordNet);
 	}
 }

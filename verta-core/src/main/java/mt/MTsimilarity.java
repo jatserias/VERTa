@@ -8,8 +8,6 @@ import mt.nlp.Segment;
 import mt.nlp.Sentence;
 import mt.nlp.io.CONLLformat;
 import mt.nlp.io.ReaderCONLL;
-import verta.wn.IWordNet;
-import verta.wn.WordNetFactory;
 import verta.xml.MTmetricXMLDumper;
 
 import java.io.BufferedReader;
@@ -50,12 +48,12 @@ public class MTsimilarity {
     public static boolean DUMP;
     public Verta verta;
 
-    public MTsimilarity(String configFilename, CONLLformat fmt, IWordNet wn) throws FileNotFoundException {
-        this.verta = new Verta(configFilename, wn);
+    public MTsimilarity(String configFilename, CONLLformat fmt, String language) throws FileNotFoundException {
+        this.verta = new Verta(language, configFilename);
     }
 
-    public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, IWordNet wn) {
-        this.verta = new Verta(configFilename, buffer, wn);
+    public MTsimilarity(String configFilename, BufferedReader buffer, CONLLformat fmt, String language) {
+        this.verta = new Verta(language, configFilename, buffer);
     }
 
     public static void usage() {
@@ -96,7 +94,6 @@ public class MTsimilarity {
                             new com.martiansoftware.jsap.Switch("xml", 'x', "xml", "Generate xml trace files"),
                             new com.martiansoftware.jsap.Switch("punc", 'p', "punc", "Filter punctuation"),
                             new com.martiansoftware.jsap.Switch("top", 't', "top", "Include TOP dependencies"),
-                            new com.martiansoftware.jsap.Switch("old", 'o', "old", "try running OLD triples module"),
                             new com.martiansoftware.jsap.UnflaggedOption("lang", JSAP.STRING_PARSER, "en",
                                     JSAP.NOT_REQUIRED, JSAP.NOT_GREEDY, "traget language")});
 
@@ -126,12 +123,10 @@ public class MTsimilarity {
 
             int nSystem = 0;
 
-            SentenceSimilarityTripleOverlapping.USE_OLD = jsapResult.getBoolean("old", false);
             SentenceSimilarityTripleOverlapping.FILTER_TOP = !jsapResult.getBoolean("top", false);
 
-            IWordNet wn = WordNetFactory.getWordNet(language, "/usr/local/wordnets");
             CONLLformat fmt = new CONLLformat(inputFormat);
-            MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, wn);
+            MTsimilarity mt = new MTsimilarity(metricConfigFile, fmt, language);
             mt.verta.setFilter(jsapResult.getBoolean("punc", false));
             mt.verta.getTracer().DUMP = DUMP;
 
@@ -218,7 +213,7 @@ public class MTsimilarity {
                             MTmetricXMLDumper.xml_similarity_dump(gtrace, res);
 
                             // get the better F1
-                            if (MAXRes == null || res.getWF1() > MAXRes.getWF1()) {
+                            if (MAXRes == null || res.getOverallWF1() > MAXRes.getOverallWF1()) {
                                 MAXRes = res;
                             }
 

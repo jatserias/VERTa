@@ -1,7 +1,7 @@
 package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
 
@@ -26,15 +26,15 @@ public class SimilaritySynonymWnPos extends SimilaritySynonymWn {
 		String posReference = referenceWord.getFeature(featureNames[FT_POS]);
 
 		if (posProposed.compareTo(posReference) != 0)
-			return Similarity.MIN_VAL;
+			return IFeaturesWordSimilarity.MIN_VAL;
 
 		if (featureReference.equals(featureProposed) && posProposed.equals(posReference))
-			return Similarity.MAX_VAL;
+			return IFeaturesWordSimilarity.MAX_VAL;
 		SynsetType[] typeProposed = wn.getSynsetTypeFromPos(posProposed);
 		SynsetType[] typeReference = wn.getSynsetTypeFromPos(posReference);
 
 		if (typeProposed == null || typeReference == null)
-			return Similarity.MIN_VAL;
+			return IFeaturesWordSimilarity.MIN_VAL;
 
 		// since both type must be the same, just checking one of the list is enough
 		// (intersection will be even more efficient)
@@ -43,14 +43,14 @@ public class SimilaritySynonymWnPos extends SimilaritySynonymWn {
 			ISynset[] referenceSynsets = wn.getSynsets(featureReference, s);
 
 			double res = similarity(featureProposed, featureReference, proposedSynsets, referenceSynsets);
-			if (res > Similarity.MIN_VAL)
+			if (res > IFeaturesWordSimilarity.MIN_VAL)
 				return res;
 		}
-		return Similarity.MIN_VAL;
+		return IFeaturesWordSimilarity.MIN_VAL;
 	}
 
 	@Override
-	public String getClassName() {
+	public String toString() {
 		return SimilaritySynonymWnPos.class.getName();
 	}
 

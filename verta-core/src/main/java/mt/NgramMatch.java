@@ -2,6 +2,9 @@ package mt;
 
 import java.io.PrintStream;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
@@ -17,16 +20,19 @@ import mt.nlp.Sentence;
  * 
  */
 @Slf4j
+@NoArgsConstructor
+@Getter
+@Setter
 public class NgramMatch extends SentenceSimilarityBase {
 
 	/// block selected ngrams
-	static boolean USE_BLOCKING = true;
+	private static boolean USE_BLOCKING = true;
 
 	/// Minimum size;
-	protected int minsize;
+	private int minsize;
 
 	/// Maximum size of Ngrams
-	protected int maxsize;
+	private int maxsize;
 
 	/**
 	 * use -1 to not limit the ngram size

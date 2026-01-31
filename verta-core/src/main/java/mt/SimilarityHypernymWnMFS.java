@@ -2,16 +2,22 @@ package mt;
 
 import java.util.Stack;
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
+import lombok.NoArgsConstructor;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
-
+import verta.wn.IWordNet;
+@NoArgsConstructor
 public class SimilarityHypernymWnMFS extends SimilarityHypernymWn {
 
+	public SimilarityHypernymWnMFS(IWordNet wn, String multilevel) {
+		super(wn, multilevel);
+	}
+	
 	public SimilarityHypernymWnMFS(String multilevel) {
 		super(multilevel);
 	}
-	
+
 	public ISynset[] getMFS(String word_form, SynsetType pos) {
 		ISynset[] res = wn.getSynsets(word_form, pos);
 		int lsize = res.length>0 ? 1 : 0;
@@ -34,7 +40,7 @@ public class SimilarityHypernymWnMFS extends SimilarityHypernymWn {
 		String featureReference = referenceWord.getFeature(featureNames[0]);		
 			
 		//@TODO we probably need to check the PoS
-		if(featureReference.equals(featureProposed)) return Similarity.MAX_VAL;
+		if(featureReference.equals(featureProposed)) return IFeaturesWordSimilarity.MAX_VAL;
 
 		for(SynsetType pos:lpos) {
 
@@ -51,12 +57,12 @@ public class SimilarityHypernymWnMFS extends SimilarityHypernymWn {
 				ISynset hypos[] = n.getHypernyms();
 				if(hypos!=null) {
 					found=SimilarityHypernymWnMFS.nsearchLists(referenceSynsets, hypos);
-					if(MULTILEVEL ) for(ISynset s:hypos) pending.add(s);
+					if(multilevel ) for(ISynset s:hypos) pending.add(s);
 				}
 			}
-			if(found) return Similarity.MAX_VAL;
+			if(found) return IFeaturesWordSimilarity.MAX_VAL;
 		}
-		return Similarity.MIN_VAL;
+		return IFeaturesWordSimilarity.MIN_VAL;
 	}
 	
 

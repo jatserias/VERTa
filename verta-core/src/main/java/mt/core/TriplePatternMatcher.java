@@ -1,0 +1,100 @@
+package mt.core;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import mt.nlp.Triples;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+
+/**
+ * new support for:
+ * Defining sets of labels (with associate weights)
+ * eg Set1={} with weight X Set2 with weight={} ...
+ * Define patterns of matching of triples (pattens to be applied in order)
+ * =: same vale s&lt;NUM&gt;: label on set *: any
+ * (S,H,T)
+ * COMPLETE_WEIGHT PARTIAL_NOMOD_WEIGHT PARTIAL_NOHEAD_WEIGHT
+ * PARTIAL_NOLABEL_WEIGHT 1.0 0.8 0.7 0.7
+ * e.g. (*,S1,*) : NUMBER
+ * (=,S1,=) : Number
+ * Extension to simplify preposition
+ * deplabel_%
+ **/
+
+@Slf4j
+@Setter
+@Getter
+public class TriplePatternMatcher extends TriplesMatcher {
+
+    static final String COMMENT = "#";
+
+    /// Groups of labels with associated weights. A label can be a pattern: dep_%
+    private HashMap<String, LabelSet> groups;
+    /// a collection of patterns to try
+    private Collection<TripleMatchPattern> lp;
+
+    public TriplePatternMatcher() {
+        super();
+        groups = new  HashMap<String, LabelSet>();
+        lp = new ArrayList<TripleMatchPattern> ();
+    }
+    /** 
+    public TriplePatternMatcher(MetricActivationCounter counters, String head_column_name, String label_column_name) {
+        super(counters, head_column_name, label_column_name);
+        log.info("Initilizing patterns");
+        // TODO load the rest of parameters
+        groups = new HashMap<>();
+        lp = new ArrayList<>();
+    }
+    **/
+
+    @Override
+    public MatchResult matchingScorer(final Triples x, final Triples y, boolean label_match, boolean source_match,
+                                      boolean target_match) {
+        // we should combine weight
+        // Pw * Lw * Sw
+
+        for (TripleMatchPattern p : lp) {
+
+            if (p.match(x, y, label_match, source_match, target_match)) {
+
+                getCounters().increase(this.getClass().getName() + "[" + p + "]", 1);
+                return new MatchResult(
+                        p.getWeight() * (p.getLabelSet() == null ? getWeight(x.getLabel()) : p.getLabelSet().getWeight()), p);
+
+            }
+
+        }
+        // Should we return 0 or -1 ??
+        return TriplesMatcher.NO_MATCH;
+
+    }
+
+    /**
+     * getting the weigh of a label or set of labels
+     */
+    public double getWeight(String label) {
+        for (LabelSet l : groups.values()) {
+            if (l.contains(label.toLowerCase()))
+                return l.getWeight();
+        }
+        // try extended pattern
+        int pos = label.indexOf('_');
+        if (pos > 0) {
+            String mlabel = label.substring(0, pos) + "_%";
+            for (LabelSet l : groups.values()) {
+                if (l.contains(mlabel.toLowerCase()))
+                    return l.getWeight();
+            }
+        }
+
+        return 1.0;
+    }
+
+    public enum TripleMatchOperator {
+        X, O
+    }
+
+}

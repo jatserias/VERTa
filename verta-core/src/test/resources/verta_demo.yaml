@@ -1,0 +1,169 @@
+---
+filterPuntuation: false
+wms:
+- featureMetrics:
+    "1":
+    - featureNames:
+      - "WORD"
+      similarityFunction:
+        type: "SimilarityEqual"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      similarityFunction:
+        type: "SimilaritySynonymWn"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      similarityFunction:
+        type: "SimilarityEqual"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      similarityFunction:
+        type: "SimilarityHyponymWnMFS"
+        weight: 100.0
+        multilevel: false
+        reversed: false
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      similarityFunction:
+        type: "SimilarityHypernymWnMFS"
+        weight: 100.0
+        multilevel: false
+        reversed: false
+      weight: 100.0
+      reversed: false
+  weight: 47.0
+  name: "1"
+- featureMetrics:
+    "2":
+    - featureNames:
+      - "WORD"
+      - "SPOS"
+      similarityFunction:
+        type: "SimilarityEqual"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      - "SPOS"
+      similarityFunction:
+        type: "SimilaritySynonymWnPos"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      - "SPOS"
+      similarityFunction:
+        type: "SimilarityEqual"
+        weight: 100.0
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      - "SPOS"
+      similarityFunction:
+        type: "SimilarityHyponymWnPosMFS"
+        weight: 100.0
+        multilevel: false
+        reversed: false
+      weight: 100.0
+      reversed: false
+    - featureNames:
+      - "LEMMA"
+      - "SPOS"
+      similarityFunction:
+        type: "SimilarityHypernymWnPosMFS"
+        weight: 100.0
+        multilevel: false
+        reversed: false
+      weight: 100.0
+      reversed: false
+  weight: 3.0
+  name: "2"
+sm:
+- type: "WeightedSentenceMetric"
+  name: "3"
+  weight: 32.0
+  metric:
+    type: "SentenceSimilarityTripleOverlapping"
+    tmatch:
+      labelColumnName: "DEPLABEL"
+      headColumnName: "DEPHEAD"
+      labelMatch: {}
+      groups:
+        top:
+          labels:
+          - "att"
+          - "agent"
+          - "pred"
+          - "obj-prep"
+          - "subj-pac"
+          - "dobj"
+          - "subj"
+          - "iobj"
+          weight: 1.0
+          id: "top"
+        last:
+          labels:
+          - "dprep"
+          - "espec"
+          - "term"
+          - "dverb"
+          - "es"
+          weight: 0.5
+          id: "last"
+        ok:
+          labels:
+          - "cc"
+          - "adjmod"
+          - "dconj"
+          - "aux"
+          - "co-%"
+          - "ador"
+          - "vsubord"
+          - "dep"
+          - "sp-mod"
+          - "sn-mod"
+          - "dep-%"
+          - "sp-obj"
+          - "subord-mod"
+          weight: 0.5
+          id: "ok"
+      lp:
+      - head: "X"
+        mod: "X"
+        label: "X"
+        labelSet: null
+        targetLabelSet: null
+        weight: 1.0
+      - head: "X"
+        mod: "X"
+        label: "O"
+        labelSet: null
+        targetLabelSet: null
+        weight: 1.0
+      - head: "X"
+        mod: "O"
+        label: "X"
+        labelSet: null
+        targetLabelSet: null
+        weight: 1.0
+- type: "WeightedSentenceMetric"
+  name: "4"
+  weight: 18.0
+  metric:
+    type: "NgramMatch"
+    minsize: 2
+    maxsize: 2

@@ -70,9 +70,8 @@ public class MetricTest {
 		Mockito.when(s1_carnivore.getHypernyms()).thenReturn(s1_carnivore_hypernyms);
 		
 		
-		SimilarityHypernymWn.wn = wn;
 		
-		SimilarityHypernymWn wnsm = new SimilarityHypernymWn("MULTILEVEL");
+		SimilarityHypernymWn wnsm = new SimilarityHypernymWn(wn, "MULTILEVEL");
 		Word cat= new Word("cat");
 		cat.setFeature(featlemma,"cat");
 		Word felines = new Word("felines");
@@ -84,13 +83,13 @@ public class MetricTest {
 		assertEquals(0.0, wnsm.similarity(featlemmaArray, felines, cat),"wn hyper felines cat");
 		
 		assertEquals(1.0, wnsm.similarity(featlemmaArray, cat, carnivore), "wn hyper cat carnivore");
-		wnsm.MULTILEVEL=false;
+		wnsm.multilevel=false;
 		assertEquals(0.0, wnsm.similarity(featlemmaArray, cat, carnivore), "wn hyper cat carnivore DIRECT");
 		
 		// Reverse test
 		wnsm.setReversed(true);
 		assertEquals(1.0,wnsm.similarity(featlemmaArray, felines,cat), "wn hyper felines cat reversed");
-		wnsm.MULTILEVEL=true;
+		wnsm.multilevel=true;
 		assertEquals(1.0,wnsm.similarity(featlemmaArray, carnivore, cat),"wn hyper cat carnivore");
 		
 		//Checking synonims
@@ -103,6 +102,7 @@ public class MetricTest {
 		SynsetType[] possible_pos = {SynsetType.ADJECTIVE};
 		Mockito.when(wn.getSynsetTypeFromPos("JJ")).thenReturn(possible_pos);
 		SimilaritySynonymWnPos wnsinp = new SimilaritySynonymWnPos();
+		wnsinp.setWn(wn);
 		Word serious= new Word("serious");
 		serious.setFeature(featlemma,"serious");
 		serious.setFeature(featpos,"JJ");

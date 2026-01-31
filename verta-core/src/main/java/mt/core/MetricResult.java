@@ -4,16 +4,23 @@ import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.util.Vector;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Getter;
+import lombok.Setter;
+
 /// representation of the whole result
+@Getter
+@Setter
 public class MetricResult {
 
-    private double prec;
-    private double rec;
-    private Vector<Double> v_w;
-    private double sumpes;
-    private Vector<Double> v_pres;
-    private Vector<Double> v_rec;
-    private Vector<String> v_name;
+    private double precision;
+    private double recall;
+    private Vector<Double> moduleWeigths;
+    private double totalWeighs;
+    private Vector<Double> modulePresion;
+    private Vector<Double> moduleRecall;
+    private Vector<String> moduleName;
 
     public MetricResult() {
         init(0, 0);
@@ -24,45 +31,43 @@ public class MetricResult {
         assert (!Double.isNaN(rec));
         assert (!Double.isInfinite(prec));
         assert (!Double.isInfinite(rec));
-        sumpes = 0;
-        this.prec = prec;
-        this.rec = rec;
-        v_w = new Vector<>();
-        v_pres = new Vector<>();
-        v_rec = new Vector<>();
-        v_name = new Vector<>();
+        totalWeighs = 0;
+        this.precision = prec;
+        this.recall = rec;
+        moduleWeigths = new Vector<>();
+        modulePresion = new Vector<>();
+        moduleRecall = new Vector<>();
+        moduleName = new Vector<>();
     }
 
-    public double getPrec() {
-        return (prec > 0 && sumpes > 0) ? prec / sumpes : 0;
+    @JsonIgnore
+    public double getOverallPrec() {
+        return (precision > 0 && totalWeighs > 0) ? precision / totalWeighs : 0;
     }
 
-    public double getRec() {
-        return (rec > 0 && sumpes > 0) ? rec / sumpes : 0;
+    @JsonIgnore
+    public double getOverallRec() {
+        return (recall > 0 && totalWeighs > 0) ? recall / totalWeighs : 0;
     }
 
-    public double getPrec(int i) {
-        return v_pres.get(i);
+    public double getModulePrec(int i) {
+        return modulePresion.get(i);
     }
 
-    public double getRec(int i) {
-        return v_rec.get(i);
+    public double getModuleRec(int i) {
+        return moduleRecall.get(i);
     }
 
-    public double getWF1() {
-        return getSF1();
+    public double getModuleF1(int i) {
+        return (getModulePrec(i) > 0 && getModuleRec(i) > 0) ? ((2 * getModulePrec(i) * getModuleRec(i)) / (getModulePrec(i) + getModuleRec(i))) : 0;
     }
 
-    public double getF1(int i) {
-        return (getPrec(i) > 0 && getRec(i) > 0) ? ((2 * getPrec(i) * getRec(i)) / (getPrec(i) + getRec(i))) : 0;
-    }
-
-    private double getSF1() {
+    public double getOverallWF1() {
         double sumf1 = 0;
         double sumw = 0;
-        for (int i = 0; i < v_pres.size(); ++i) {
-            sumf1 += v_w.get(i) * getF1(i);
-            sumw += v_w.get(i);
+        for (int i = 0; i < modulePresion.size(); ++i) {
+            sumf1 += moduleWeigths.get(i) * getModuleF1(i);
+            sumw += moduleWeigths.get(i);
         }
         return (sumf1 > 0 ? (sumf1 / sumw) : 0.0);
     }
@@ -78,31 +83,31 @@ public class MetricResult {
         assert (!Double.isInfinite(pRec));
         assert (weight >= 0);
 
-        prec += pPrec * weight;
-        rec += pRec * weight;
-        sumpes += weight;
+        precision += pPrec * weight;
+        recall += pRec * weight;
+        totalWeighs += weight;
 
-        v_pres.add(pPrec);
-        v_rec.add(pRec);
-        v_w.add(weight);
+        modulePresion.add(pPrec);
+        moduleRecall.add(pRec);
+        moduleWeigths.add(weight);
 
-        v_name.add(name);
+        moduleName.add(name);
     }
 
     public String toString() {
-        return getSF1() + "\t" + getPrec() + "\t" + getRec();
+        return getOverallWF1() + "\t" + getOverallPrec() + "\t" + getOverallRec();
     }
 
     public void dump(PrintStream strace) {
 
-        for (int i = 0; i < v_pres.size(); ++i) {
-            String name = v_name.get(i);
-            double prec = getPrec(i);
-            double rec = getRec(i);
-            double f1 = getF1(i);
-            double wprec = v_w.get(i) * prec;
-            double wrec = v_w.get(i) * rec;
-            double wf1 = v_w.get(i) * f1;
+        for (int i = 0; i < modulePresion.size(); ++i) {
+            String name = moduleName.get(i);
+            double prec = getModulePrec(i);
+            double rec = getModuleRec(i);
+            double f1 = getModuleF1(i);
+            double wprec = moduleWeigths.get(i) * prec;
+            double wrec = moduleWeigths.get(i) * rec;
+            double wf1 = moduleWeigths.get(i) * f1;
 
             strace.println("<wmetric name='" + name + "'>");
             strace.println("<f>" + f1 + "</f>");
@@ -114,9 +119,9 @@ public class MetricResult {
             strace.println("</wmetric>");
         }
 
-        strace.println("<f>" + getSF1() + "</f>");
-        strace.println("<prec>" + getPrec() + "</prec>");
-        strace.println("<rec>" + getRec() + "</rec>");
+        strace.println("<f>" + getOverallWF1() + "</f>");
+        strace.println("<prec>" + getOverallPrec() + "</prec>");
+        strace.println("<rec>" + getOverallRec() + "</rec>");
     }
 
     /**
@@ -127,18 +132,18 @@ public class MetricResult {
 	 * </p>
      */
     public void textdump(PrintStream strace, NumberFormat nf) {
-        strace.print(nf.format(getSF1()));
-        strace.print("\t" + nf.format(getPrec()));
-        strace.print("\t" + nf.format(getRec()));
-        strace.print("\t" + v_pres.size());
-        for (int i = 0; i < v_pres.size(); ++i) {
-            String name = v_name.get(i);
-            double prec = getPrec(i);
-            double f1 = getF1(i);
-            double rec = getRec(i);
-            double wprec = v_w.get(i) * prec;
-            double wrec = v_w.get(i) * rec;
-            double wf1 = v_w.get(i) * f1;
+        strace.print(nf.format(getOverallWF1()));
+        strace.print("\t" + nf.format(getOverallPrec()));
+        strace.print("\t" + nf.format(getOverallRec()));
+        strace.print("\t" + modulePresion.size());
+        for (int i = 0; i < modulePresion.size(); ++i) {
+            String name = moduleName.get(i);
+            double prec = getModulePrec(i);
+            double f1 = getModuleF1(i);
+            double rec = getModuleRec(i);
+            double wprec = moduleWeigths.get(i) * prec;
+            double wrec = moduleWeigths.get(i) * rec;
+            double wf1 = moduleWeigths.get(i) * f1;
             strace.print("\t" + name);
             strace.print("\t" + nf.format(f1));
             strace.print("\t" + nf.format(prec));

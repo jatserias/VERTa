@@ -12,20 +12,29 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+
 import mt.nlp.Sentence;
 import mt.nlp.Triples;
 import mt.nlp.Word;
 
-public class TripleMatchTest {
+public class TripleMatcherTest {
 
 	void really_old_main_test() throws IOException {
-		assert (TriplesMatch.isPatternLabel("dep_%)"));
-		assert (!TriplesMatch.isPatternLabel("dep%)"));
-		assert (!TriplesMatch.isPatternLabel("dep_a)"));
-		assert (TriplesMatch.getSubLabel("dep_a)").equals("a"));
-		assert (TriplesMatch.getSubLabel("dep_de)").equals("de"));
-		assert (TriplesMatch.getSubLabel("subj").equals("subj"));
-		TriplesMatch tm = new TriplesMatch(new MetricActivationCounter(), "DEPHEAD", "DEPLABEL");
+		assert (TriplesMatcher.isPatternLabel("dep_%)"));
+		assert (!TriplesMatcher.isPatternLabel("dep%)"));
+		assert (!TriplesMatcher.isPatternLabel("dep_a)"));
+		assert (TriplesMatcher.getSubLabel("dep_a)").equals("a"));
+		assert (TriplesMatcher.getSubLabel("dep_de)").equals("de"));
+		assert (TriplesMatcher.getSubLabel("subj").equals("subj"));
+		TriplesMatcher tm = new TriplesMatcher();
+		tm.setCounters(new MetricActivationCounter());
+		tm.setHeadColumnName("DEPHEAD");
+		tm.setLabelColumnName("DEPLABEL");
 		tm.getLabelMatch().put("dep_b#dep_a", 2.0);
 		assert (tm.matchRules("dep_%", "dep_a"));
 		assert (tm.matchRules("dep_a", "dep_%"));
@@ -56,11 +65,14 @@ public class TripleMatchTest {
 		distances.setDistance(0, 1, 0, "test");
 		distances.setDistance(0, 0, 0, "test");
 		distances.setDistance(0, 0, 1, "test");
-		ISentenceAlignment nalign = new AlignmentImplSingle(distances.source_size, distances.target_size);
+		ISentenceAlignment nalign = new AlignmentImplSingle(distances.getRowSize(), distances.getColumnSize());
 		new AlignmentBuilderFirstLeft2Rigth().build(nalign, distances);
 
-		TriplesMatch triples_matcher = new TriplesMatch("DEPHEAD", "DEPLABEL");
-		triples_matcher.load("conf/triples.conf", new BufferedReader(new StringReader("#\n"
+		TriplesMatcher triples_matcher = new TriplesMatcher();
+		triples_matcher.setHeadColumnName("DEPHEAD");
+		triples_matcher.setLabelColumnName("DEPLABEL");
+
+		TriplesMatcherLoader.load("conf/triples.conf", new BufferedReader(new StringReader("#\n"
 				+ "# Complete_WEIGHT	PARTIAL_NOMOD_WEIGHT      PARTIAL_NOHEAD_WEIGHT      PARTIAL_NOLABEL_WEIGHT \n"
 				+ "#\n" + "1.0	0.8	0.7	0.7\n" + "#\n" + "# Label matching rules\n" + "#\n" + "# label - label weight\n"
 				+ "#\n" + "amod	prep_of	1.0\n" + "nsubj	agent	1.0\n" + "")));
@@ -92,23 +104,41 @@ public class TripleMatchTest {
 	}
 
 	private static Stream<Arguments> generator() {
-		return Stream.of(Arguments.of(true, true, true, TriplesMatch.COMPLETE_WEIGHT, "perfect match"),
-				Arguments.of(true, true, false, TriplesMatch.PARTIAL_NO_MOD_WEIGHT, "no mod match"),
-				Arguments.of(true, false, true, TriplesMatch.PARTIAL_NO_HEAD_WEIGHT, "no head match"),
-				Arguments.of(true, false, false, TriplesMatch.NO_MATCH, "only label match"),
-				Arguments.of(false, true, true, TriplesMatch.PARTIAL_NO_LABEL_WEIGHT, "only label match"),
-				Arguments.of(false, true, false, TriplesMatch.NO_MATCH, "no label match but mod amtch"),
-				Arguments.of(false, false, true, TriplesMatch.NO_MATCH, "no label match but head match"),
-				Arguments.of(false, false, false, TriplesMatch.NO_MATCH, "nothing match"));
+		return Stream.of(Arguments.of(true, true, true, TriplesMatcher.COMPLETE_WEIGHT, "perfect match"),
+				Arguments.of(true, true, false, TriplesMatcher.PARTIAL_NO_MOD_WEIGHT, "no mod match"),
+				Arguments.of(true, false, true, TriplesMatcher.PARTIAL_NO_HEAD_WEIGHT, "no head match"),
+				Arguments.of(true, false, false, TriplesMatcher.NO_MATCH, "only label match"),
+				Arguments.of(false, true, true, TriplesMatcher.PARTIAL_NO_LABEL_WEIGHT, "only label match"),
+				Arguments.of(false, true, false, TriplesMatcher.NO_MATCH, "no label match but mod amtch"),
+				Arguments.of(false, false, true, TriplesMatcher.NO_MATCH, "no label match but head match"),
+				Arguments.of(false, false, false, TriplesMatcher.NO_MATCH, "nothing match"));
 	}
 
 	@ParameterizedTest
 	@MethodSource("generator")
 	public void test_matchingScorer(boolean label_match, boolean head_match, boolean mod_match,
 			MatchResult expected_result, String test_id) {
-		MatchResult result = new TriplesMatch("DEPHEAD", "DEPLABEL").matchingScorer(null, null, label_match, head_match,
+
+		TriplesMatcher matcher = new TriplesMatcher();
+		matcher.setHeadColumnName("DEPHEAD");
+		matcher.setLabelColumnName("DEPLABEL");
+
+		MatchResult result = matcher.matchingScorer(null, null, label_match, head_match,
 				mod_match);
 		assertEquals(expected_result, result, test_id);
+	}
+
+	@Test
+	public void testSerialize() throws JsonProcessingException {
+		YAMLFactory f = new YAMLFactory();
+		f.disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID);
+		final ObjectMapper mapper = new ObjectMapper(f);
+		TriplesMatcher matcher = new TriplesMatcher();
+		matcher.setHeadColumnName("DEPHEAD");
+		matcher.setLabelColumnName("DEPLABEL");
+
+		String jsonDataString = mapper.writeValueAsString(matcher);
+		System.err.println(jsonDataString);
 	}
 
 }

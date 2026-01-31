@@ -1,10 +1,10 @@
 package mt;
 
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 
-public class SimilarityEqual extends BaseSimilarity implements Similarity {
+public class SimilarityEqual extends BaseSimilarity  {
 
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
 		int i = 0;
@@ -13,10 +13,10 @@ public class SimilarityEqual extends BaseSimilarity implements Similarity {
 			hold = (referenceWord.getFeature(featureNames[i]).compareTo(proposedWord.getFeature(featureNames[i])) == 0);
 			++i;
 		}
-		return hold ? Similarity.MAX_VAL : Similarity.MIN_VAL;
+		return hold ? IFeaturesWordSimilarity.MAX_VAL : IFeaturesWordSimilarity.MIN_VAL;
 	}
 
-	public String getClassName() {
+	public String toString() {
 		return SimilarityEqual.class.getName();
 	}
 

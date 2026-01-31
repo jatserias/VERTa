@@ -4,24 +4,33 @@ import mt.nlp.Sentence;
 
 import java.io.PrintStream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
 /// A direct implementation  of a sentenceAligment using the whole matrix
 public class DistanceMatrix extends SimilarityMatrix implements ISentenceAlignment {
 
-    final int source_size;
-    final int target_size;
+    private int rowSize;
+    private int columnSize;
 
 
     // for testing purposes
     public DistanceMatrix(double[][] m) {
         super(m);
-        this.source_size = m.length;
-        this.target_size = m[0].length;
+        this.rowSize = m.length;
+        this.columnSize = m[0].length;
     }
 
     public DistanceMatrix(int source_size, int target_size) {
         super(source_size, target_size);
-        this.source_size = source_size;
-        this.target_size = target_size;
+        this.rowSize = source_size;
+        this.columnSize = target_size;
     }
 
     public DistanceMatrix(Sentence source, Sentence target) {
@@ -34,16 +43,16 @@ public class DistanceMatrix extends SimilarityMatrix implements ISentenceAlignme
     }
 
     public void dump(PrintStream s) {
-        s.println("Source Length:" + source_size);
-        s.println("Target Length:" + target_size);
+        s.println("Source Length:" + rowSize);
+        s.println("Target Length:" + columnSize);
     }
 
     public int bestMatchH(int c) {
         double max = -1;
         int maxp = -1;
-        for (int i = 0; i < dist[c].length; ++i)
-            if (dist[c][i] > max) {
-                max = dist[c][i];
+        for (int i = 0; i < getDist()[c].length; ++i)
+            if (getDist()[c][i] > max) {
+                max = getDist()[c][i];
                 maxp = i;
             }
         return maxp;
@@ -52,27 +61,21 @@ public class DistanceMatrix extends SimilarityMatrix implements ISentenceAlignme
     public int bestMatchV(int c) {
         double max = -1;
         int maxp = -1;
-        for (int i = 0; i < dist.length; ++i)
-            if (dist[i][c] > max) {
-                max = dist[i][c];
+        for (int i = 0; i < getDist().length; ++i)
+            if (getDist()[i][c] > max) {
+                max = getDist()[i][c];
                 maxp = i;
             }
         return maxp;
     }
 
-    public int getRowSize() {
-        return source_size;
-    }
-
-    public int getColumnSize() {
-        return target_size;
-    }
-
+    @JsonIgnore
     @Override
     public int[] getAlignment() {
         throw new RuntimeException("NOT IMPLEMENTED!");
     }
 
+    @JsonIgnore
     @Override
     public void setAligned(int i, int j, String provenence) {
         throw new RuntimeException("NOT IMPLEMENTED!");
@@ -80,9 +83,9 @@ public class DistanceMatrix extends SimilarityMatrix implements ISentenceAlignme
 
     @Override
     public ISentenceAlignment revert() {
-        DistanceMatrix rev = new DistanceMatrix(target_size, source_size);
-        for (int i = 0; i < source_size; ++i)
-            for (int j = 0; j < target_size; ++j) {
+        DistanceMatrix rev = new DistanceMatrix(columnSize, rowSize);
+        for (int i = 0; i < rowSize; ++i)
+            for (int j = 0; j < columnSize; ++j) {
                 rev.setDistance(j, i, this.getDistance(i, j), this.getProvenance(i, j));
             }
         return rev;
