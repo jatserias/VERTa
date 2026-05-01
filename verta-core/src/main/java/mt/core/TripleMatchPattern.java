@@ -1,124 +1,99 @@
 package mt.core;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.PrintStream;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import mt.core.TriplePatternMatcher.TripleMatchOperator;
 import mt.nlp.Triples;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+/// pattern to match triples
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class TripleMatchPattern {
 
-/**
- * new support for:
- * Defining sets of labels (with associate weights)
- * eg Set1={} with weight X Set2 with weight={} ...
- * Define patterns of matching of triples (pattens to be applied in order)
- * =: same vale s&lt;NUM&gt;: label on set *: any
- * (S,H,T)
- * COMPLETE_WEIGHT PARTIAL_NOMOD_WEIGHT PARTIAL_NOHEAD_WEIGHT
- * PARTIAL_NOLABEL_WEIGHT 1.0 0.8 0.7 0.7
- * e.g. (*,S1,*) : NUMBER
- * (=,S1,=) : Number
- * Extension to simplify preposition
- * deplabel_%
- **/
+	/// match operator for head
+	private TripleMatchOperator head;
+	/// mod match operator
+	private TripleMatchOperator mod;
+	/// Label operator if null LabelSet apply
+	private TripleMatchOperator label;
+	/// Labelset for source triple
+	private LabelSet labelSet;
+	/// LabelSet for target triple
+	private LabelSet targetLabelSet;
+	/// weight of the pattern
+	private double weight;
 
-@Slf4j
-public class TripleMatchPattern extends TriplesMatch {
+	
+	/**
+	 * TripleMatchPattern(TripleMatchOperator head, TripleMatchOperator label,
+	 * TripleMatchOperator mod, double weight) {
+	 * this.head = head;
+	 * this.mod = mod;
+	 * this.weight = weight;
+	 * this.label = label;
+	 * this.labelSet = null;
+	 * this.targetLabelSet = null;
+	 * }
+	 **/
+	/**
+	 * using sets the _% will not work _X -> _% (possible)
+	 * 
+	 * @param x
+	 * @param y
+	 * @param label_match
+	 * @return
+	 */
+	private boolean matchLabel(final Triples x, final Triples y, boolean label_match) {
+		return (
 
-    private static final String COMMENT = "#";
+		// check group only for x
+		(label == null && ((getLabelSet() == null || getLabelSet().contains(x.getLabel())
+				|| checkLabel(getLabelSet(), x.getLabel()))
+				&& (targetLabelSet == null || targetLabelSet.contains(y.getLabel())
+						|| checkLabel(targetLabelSet, y.getLabel()))
 
-    /// Groups of labels with associated weights. A label can be a pattern: dep_%
-    HashMap<String, LabelSet> groups;
-    /// a collection of patterns to try
-    Collection<Tpattern> lp;
+		)) || ((label != null) && (label_match || label == TripleMatchOperator.O)));
+	}
 
-    public TripleMatchPattern(MetricActivationCounter counters, String head_column_name, String label_column_name) {
-        super(counters, head_column_name, label_column_name);
-        log.info("Initilizing patterns");
-        // TODO load the rest of parameters
-        groups = new HashMap<>();
-        lp = new ArrayList<>();
-    }
+	static public boolean checkLabel(LabelSet labelSet, String label) {
+		return labelSet.contains(label) || labelSet.contains(TriplesMatcher.getSubLabel(label) + "_%");
+	}
 
-    private void readSets(BufferedReader fconf) throws IOException {
-        String buff;
-        while ((buff = fconf.readLine()) != null && buff.startsWith("##%SETS")) ;
-        while ((buff = fconf.readLine()) != null && !buff.startsWith("%%#PATTERNS")) {
-            if (!buff.startsWith(COMMENT)) {
-                LabelSet s = new LabelSet(buff);
-                groups.put(s.id, s);
-            }
-        }
+	/**
+	 * label match => label are equal or match rules
+	 */
+	public boolean match(final Triples x, final Triples y, boolean label_match, boolean source_match,
+			boolean target_match) {
+		return ((matchLabel(x, y, label_match)) && (head == TripleMatchOperator.O || source_match) &&
+				(mod == TripleMatchOperator.O || target_match));
+	}
 
-    }
+	public void dump(PrintStream err) {
+		err.println(this.toString());
+	}
 
-    private void readPatterns(BufferedReader fconf) throws IOException {
-        String buff;
-        while ((buff = fconf.readLine()) != null) {
-            if (!buff.startsWith(COMMENT)) {
-                if (buff.trim().length() > 0) {
-                    Tpattern s = new Tpattern(buff, this.groups);
-                    lp.add(s);
-                }
-            }
-        }
-
-
-    }
-
-    @Override
-    public void load(String filename, BufferedReader config) throws IOException {
-        readSets(config);
-        readPatterns(config);
-    }
-
-    @Override
-    public MatchResult matchingScorer(final Triples x, final Triples y, boolean label_match, boolean source_match,
-                                      boolean target_match) {
-        // we should combine weight
-        // Pw * Lw * Sw
-
-        for (Tpattern p : lp) {
-
-            if (p.match(x, y, label_match, source_match, target_match)) {
-
-                getCounters().increase(this.getClass().getName() + "[" + p + "]", 1);
-                return new MatchResult(
-                        p.getWeight() * (p.getLabelSet() == null ? getWeight(x.getLabel()) : p.getLabelSet().w), p);
-
-            }
-
-        }
-        // Should we return 0 or -1 ??
-        return TriplesMatch.NO_MATCH;
-
-    }
-
-    /**
-     * getting the weigh of a label or set of labels
-     */
-    public double getWeight(String label) {
-        for (LabelSet l : groups.values()) {
-            if (l.contains(label.toLowerCase()))
-                return l.w;
-        }
-        // try extended pattern
-        int pos = label.indexOf('_');
-        if (pos > 0) {
-            String mlabel = label.substring(0, pos) + "_%";
-            for (LabelSet l : groups.values()) {
-                if (l.contains(mlabel.toLowerCase()))
-                    return l.w;
-            }
-        }
-
-        return 1.0;
-    }
-
-    public enum OPERATOR {
-        X, O
-    }
-
+	public String toString() {
+		StringBuffer err = new StringBuffer();
+		err.append("(");
+		if (label != null)
+			err.append(label.name());
+		if (getLabelSet() != null)
+			err.append(" " + getLabelSet().getLabels() + " " + getLabelSet().getId() + " setw:" + getLabelSet().getWeight());
+		if (targetLabelSet != null)
+			err.append(" " + targetLabelSet.getLabels() + " labelw:" + targetLabelSet.getWeight());
+		err.append(",");
+		err.append(head == null ? "NULL" : head.name());
+		err.append(",");
+		err.append(mod == null ? "NULL" : mod.name());
+		err.append(") : " + getWeight());
+		return err.toString();
+	}
 }

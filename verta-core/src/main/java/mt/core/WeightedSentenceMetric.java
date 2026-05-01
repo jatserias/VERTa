@@ -4,19 +4,24 @@ import java.io.PrintStream;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import mt.nlp.Sentence;
 
 @Getter
+@Setter
 @AllArgsConstructor
-public class WeightedSentenceMetric implements SentenceMetric {
-	String name;
-	double weight;
-	SentenceMetric metric;
+@NoArgsConstructor
+public class WeightedSentenceMetric implements ISentenceMetric {
+
+	private String name;
+	private double weight;
+	private ISentenceMetric metric;
 
 	@Override
-	public SimilarityResult similarity(final Sentence s1, final Sentence s2, final ISentenceAlignment dist,
+	public SimilarityResult similarity(final Sentence source, final Sentence target, final ISentenceAlignment dist,
 			PrintStream strace) {
-		return metric.similarity(s1, s2, dist, strace);
+		return metric.similarity(source, target, dist, strace);
 	}
 
 	public void dump(PrintStream strace) {

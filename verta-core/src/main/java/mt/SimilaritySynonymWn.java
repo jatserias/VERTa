@@ -1,6 +1,6 @@
 package mt;
 
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
 import verta.wn.ISynset;
@@ -20,7 +20,7 @@ public class SimilaritySynonymWn extends WnBaseSimilarity {
 		String featureReference = referenceWord.getFeature(featureNames[0]);
 
 		if (featureReference.equals(featureProposed))
-			return Similarity.MAX_VAL;
+			return IFeaturesWordSimilarity.MAX_VAL;
 
 		ISynset[] proposedSynsets = wn.getSynsets(featureProposed);
 		ISynset[] referenceSynsets = wn.getSynsets(featureReference);
@@ -42,10 +42,10 @@ public class SimilaritySynonymWn extends WnBaseSimilarity {
 			++i;
 		}
 
-		return found ? Similarity.MAX_VAL : Similarity.MIN_VAL;
+		return found ? IFeaturesWordSimilarity.MAX_VAL : IFeaturesWordSimilarity.MIN_VAL;
 	}
 
-	public String getClassName() {
+	public String toString() {
 		return SimilaritySynonymWn.class.getName();
 	}
 

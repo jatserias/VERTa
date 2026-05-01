@@ -21,19 +21,19 @@ public class MetricResultTest {
 
 		MetricResult m = new MetricResult();
 		m.add("pp", 2, 0, 0);
-		assertEquals(0.0, m.getF1(0));
-		assertEquals(0.0, m.getPrec(0));
-		assertEquals(0.0, m.getRec(0));
+		assertEquals(0.0, m.getModuleF1(0));
+		assertEquals(0.0, m.getModulePrec(0));
+		assertEquals(0.0, m.getModuleRec(0));
 		m.add("pp2", 1, 1, 1);
-		assertEquals(0.0, m.getF1(0));
-		assertEquals(0.0, m.getPrec(0));
-		assertEquals(0.0, m.getRec(0));
-		assertEquals(1.0, m.getF1(1));
-		assertEquals(1.0, m.getPrec(1));
-		assertEquals(1.0, m.getRec(1));
-		assertEquals(1.0 / 3.0, m.getWF1());
-		assertEquals(1.0 / 3.0, m.getPrec());
-		assertEquals(1.0 / 3.0, m.getRec());
+		assertEquals(0.0, m.getModuleF1(0));
+		assertEquals(0.0, m.getModulePrec(0));
+		assertEquals(0.0, m.getModuleRec(0));
+		assertEquals(1.0, m.getModuleF1(1));
+		assertEquals(1.0, m.getModulePrec(1));
+		assertEquals(1.0, m.getModuleRec(1));
+		assertEquals(1.0 / 3.0, m.getOverallWF1());
+		assertEquals(1.0 / 3.0, m.getOverallPrec());
+		assertEquals(1.0 / 3.0, m.getOverallRec());
 
 	}
 }

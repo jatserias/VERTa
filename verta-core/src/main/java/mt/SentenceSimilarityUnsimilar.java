@@ -8,6 +8,9 @@ import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 
+/**
+ * Always return the worst similirity
+ */
 public class SentenceSimilarityUnsimilar extends SentenceSimilarityBase {
 
 	SentenceSimilarityUnsimilar(MetricActivationCounter counters) {
@@ -15,7 +18,7 @@ public class SentenceSimilarityUnsimilar extends SentenceSimilarityBase {
 	}
 
 	@Override
-	public SimilarityResult similarity(Sentence s1, Sentence s2, ISentenceAlignment dist, PrintStream strace) {
+	public SimilarityResult similarity(Sentence source, Sentence target, ISentenceAlignment dist, PrintStream strace) {
 		return SimilarityResult.bad;
 	}
 

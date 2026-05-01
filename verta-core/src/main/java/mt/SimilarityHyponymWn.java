@@ -2,11 +2,16 @@ package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
 import mt.nlp.Word;
+import verta.wn.IWordNet;
 
 public class SimilarityHyponymWn extends SimilarityHypernymWn {
 
 	public SimilarityHyponymWn(String multilevel) {
 		super(multilevel);
+	}
+
+	public SimilarityHyponymWn(IWordNet wn, String multilevel) {
+		super(wn, multilevel);
 	}
 
 	// just use reversed and call hyperonym similarity

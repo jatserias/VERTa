@@ -1,17 +1,17 @@
 package mt;
 
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
 
-public class SimilarityUnsimilar extends BaseSimilarity implements Similarity {
+public class SimilarityUnsimilar extends BaseSimilarity {
 	@Override
 	public double similarity(String[] featureNames, Word proposedWord, Word referenceWord) {
-		return Similarity.MIN_VAL;
+		return IFeaturesWordSimilarity.MIN_VAL;
 	}
 
 	@Override
-	public String getClassName() {
+	public String toString() {
 		return this.getClass().getName();
 	}
 

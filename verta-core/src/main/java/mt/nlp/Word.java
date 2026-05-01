@@ -3,6 +3,13 @@ package mt.nlp;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Set;
 
 import verta.xml.XMLFormater;
@@ -12,12 +19,15 @@ import verta.xml.XMLFormater;
  * what ever a word is
  * 
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class Word {
 
-	HashMap<String, String> features;
+	private HashMap<String, String> features = new HashMap<>();
 	
 	// TODO make consistent the use of the id and the feature named ID
-	String id;
+	private String id;
 
 	public Word(String id) {
 		this.id = id;
@@ -78,6 +88,7 @@ public class Word {
 		return features;
 	}
 
+	@JsonIgnore
 	public String getText() {
 		return features.get("WORD");
 	}

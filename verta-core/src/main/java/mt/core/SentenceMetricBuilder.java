@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 @Slf4j
 public class SentenceMetricBuilder {
 
-    static public SentenceMetric instantiateSentenceMetric(String className, String[] line,
+    static public ISentenceMetric instantiateSentenceMetric(String className, String[] line,
                                                            MetricActivationCounter counters, IWordNet wn) {
-        SentenceMetric sm = null;
+        ISentenceMetric sm = null;
         try {
             @SuppressWarnings("rawtypes")
             Class[] partypes = new Class[1];
@@ -34,7 +34,7 @@ public class SentenceMetricBuilder {
                 }
             }
             Constructor<?> ct = cl.getConstructor(clist);
-            sm = (SentenceMetric) ct.newInstance(arglist);
+            sm = (ISentenceMetric) ct.newInstance(arglist);
             // try setting up Wordnet (may fail if not needed
             try {
                 @SuppressWarnings("rawtypes")

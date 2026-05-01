@@ -2,19 +2,17 @@ package mt.core;
 
 import java.util.Vector;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class WeightedWordMetric extends Vector<FeatureMetric> {
 
-	private static final long serialVersionUID = 1L;
 	private double weight;
-
-	public WeightedWordMetric(double weight) {
-		super();
-		this.weight = weight;
-
-	}
-
-	public double getWeight() {
-		return weight;
-	}
 
 }

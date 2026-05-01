@@ -1,46 +1,60 @@
 package mt.core;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import mt.nlp.Triples;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+
 import java.util.HashMap;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /// A simple class for Matching triples
 @Slf4j
-public class TriplesMatch {
+@Getter
+@Setter
+public class TriplesMatcher {
 
-    private static final String LABEL_PAIR_SEPARATOR = "#";
+    static final String LABEL_PAIR_SEPARATOR = "#";
     public static  final MatchResult NO_MATCH = new MatchResult(0.0, "(o,o,o)");
     // we need to read this weight from the config file
     static final MatchResult COMPLETE_WEIGHT = new MatchResult(1.0, "(x,x,x)");
     static final MatchResult PARTIAL_NO_MOD_WEIGHT = new MatchResult(0.8, "(x,x,o)");
     static final MatchResult PARTIAL_NO_HEAD_WEIGHT = new MatchResult(0.7, "(x,o,x)");
     static final MatchResult PARTIAL_NO_LABEL_WEIGHT = new MatchResult(0.7, "(o,x,x)");
+
     /// Column name for the triple label
-    private final String labelColumnName;
+    private String labelColumnName;
 
     // we also need to incorporate equivalent labels
     // <label label weight>
     /// Column name for the triple head
-    private final String headColumnName;
+    private String headColumnName;
     /// label # label matching table
     private HashMap<String, Double> labelMatch;
     // to report counters
+    @JsonIgnore
     private MetricActivationCounter counters;
 
-    public TriplesMatch(String headColumnName, String labelColumnName) {
+    public TriplesMatcher() {
+        setLabelMatch(new HashMap<>());
+        counters = new MetricActivationCounter(); 
+    }
+
+    /** 
+    public TriplesMatcher(String headColumnName, String labelColumnName) {
         setLabelMatch(new HashMap<>());
         this.labelColumnName = labelColumnName;
         this.headColumnName = headColumnName;
         this.setCounters(new MetricActivationCounter());
     }
 
-    public TriplesMatch(MetricActivationCounter counters, String headColumnName, String labelColumnName) {
+    public TriplesMatcher(MetricActivationCounter counters, String headColumnName, String labelColumnName) {
         this(headColumnName, labelColumnName);
         this.setCounters(counters);
     }
+**/
 
     static public String getSubLabel(String label) {
         int pos = label.indexOf('_');
@@ -51,38 +65,7 @@ public class TriplesMatch {
         return label.endsWith("_%");
     }
 
-    public void load(String filename, BufferedReader config) throws IOException {
-        String buff = null;
-        try {
-
-            // read weights
-            while ((buff = config.readLine()) != null && buff.trim().startsWith(LABEL_PAIR_SEPARATOR))
-                ;
-
-            if (buff == null) {
-                throw new RuntimeException(
-                        "Format ERROR, empty/non existing file on the triple config file >" + filename + "<");
-            }
-
-            String[] wbuff = buff.split("\t");
-            int i = 0;
-            COMPLETE_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
-            PARTIAL_NO_MOD_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
-            PARTIAL_NO_HEAD_WEIGHT.setScore(Double.parseDouble(wbuff[i++]));
-            PARTIAL_NO_LABEL_WEIGHT.setScore(Double.parseDouble(wbuff[i]));
-
-            /// Read rules
-            while ((buff = config.readLine()) != null) {
-                if (!buff.trim().startsWith(LABEL_PAIR_SEPARATOR)) {
-                    String[] label = buff.split("\t");
-                    getLabelMatch().put(label[0] + LABEL_PAIR_SEPARATOR + label[1], Double.parseDouble(label[2]));
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error reading triplet config file:" + buff, e);
-            throw e;
-        }
-    }
+    
 
     public double getWeight(String label) {
         return 1.0;
@@ -146,30 +129,6 @@ public class TriplesMatch {
                         ((isPatternLabel(label) || isPatternLabel(label2))
                                 && (getLabelMatch().get(elabel + LABEL_PAIR_SEPARATOR + elabel2) != null
                                 || getLabelMatch().get(elabel2 + LABEL_PAIR_SEPARATOR + elabel) != null));
-    }
-
-    public MetricActivationCounter getCounters() {
-        return counters;
-    }
-
-    public void setCounters(MetricActivationCounter counters) {
-        this.counters = counters;
-    }
-
-    public HashMap<String, Double> getLabelMatch() {
-        return labelMatch;
-    }
-
-    public void setLabelMatch(HashMap<String, Double> labelMatch) {
-        this.labelMatch = labelMatch;
-    }
-
-    public String getLabelColumnName() {
-        return labelColumnName;
-    }
-
-    public String getHeadColumnName() {
-        return headColumnName;
     }
 
 }

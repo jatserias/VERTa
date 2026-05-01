@@ -1,7 +1,8 @@
 package mt.core;
 
-public class BaseSimilarity  {
-	double weight=mt.core.Similarity.MAX_VAL;
+public abstract class BaseSimilarity implements IFeaturesWordSimilarity {
+	double weight=mt.core.IFeaturesWordSimilarity.MAX_VAL;
 	public void setWeight(double w) {weight=w;}
 	public double getWeight(){return weight;}
+	public void compile(Object obj) {}
 }

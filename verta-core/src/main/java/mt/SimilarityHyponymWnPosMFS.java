@@ -1,12 +1,19 @@
 package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
+import lombok.NoArgsConstructor;
+import mt.core.IFeaturesWordSimilarity;
 import mt.nlp.Word;
+import verta.wn.IWordNet;
 
+@NoArgsConstructor
 public class SimilarityHyponymWnPosMFS extends SimilarityHyponymWnMFS {
 
 	private static final int FT_POS = 1;
+
+	public SimilarityHyponymWnPosMFS(IWordNet wn, String multilevel) {
+		super(wn, multilevel);
+	}
 
 	public SimilarityHyponymWnPosMFS(String multilevel) {
 		super(multilevel);
@@ -17,11 +24,11 @@ public class SimilarityHyponymWnPosMFS extends SimilarityHyponymWnMFS {
 		String featPos = featureNames[FT_POS];
 
 		if (proposedWord.getFeature(featPos).compareTo(referenceWord.getFeature(featPos)) != 0)
-			return Similarity.MIN_VAL;
+			return IFeaturesWordSimilarity.MIN_VAL;
 
 		SynsetType[] ppos = wn.getSynsetTypeFromPos(proposedWord.getFeature(featPos));
 		if (ppos == null)
-			return Similarity.MIN_VAL;
+			return IFeaturesWordSimilarity.MIN_VAL;
 		return super.INNERsimilarity(featureNames, proposedWord, referenceWord, ppos);
 	}
 

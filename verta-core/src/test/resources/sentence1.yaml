@@ -1,0 +1,16 @@
+---
+- features:
+    WORD: "the"
+  id: "the"
+- features:
+    WORD: "cat"
+  id: "cat"
+- features:
+    WORD: "eats"
+  id: "eats"
+- features:
+    WORD: "fish"
+  id: "fish"
+- features:
+    WORD: "."
+  id: "."

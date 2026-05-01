@@ -2,18 +2,50 @@ package mt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 import mt.core.FeatureMetric;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
+import mt.core.MetricActivationCounter;
 import mt.core.WeightedWordMetric;
 import mt.nlp.Word;
+import verta.wn.IWordNet;
 
 public class WordMetricTest {
+
+	@Test
+	public void testDeserialization() {
+	   YAMLFactory f = new YAMLFactory();
+	   f.disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID);
+	   final ObjectMapper mapper = new ObjectMapper(f);
+	   IWordNet wordnetI = Mockito.mock(IWordNet.class);
+	   MetricActivationCounter counters = new MetricActivationCounter();
+	   WordMetric serializedEx = new WordMetric("word metric",
+	   new BufferedReader(new StringReader("1\tWORD\t100\tmt.SimilarityEqual\n"))
+, 1.0, "config filename", counters,  wordnetI);
+	   String jsonDataString;
+	   
+	try {
+		jsonDataString = mapper.writeValueAsString(serializedEx);
+		System.err.println(jsonDataString);
+	} catch (JsonProcessingException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	}
 
 	private static Stream<Arguments> generator() {
 
@@ -37,7 +69,7 @@ public class WordMetricTest {
 		// using equality
 		WordMetric wm = new WordMetric();
 		WeightedWordMetric group = new WeightedWordMetric(1.0);
-		Similarity sm = new SimilarityEqual();
+		IFeaturesWordSimilarity sm = new SimilarityEqual();
 		group.add(new FeatureMetric("WORD", sm, 100));
 		wm.featureMetrics.put("1", group);
 		return wm;

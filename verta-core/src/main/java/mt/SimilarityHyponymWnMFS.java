@@ -1,9 +1,16 @@
 package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
+import lombok.NoArgsConstructor;
 import mt.nlp.Word;
+import verta.wn.IWordNet;
 
+@NoArgsConstructor
 public class SimilarityHyponymWnMFS extends SimilarityHypernymWnMFS {
+
+	public SimilarityHyponymWnMFS(IWordNet wn, String multilevel) {
+		super(wn, multilevel);
+	}
 
 	public SimilarityHyponymWnMFS(String multilevel) {
 		super(multilevel);

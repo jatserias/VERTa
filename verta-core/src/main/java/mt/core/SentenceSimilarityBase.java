@@ -1,18 +1,19 @@
 package mt.core;
 
-public abstract class SentenceSimilarityBase implements SentenceMetric {
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public abstract class SentenceSimilarityBase implements ISentenceMetric {
+
+    @JsonIgnore
     private MetricActivationCounter counters;
 
-    public SentenceSimilarityBase(MetricActivationCounter counters) {
-        this.setCounters(counters);
-    }
-
-    public MetricActivationCounter getCounters() {
-        return counters;
-    }
-
-    public void setCounters(MetricActivationCounter counters) {
-        this.counters = counters;
-    }
 }

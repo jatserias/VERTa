@@ -1,10 +1,9 @@
 package mt;
 
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
 import mt.nlp.Word;
 
-public class SimilaritySubstring extends BaseSimilarity implements Similarity {
+public class SimilaritySubstring extends BaseSimilarity {
 	public int nchars = 1;
 
 	public SimilaritySubstring(String snchars) {
@@ -26,7 +25,7 @@ public class SimilaritySubstring extends BaseSimilarity implements Similarity {
 		return hold ? MAX_VAL : MIN_VAL;
 	}
 
-	public String getClassName() {
+	public String toString() {
 		return SimilaritySubstring.class.getName();
 	}
 

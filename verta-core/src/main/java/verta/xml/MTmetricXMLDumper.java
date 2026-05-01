@@ -110,11 +110,11 @@ public class MTmetricXMLDumper {
 			int nsen, PrintStream gtrace, MetricResult MAXRes) {
 		if (MTsimilarity.DUMP) {
 			trace.println("<res link=\"" + "trace" + experimentName + "_" + nSystem + "_s" + nseg + "."
-					+ (nsen - 1) + ".xml" + "\"><f>" + MAXRes.getWF1() + "</f></res>");
+					+ (nsen - 1) + ".xml" + "\"><f>" + MAXRes.getOverallWF1() + "</f></res>");
 			gtrace.println("<results>");
-			gtrace.println("<f>" + MAXRes.getWF1() + "</f>");
-			gtrace.println("<prec>" + MAXRes.getPrec() + "</prec>");
-			gtrace.println("<rec>" + MAXRes.getRec() + "</rec>");
+			gtrace.println("<f>" + MAXRes.getOverallWF1() + "</f>");
+			gtrace.println("<prec>" + MAXRes.getOverallPrec() + "</prec>");
+			gtrace.println("<rec>" + MAXRes.getOverallRec() + "</rec>");
 			gtrace.println("</results>");
 		}
 	}
@@ -182,14 +182,14 @@ public class MTmetricXMLDumper {
 
 	public static void mt_dump(MTsimilarity mt, PrintStream strace) {
 		// dump word metrics
-		for (WordMetric iwm : mt.verta.wms) {
+		for (WordMetric iwm : mt.verta.getWms()) {
 			strace.println("<wordmetrics>");
 			WordMetricXMLDumper.wm_dump(iwm, strace);
 			strace.println("</wordmetrics>");
 		}
 	
 		// dump sentence metrics
-		for (WeightedSentenceMetric iwm : mt.verta.sm) {
+		for (WeightedSentenceMetric iwm : mt.verta.getSm()) {
 			strace.println("<senmetrics>");
 			iwm.dump(strace);
 			strace.println("</senmetrics>");

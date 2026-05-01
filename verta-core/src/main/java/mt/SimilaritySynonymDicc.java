@@ -5,7 +5,6 @@ import java.io.FileReader;
 import java.util.HashSet;
 
 import mt.core.BaseSimilarity;
-import mt.core.Similarity;
 import mt.nlp.Word;
 
 /**
@@ -13,7 +12,7 @@ import mt.nlp.Word;
  * hashset
  *
  */
-public class SimilaritySynonymDicc extends BaseSimilarity implements Similarity {
+public class SimilaritySynonymDicc extends BaseSimilarity {
 
 	double defaultValue = 0;
 	HashSet<String> dicc;
@@ -60,7 +59,7 @@ public class SimilaritySynonymDicc extends BaseSimilarity implements Similarity 
 		return hold ? MAX_VAL : MIN_VAL;
 	}
 
-	public String getClassName() {
+	public String toString() {
 		return SimilaritySynonymDicc.class.getName();
 	}
 

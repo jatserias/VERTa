@@ -1,13 +1,13 @@
 package mt;
 
 import edu.smu.tspell.wordnet.SynsetType;
-import mt.core.Similarity;
+import mt.core.IFeaturesWordSimilarity;
 import mt.core.WnBaseSimilarity;
 import mt.nlp.Word;
 
 public class SimilarityLemma extends WnBaseSimilarity {
 
-	public String getClassName() {
+	public String toString() {
 		return "SimilarityLemma";
 	}
 
@@ -26,10 +26,10 @@ public class SimilarityLemma extends WnBaseSimilarity {
 			for (String lemmaS : lemmasS)
 				for (String lemmaT : lemmasT) {
 					if (lemmaT.compareTo(lemmaS) == 0)
-						return Similarity.MAX_VAL;
+						return IFeaturesWordSimilarity.MAX_VAL;
 				}
 		}
-		return Similarity.MIN_VAL;
+		return IFeaturesWordSimilarity.MIN_VAL;
 	}
 
 }

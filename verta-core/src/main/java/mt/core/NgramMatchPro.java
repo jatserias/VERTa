@@ -27,7 +27,7 @@ public class NgramMatchPro extends NgramMatch {
 		if (MTsimilarity.DUMP)
 			strace.println("<s2t>");
 		
-		if (minsize > s1.size() || minsize > s2.size())
+		if (getMinsize() > s1.size() || getMinsize() > s2.size())
 			return SimilarityResult.bad;
 
 		nGramPrec = getNgramNormalized(s1, s2, dist, strace);
@@ -44,10 +44,10 @@ public class NgramMatchPro extends NgramMatch {
 		if (MTsimilarity.DUMP)
 			strace.println("</t2s>");
 		// returning results
-		int maxsize1 = Math.min(maxsize, s1.size());
-		int maxsize2 = Math.min(maxsize, s2.size());
-		int minsize1 = Math.min(minsize, s1.size());
-		int minsize2 = Math.min(minsize, s2.size());
+		int maxsize1 = Math.min(getMaxsize(), s1.size());
+		int maxsize2 = Math.min(getMaxsize(), s2.size());
+		int minsize1 = Math.min(getMinsize(), s1.size());
+		int minsize2 = Math.min(getMinsize(), s2.size());
 
 		return new SimilarityResult(nGramPrec == 0 ? 0.0 : nGramPrec / (maxsize1 - minsize1 + 1),
 				nGramRec == 0 ? 0.0 : nGramRec / (maxsize2 - minsize2 + 1));
@@ -56,8 +56,8 @@ public class NgramMatchPro extends NgramMatch {
 
 	private double getNgramNormalized(final Sentence s1, final Sentence s2, final ISentenceAlignment dist, PrintStream strace) {
 		double ngramprec = 0.0;
-		for (int ngram_size = Math.min(Math.min(minsize, s1.size()), s2.size()); 
-				 ngram_size <= Math.min(Math.min(maxsize, s1.size()),s2.size()); 
+		for (int ngram_size = Math.min(Math.min(getMinsize(), s1.size()), s2.size()); 
+				 ngram_size <= Math.min(Math.min(getMaxsize(), s1.size()),s2.size()); 
 				 ++ngram_size) {
 			ngramprec += NgramMatch.compareNgrams(ngram_size, s1, s2, dist, strace)
 					/ NgramMatchPro.totalngrams(ngram_size, s1.size());

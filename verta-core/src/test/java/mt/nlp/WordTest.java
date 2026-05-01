@@ -9,7 +9,7 @@ class WordTest {
 	@Test
 	void test_default_contructor() {
 		Word word = new Word("1", "word");
-		assertEquals(word.id, "1");
+		assertEquals(word.getId(), "1");
 		assertEquals(word.getText(), "word");
 		assertEquals(word.getFeature("WORD"), "word");
 	}

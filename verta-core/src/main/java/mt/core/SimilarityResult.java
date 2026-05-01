@@ -4,8 +4,8 @@ public class SimilarityResult {
 	public double prec;
 	public double rec;
 
-	public static final SimilarityResult perfect = new SimilarityResult(Similarity.MAX_VAL, Similarity.MAX_VAL);
-	public static final SimilarityResult bad = new SimilarityResult(Similarity.MAX_VAL, Similarity.MAX_VAL);
+	public static final SimilarityResult perfect = new SimilarityResult(IFeaturesWordSimilarity.MAX_VAL, IFeaturesWordSimilarity.MAX_VAL);
+	public static final SimilarityResult bad = new SimilarityResult(IFeaturesWordSimilarity.MAX_VAL, IFeaturesWordSimilarity.MAX_VAL);
 
 	public SimilarityResult(double prec, double rec) {
 		this.rec = rec;
@@ -36,7 +36,7 @@ public class SimilarityResult {
 	}
 
 	boolean match() {
-		return getF1() > Similarity.MIN_VAL;
+		return getF1() > IFeaturesWordSimilarity.MIN_VAL;
 	}
 
 	public String toString() {

@@ -1,12 +1,25 @@
 package mt.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.inject.Inject;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import verta.wn.IWordNet;
 
-public abstract class WnBaseSimilarity extends BaseSimilarity implements Similarity {
-	public static IWordNet wn;
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+public abstract class WnBaseSimilarity extends BaseSimilarity {
+	@JsonIgnore
+	@Inject
+	public IWordNet wn;
 
-	public WnBaseSimilarity Wn(IWordNet wn) {
-		WnBaseSimilarity.wn = wn;
-		return this;
+	@Override
+	public void compile(Object wn) {
+		this.setWn((IWordNet) wn);
 	}
 }

@@ -84,7 +84,7 @@ public class Segment {
 		for (Sentence s : getSentences()) {
 			for (Word w : s) {
 				Word w1 = new Word(w);
-				w1.id = "x" + nsen + "=" + (Integer.parseInt(w1.getFeature("ID")) + woffset);
+				w1.setId("x" + nsen + "=" + (Integer.parseInt(w1.getFeature("ID")) + woffset));
 				w1.setFeature("ID", "" + (Integer.parseInt(w1.getFeature("ID")) + woffset));
 				String head = w1.getFeature("DEPHEAD");
 				w1.setFeature("DEPHEAD",

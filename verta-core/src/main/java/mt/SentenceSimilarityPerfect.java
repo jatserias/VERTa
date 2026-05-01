@@ -8,6 +8,9 @@ import mt.core.SentenceSimilarityBase;
 import mt.core.SimilarityResult;
 import mt.nlp.Sentence;
 
+/**
+ * Always return perfect result
+ */
 public class SentenceSimilarityPerfect extends SentenceSimilarityBase {
 
 	public SentenceSimilarityPerfect(MetricActivationCounter counters) {
@@ -15,7 +18,7 @@ public class SentenceSimilarityPerfect extends SentenceSimilarityBase {
 	}
 
 	@Override
-	public SimilarityResult similarity(final Sentence s1, final Sentence s2, ISentenceAlignment dist,
+	public SimilarityResult similarity(final Sentence source, final Sentence target, ISentenceAlignment dist,
 			PrintStream strace) {
 		return SimilarityResult.perfect;
 	}

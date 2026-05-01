@@ -3,7 +3,7 @@ package mt;
 import java.io.PrintStream;
 import java.util.Collection;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import mt.core.MetricActivationCounter;
 import mt.core.ISentenceAlignment;
